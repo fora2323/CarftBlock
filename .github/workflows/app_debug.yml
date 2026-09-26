@@ -1,0 +1,70 @@
+name: Build & Send Debug APK
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  workflow_dispatch:
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      # Kirim APK ke Telegram
+      - name: Send Debug APK to Telegram Group
+        if: success()
+        env:
+          BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          
+          CAPTION="<b>🛠️ DEBUG BUILD SUCCESS</b>
+
+          <b>Repo:</b> ${GITHUB_REPOSITORY}
+          <b>Branch:</b> <code>${GITHUB_REF_NAME}</code>
+          <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
+          <b>Author:</b> ${GITHUB_ACTOR}"
+
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
+            -F chat_id="${CHAT_ID}" \
+            -F document=@"${APK_PATH}" \
+            -F caption="${CAPTION}" \
+            -F parse_mode="HTML"
+
+      # Notifikasi jika gagal
+      - name: Send Failure Alert
+        if: failure()
+        env:
+          BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          MESSAGE="❌ <b>DEBUG BUILD FAILED!</b>
+
+          <b>Repo:</b> ${GITHUB_REPOSITORY}
+          <b>Branch:</b> <code>${GITHUB_REF_NAME}</code>
+          <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
+          <b>Author:</b> ${GITHUB_ACTOR}"
+
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -d chat_id="${CHAT_ID}" \
+            -d text="${MESSAGE}" \
+            -d parse_mode="HTML"

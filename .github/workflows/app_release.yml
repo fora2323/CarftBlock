@@ -1,0 +1,70 @@
+name: Build & Send Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: # Bisa di-trigger manual dari tab Actions
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Build APK Release (Keystore dibaca dari root project oleh Gradle KTS)
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      # Kirim APK Release ke Telegram
+      - name: Send Release APK to Telegram Group
+        if: success()
+        env:
+          BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          APK_PATH="app/build/outputs/apk/release/app-release.apk"
+          
+          CAPTION="<b>🚀 RELEASE BUILD SUCCESS</b>
+
+          <b>Repo:</b> ${GITHUB_REPOSITORY}
+          <b>Tag/Branch:</b> <code>${GITHUB_REF_NAME}</code>
+          <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
+          <b>Triggered By:</b> ${GITHUB_ACTOR}"
+
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
+            -F chat_id="${CHAT_ID}" \
+            -F document=@"${APK_PATH}" \
+            -F caption="${CAPTION}" \
+            -F parse_mode="HTML"
+
+      # Notifikasi jika gagal
+      - name: Send Failure Alert
+        if: failure()
+        env:
+          BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          MESSAGE="❌ <b>RELEASE BUILD FAILED!</b>
+
+          <b>Repo:</b> ${GITHUB_REPOSITORY}
+          <b>Tag/Branch:</b> <code>${GITHUB_REF_NAME}</code>
+          <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
+          <b>Triggered By:</b> ${GITHUB_ACTOR}"
+
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -d chat_id="${CHAT_ID}" \
+            -d text="${MESSAGE}" \
+            -d parse_mode="HTML"
