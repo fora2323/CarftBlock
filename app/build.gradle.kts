@@ -7,7 +7,7 @@ android {
     namespace = "com.aurora"
     compileSdk = 37
 
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "27.0.12077973"
 
     defaultConfig {
         applicationId = "com.aurora"
