@@ -68,6 +68,10 @@ android {
             useLegacyPackaging = true
         }
     }
+    
+    buildFeatures {
+        prefab = true
+    }
 }
 
 dependencies {
