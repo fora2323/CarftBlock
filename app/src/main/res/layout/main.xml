@@ -1,0 +1,29 @@
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/surface"
+	android:foreground="@drawable/bg_shadow_edges"
+	android:id="@+id/_main">
+	<androidx.viewpager2.widget.ViewPager2
+		android:id="@+id/viewpager1"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
+	<com.aurora.manager.view.MyBaseToolbar
+		android:id="@+id/my_toolbar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:padding="6dp"
+		android:layout_gravity="top" />
+	<com.aurora.manager.view.MyBaseNavigationBar
+		android:id="@+id/nav_bar"
+		android:layout_width="wrap_content"
+		android:layout_height="48dp"
+		android:layout_margin="18dp"
+		android:background="@color/surfaceContainerHigh"
+		android:layout_gravity="center_horizontal|bottom"
+		app:ax_menu="@menu/nav_menu_bottom"
+		app:ax_elevation="4dp" />
+</FrameLayout>

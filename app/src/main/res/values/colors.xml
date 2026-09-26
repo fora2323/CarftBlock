@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#FF99DDFF</color>
+    <color name="onPrimary">#FF004466</color>
+    <color name="primaryContainer">#FF006699</color>
+    <color name="onPrimaryContainer">#FFCCEEFF</color>
+    <color name="inversePrimary">#FF0088CC</color>
+    <color name="secondary">#FFBDD1DB</color>
+    <color name="onSecondary">#FF243842</color>
+    <color name="secondaryContainer">#FF365463</color>
+    <color name="onSecondaryContainer">#FFDEE8ED</color>
+    <color name="tertiary">#FFBB99FF</color>
+    <color name="onTertiary">#FF220066</color>
+    <color name="tertiaryContainer">#FF330099</color>
+    <color name="onTertiaryContainer">#FFDDCCFF</color>
+    <color name="background">#FF0E1011</color>
+    <color name="onBackground">#FFE3E6E8</color>
+    <color name="surface">#FF0E1011</color>
+    <color name="onSurface">#FFE3E6E8</color>
+    <color name="surfaceVariant">#FF415058</color>
+    <color name="onSurfaceVariant">#FFC4CFD4</color>
+    <color name="surfaceTint">#FF99DDFF</color>
+    <color name="inverseSurface">#FFE3E6E8</color>
+    <color name="inverseOnSurface">#FF2E3538</color>
+    <color name="surfaceDim">#FF0E1011</color>
+    <color name="surfaceBright">#FF373F43</color>
+    <color name="surfaceContainerLowest">#FF090B0B</color>
+    <color name="surfaceContainerLow">#FF171A1C</color>
+    <color name="surfaceContainer">#FF1C2022</color>
+    <color name="surfaceContainerHigh">#FF272D30</color>
+    <color name="surfaceContainerHighest">#FF323A3E</color>
+    <color name="error">#FFF5A3A3</color>
+    <color name="onError">#FF5C0A0A</color>
+    <color name="errorContainer">#FF8A0F0F</color>
+    <color name="onErrorContainer">#FFFAD1D1</color>
+    <color name="outline">#FF8A9EA8</color>
+    <color name="outlineVariant">#FF415058</color>
+    <color name="scrim">#FF000000</color>
+    
+    <!--custom color-->
+    <color name="color_gray_white">#374340</color>
+</resources>

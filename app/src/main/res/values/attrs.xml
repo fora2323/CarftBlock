@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MyBaseLinearLayout">
+        <attr name="ax_shapeType" format="enum">
+            <enum name="round" value="0" />
+            <enum name="hexagon" value="1" />
+        </attr>
+        <attr name="ax_radius" format="dimension" />
+        <attr name="ax_radiusTopLeft" format="dimension" />
+        <attr name="ax_radiusTopRight" format="dimension" />
+        <attr name="ax_radiusBottomRight" format="dimension" />
+        <attr name="ax_radiusBottomLeft" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="MyBaseNavigationBar">
+        <attr name="ax_menu" format="reference" />
+        <attr name="ax_itemIconTint" format="color|reference" />
+        <attr name="ax_itemTextColor" format="color|reference" />
+        <attr name="ax_indicatorColor" format="color|reference" />
+        <attr name="ax_elevation" format="dimension" />
+        <attr name="ax_cornerCutSize" format="dimension" />
+    </declare-styleable>
+</resources>
