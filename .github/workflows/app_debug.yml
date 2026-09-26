@@ -26,9 +26,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug 2>&1 | tee build.log
 
-      # Kirim APK ke Telegram
       - name: Send Debug APK to Telegram Group
         if: success()
         env:
@@ -50,21 +49,19 @@ jobs:
             -F caption="${CAPTION}" \
             -F parse_mode="HTML"
 
-      # Notifikasi jika gagal
-      - name: Send Failure Alert
+      - name: Send Failure Log to Telegram
         if: failure()
         env:
           BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          MESSAGE="❌ <b>DEBUG BUILD FAILED!</b>
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
+            -F chat_id="${CHAT_ID}" \
+            -F document=@"build.log" \
+            -F caption="❌ <b>BUILD FAILED!</b>
 
           <b>Repo:</b> ${GITHUB_REPOSITORY}
           <b>Branch:</b> <code>${GITHUB_REF_NAME}</code>
           <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
-          <b>Author:</b> ${GITHUB_ACTOR}"
-
-          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-            -d chat_id="${CHAT_ID}" \
-            -d text="${MESSAGE}" \
-            -d parse_mode="HTML"
+          <b>Author:</b> ${GITHUB_ACTOR}" \
+            -F parse_mode="HTML"
