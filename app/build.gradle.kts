@@ -22,8 +22,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags("")
-                arguments("-DANDROID_STL=c++_shared")
+                arguments("-DANDROID_STL=none")
             }
         }
     }
@@ -56,12 +55,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlinOptions {
         jvmTarget = "21"
+    }
+    
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 
@@ -73,4 +78,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     
     implementation("com.google.android.material:material:1.14.0")
+    
+    implementation("io.github.vvb2060.ndk:boringssl:20250114")
+    implementation("org.lsposed.libcxx:libcxx:27.0.12077973")
 }
