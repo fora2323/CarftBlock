@@ -1,4 +1,4 @@
-package com.aurora.manager;
+package com.aurora.main.fragments;
 
 import android.animation.*;
 import android.app.*;
@@ -44,4 +44,4 @@ public class SettingsFragmentActivity extends Fragment {
 	private void initializeLogic() {
 	}
 	
-}
+}

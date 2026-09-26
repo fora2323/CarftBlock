@@ -1,4 +1,4 @@
-package com.aurora.manager;
+package com.aurora.main.fragments;
 
 import android.animation.*;
 import android.app.*;
@@ -48,4 +48,4 @@ public class MenuFragmentActivity extends Fragment {
 	private void initializeLogic() {
 	}
 	
-}
+}
