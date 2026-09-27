@@ -29,7 +29,7 @@ import com.aurora.R;
 
 import org.aurora.view.MyBaseLinearLayout;
 
-public class HomeFragmentActivity extends Fragment {
+public class HomeFragment extends Fragment {
 	
 	private NestedScrollView vscroll2;
 	private LinearLayout scroll_view;
@@ -52,5 +52,4 @@ public class HomeFragmentActivity extends Fragment {
 	
 	private void initializeLogic() {
 	}
-	
 }

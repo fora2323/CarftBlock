@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.regex.*;
 import org.json.*;
 
-public class SettingsFragmentActivity extends Fragment {
+public class SettingsFragment extends Fragment {
 	
 	@NonNull
 	@Override

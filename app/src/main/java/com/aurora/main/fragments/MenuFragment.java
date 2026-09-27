@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.regex.*;
 import org.json.*;
 
-public class MenuFragmentActivity extends Fragment {
+public class MenuFragment extends Fragment {
 	
 	private LinearLayout linear1;
 	
