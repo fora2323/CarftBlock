@@ -1,6 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    kotlin("android")
 }
 
 android {
@@ -46,9 +46,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            
             signingConfig = signingConfigs.getByName("release")
-            
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -58,30 +56,29 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
     }
-    
-    packagingOptions {
+
+    packaging {
         jniLibs {
             useLegacyPackaging = true
         }
     }
-    
+
     buildFeatures {
         prefab = true
     }
 }
 
 dependencies {
-    // AndroidX Core & Activity
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    
     implementation("com.google.android.material:material:1.14.0")
-    
     implementation("io.github.vvb2060.ndk:boringssl:20250114")
     implementation("org.lsposed.libcxx:libcxx:27.0.12077973")
 }
