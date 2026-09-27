@@ -34,15 +34,11 @@ jobs:
           BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
+          CAPTION=$'<b>🛠️ DEBUG BUILD SUCCESS</b>\n\n<b>Repo:</b> '"${GITHUB_REPOSITORY}"$'\n<b>Branch:</b> <code>'"${GITHUB_REF_NAME}"$'</code>\n<b>Commit:</b> <code>'"${GITHUB_SHA::7}"$'</code>\n<b>Author:</b> '"${GITHUB_ACTOR}"
           curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
             -F chat_id="${CHAT_ID}" \
-            -F document=@"app/build/outputs/apk/debug/app-debug.apk" \
-            -F caption="<b>🛠️ DEBUG BUILD SUCCESS</b>
-
-          <b>Repo:</b> ${GITHUB_REPOSITORY}
-          <b>Branch:</b> <code>${GITHUB_REF_NAME}</code>
-          <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
-          <b>Author:</b> ${GITHUB_ACTOR}" \
+            -F document=@app/build/outputs/apk/debug/app-debug.apk \
+            -F caption="${CAPTION}" \
             -F parse_mode="HTML"
 
       - name: Send Failure Log to Telegram
@@ -51,13 +47,9 @@ jobs:
           BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
+          CAPTION=$'❌ <b>BUILD FAILED!</b>\n\n<b>Repo:</b> '"${GITHUB_REPOSITORY}"$'\n<b>Branch:</b> <code>'"${GITHUB_REF_NAME}"$'</code>\n<b>Commit:</b> <code>'"${GITHUB_SHA::7}"$'</code>\n<b>Author:</b> '"${GITHUB_ACTOR}"
           curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
             -F chat_id="${CHAT_ID}" \
-            -F document=@"build.log" \
-            -F caption="❌ <b>BUILD FAILED!</b>
-
-          <b>Repo:</b> ${GITHUB_REPOSITORY}
-          <b>Branch:</b> <code>${GITHUB_REF_NAME}</code>
-          <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
-          <b>Author:</b> ${GITHUB_ACTOR}" \
+            -F document=@build.log \
+            -F caption="${CAPTION}" \
             -F parse_mode="HTML"
