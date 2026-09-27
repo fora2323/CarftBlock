@@ -19,6 +19,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import java.util.Locale;
 
+@SuppressWarnings("deprecation")
 public class BaseCompatActivity extends AppCompatActivity {
 	
 	@Override

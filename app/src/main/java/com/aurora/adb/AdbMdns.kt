@@ -1,3 +1,4 @@
+@file:Suppress("DEPRECATION")
 package com.aurora.adb
 
 import android.content.Context
@@ -13,10 +14,7 @@ import java.net.NetworkInterface
 import java.net.ServerSocket
 
 @RequiresApi(Build.VERSION_CODES.R)
-class AdbMdns(
-    context: Context, private val serviceType: String,
-    private val observer: Observer<Int>
-) {
+class AdbMdns(context: Context, private val serviceType: String, private val observer: Observer<Int>) {
 
     private var registered = false
     private var running = false
@@ -56,7 +54,6 @@ class AdbMdns(
         if (info.serviceName == serviceName) observer.onChanged(-1)
     }
     
-    @Suppress("DEPRECATION")
     private fun onServiceResolved(resolvedService: NsdServiceInfo) {
         if (running && NetworkInterface.getNetworkInterfaces()
                 .asSequence()

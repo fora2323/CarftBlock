@@ -1,3 +1,4 @@
+#pragma clang diagnostic ignored "-Wvla-cxx-extension"
 #include <jni.h>
 #include <dirent.h>
 #include <cstring>
