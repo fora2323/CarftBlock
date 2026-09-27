@@ -33,13 +33,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: |
-          CAPTION=$'<b>🛠️ DEBUG BUILD SUCCESS</b>\n\n<b>Repo:</b> '"${GITHUB_REPOSITORY}"$'\n<b>Branch:</b> <code>'"${GITHUB_REF_NAME}"$'</code>\n<b>Commit:</b> <code>'"${GITHUB_SHA::7}"$'</code>\n<b>Author:</b> '"${GITHUB_ACTOR}"
-          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
-            -F chat_id="${CHAT_ID}" \
-            -F document=@app/build/outputs/apk/debug/app-debug.apk \
-            -F caption="${CAPTION}" \
-            -F parse_mode="HTML"
+        run: python send_telegram.py
 
       - name: Send Failure Log to Telegram
         if: failure()
@@ -47,9 +41,21 @@ jobs:
           BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          CAPTION=$'❌ <b>BUILD FAILED!</b>\n\n<b>Repo:</b> '"${GITHUB_REPOSITORY}"$'\n<b>Branch:</b> <code>'"${GITHUB_REF_NAME}"$'</code>\n<b>Commit:</b> <code>'"${GITHUB_SHA::7}"$'</code>\n<b>Author:</b> '"${GITHUB_ACTOR}"
-          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
-            -F chat_id="${CHAT_ID}" \
-            -F document=@build.log \
-            -F caption="${CAPTION}" \
-            -F parse_mode="HTML"
+          python - <<EOF
+          import os, requests
+          bot_token = os.environ["BOT_TOKEN"]
+          chat_id = os.environ["CHAT_ID"]
+          caption = (
+              f"❌ <b>BUILD FAILED!</b>\n\n"
+              f"<b>Repo:</b> {os.environ['GITHUB_REPOSITORY']}\n"
+              f"<b>Branch:</b> <code>{os.environ['GITHUB_REF_NAME']}</code>\n"
+              f"<b>Commit:</b> <code>{os.environ['GITHUB_SHA'][:7]}</code>\n"
+              f"<b>Author:</b> {os.environ['GITHUB_ACTOR']}"
+          )
+          with open("build.log", "rb") as log:
+              requests.post(
+                  f"https://api.telegram.org/bot{bot_token}/sendDocument",
+                  data={"chat_id": chat_id, "caption": caption, "parse_mode": "HTML"},
+                  files={"document": log}
+              )
+          EOF
