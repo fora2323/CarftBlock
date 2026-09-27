@@ -9,4 +9,19 @@
     <string name="title_toolbar_name_main_dec_game">Dasboard Game</string>
     <string name="title_toolbar_name_main_dec_menu">Management Feature</string>
     <string name="title_toolbar_name_main_dec_settings">System Preference</string>
+    <!--tag name service notification-->
+    <string name="notification_channel_adb_pairing">ADB Pairing</string>
+    <string name="notification_adb_pairing_succeed_title">Pairing Succeed</string>
+    <string name="notification_adb_pairing_succeed_text">ADB pairing completed successfully</string>
+    <string name="notification_adb_pairing_failed_title">Pairing Failed</string>
+    <string name="notification_adb_pairing_stop_searching">Stop</string>
+    <string name="notification_adb_pairing_retry">Retry</string>
+    <string name="notification_adb_pairing_input_paring_code">Enter Code</string>
+    <string name="dialog_adb_pairing_paring_code">Pairing Code</string>
+    <string name="notification_adb_pairing_searching_for_service_title">Searching for ADB service...</string>
+    <string name="notification_adb_pairing_service_found_title">ADB service found</string>
+    <string name="notification_adb_pairing_working_title">Pairing in progress...</string>
+    <string name="cannot_connect_port">Cannot connect to port</string>
+    <string name="paring_code_is_wrong">Pairing code is wrong</string>
+    <string name="adb_error_key_store">Key store error</string>
 </resources>

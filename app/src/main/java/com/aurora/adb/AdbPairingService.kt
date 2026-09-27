@@ -12,7 +12,8 @@ import androidx.lifecycle.Observer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import moe.shizuku.manager.R
+
+import com.aurora.R
 import moe.shizuku.manager.ShizukuSettings
 import rikka.core.ktx.unsafeLazy
 import java.net.ConnectException
