@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
-import com.aurora.manager.R;
+import com.aurora.R;
 
 public class MyBaseToolbar extends LinearLayout {
 

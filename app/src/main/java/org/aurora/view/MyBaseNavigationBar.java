@@ -26,7 +26,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.aurora.manager.R;
+import com.aurora.R;
 
 import java.util.ArrayList;
 import java.util.List;
