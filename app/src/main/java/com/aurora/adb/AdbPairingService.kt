@@ -72,11 +72,7 @@ class AdbPairingService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val channel = NotificationChannel(
-            notificationChannel,
-            "Onyx ADB Pairing Service",
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
+        val channel = NotificationChannel(notificationChannel, "Aurora ADB Pairing Service", NotificationManager.IMPORTANCE_HIGH).apply {
             setSound(null, null)
             setShowBadge(false)
             setAllowBubbles(false)
@@ -225,7 +221,7 @@ class AdbPairingService : Service() {
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(Notification.BigTextStyle().bigText(text))
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setAutoCancel(true)
             .build()
 
@@ -265,7 +261,7 @@ class AdbPairingService : Service() {
         return Notification.Builder(this, notificationChannel)
             .setContentTitle("Aurora Pairing Service Detected")
             .setContentText("Expand this notification and tap 'Enter Code' to authenticate.")
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .addAction(replyAction)
             .addAction(stopNotificationAction)
             .build()
@@ -276,7 +272,7 @@ class AdbPairingService : Service() {
             .setContentTitle("Searching for Pairing Service...")
             // Inform the user that this notification is clickable
             .setContentText("Tap here to enable 'Wireless Debugging' in Developer Options.")
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.mipmap.ic_launcher)
             // [NEW FEATURE] Click the notification to open settings and highlight the menu!
             .setContentIntent(getSettingsPendingIntent()) 
             .addAction(stopNotificationAction)
@@ -287,7 +283,7 @@ class AdbPairingService : Service() {
         Notification.Builder(this, notificationChannel)
             .setContentTitle("Authenticating Aurora Daemon...")
             .setContentText("Establishing secure connection with Android system...")
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .build()
     }
 
