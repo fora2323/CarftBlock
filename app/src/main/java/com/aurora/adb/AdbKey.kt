@@ -1,4 +1,4 @@
-package com.cyrust.fftoolspromaxnew.adb
+package com.aurora.adb
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences

@@ -1,4 +1,4 @@
-package com.cyrust.fftoolspromaxnew.adb
+package com.aurora.adb
 
 import android.annotation.TargetApi
 import android.app.*

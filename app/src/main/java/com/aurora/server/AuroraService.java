@@ -1,4 +1,4 @@
-package org.aurora.server;
+package com.aurora.server;
 
 import android.os.Looper;
 import android.util.Log;

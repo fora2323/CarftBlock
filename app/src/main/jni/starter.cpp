@@ -31,9 +31,9 @@
 #define EXIT_FATAL_KILL 9
 #define EXIT_FATAL_BINDER_BLOCKED_BY_SELINUX 10
 
-#define PACKAGE_NAME "com.aurora.manager"
+#define PACKAGE_NAME "org.aurora"
 #define SERVER_NAME "aurora_server"
-#define SERVER_CLASS_PATH "com.aurora.manager.server.AuroraService"
+#define SERVER_CLASS_PATH "org.aurora.server.AuroraService"
 
 #if defined(__arm__)
 #define ABI "arm"

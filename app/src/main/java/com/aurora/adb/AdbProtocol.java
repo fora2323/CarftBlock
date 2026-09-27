@@ -1,4 +1,4 @@
-package com.cyrust.fftoolspromaxnew.adb;
+package com.aurora.adb;
 
 public class AdbProtocol {
     public static final int A_SYNC = 0x434e5953;
