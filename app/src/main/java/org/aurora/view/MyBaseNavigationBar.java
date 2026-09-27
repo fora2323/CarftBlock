@@ -1,4 +1,4 @@
-package com.aurora.manager.view;
+package org.aurora.view;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;

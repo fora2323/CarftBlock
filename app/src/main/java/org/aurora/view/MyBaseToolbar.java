@@ -1,4 +1,4 @@
-package com.aurora.manager.view;
+package org.aurora.view;
 
 import android.content.Context;
 import android.util.AttributeSet;

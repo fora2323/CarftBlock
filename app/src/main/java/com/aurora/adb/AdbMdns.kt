@@ -55,7 +55,8 @@ class AdbMdns(
     private fun onServiceLost(info: NsdServiceInfo) {
         if (info.serviceName == serviceName) observer.onChanged(-1)
     }
-
+    
+    @Suppress("DEPRECATION")
     private fun onServiceResolved(resolvedService: NsdServiceInfo) {
         if (running && NetworkInterface.getNetworkInterfaces()
                 .asSequence()
