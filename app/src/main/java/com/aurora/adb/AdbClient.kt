@@ -1,6 +1,7 @@
 package com.aurora.adb
 
 import android.util.Log
+
 import com.aurora.adb.ADB_AUTH_RSAPUBLICKEY
 import com.aurora.adb.AdbProtocol.ADB_AUTH_SIGNATURE
 import com.aurora.adb.AdbProtocol.ADB_AUTH_TOKEN
@@ -14,8 +15,10 @@ import com.aurora.adb.AdbProtocol.A_STLS
 import com.aurora.adb.AdbProtocol.A_STLS_VERSION
 import com.aurora.adb.AdbProtocol.A_VERSION
 import com.aurora.adb.AdbProtocol.A_WRTE
+
 import moe.shizuku.manager.ktx.logd
 import rikka.core.util.BuildUtils
+
 import java.io.Closeable
 import java.io.DataInputStream
 import java.io.DataOutputStream
