@@ -27,6 +27,9 @@ jobs:
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug 2>&1 | tee build.log
+        
+      - name: Check APK exists
+        run: ls -la app/build/outputs/apk/debug/ || echo "APK folder not found!"
 
       - name: Send Debug APK to Telegram Group
         if: success()
