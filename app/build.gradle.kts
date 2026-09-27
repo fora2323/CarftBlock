@@ -15,13 +15,13 @@ android {
         versionName = "1.0"
 
         ndk {
-            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a"))
         }
 
         externalNativeBuild {
             cmake {
-                cppFlags '-std=c++17 -fexceptions -frtti'
-                arguments '-DANDROID_STL=c++_shared'
+                cppFlags += listOf("-std=c++17 -fexceptions -frtti")
+                arguments += listOf("-DANDROID_STL=none")
             }
         }
     }
