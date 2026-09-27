@@ -85,7 +85,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     
     implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
     
     implementation("io.github.vvb2060.ndk:boringssl:20250114")
     

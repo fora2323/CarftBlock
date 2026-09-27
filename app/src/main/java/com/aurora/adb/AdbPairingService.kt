@@ -13,12 +13,13 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.Observer
-import com.cyrust.fftoolspromaxnew.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.net.ConnectException
+
+import com.aurora.R
 
 @TargetApi(Build.VERSION_CODES.R)
 class AdbPairingService : Service() {
@@ -53,7 +54,6 @@ class AdbPairingService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var adbMdns: AdbMdns? = null
 
-    // [ANTI-ANR] Timer Handler to auto-terminate the service within 2.5 Minutes (150,000 ms)
     private val timeoutHandler = Handler(Looper.getMainLooper())
     private val timeoutRunnable = Runnable {
         Log.w(tag, "Pairing timeout (2.5 minutes). Terminating service to prevent Android 14 ANR.")
