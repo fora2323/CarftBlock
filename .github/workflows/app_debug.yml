@@ -27,29 +27,22 @@ jobs:
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug 2>&1 | tee build.log
-        
-      - name: Check APK exists
-        run: ls -la app/build/outputs/apk/debug/ || echo "APK folder not found!"
 
-      - name: Send Debug APK to Telegram Group
+      - name: Send Debug APK to Telegram
         if: success()
         env:
           BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: |
-          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
-          
-          CAPTION="<b>🛠️ DEBUG BUILD SUCCESS</b>
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
+            -F chat_id="${CHAT_ID}" \
+            -F document=@"app/build/outputs/apk/debug/app-debug.apk" \
+            -F caption="<b>🛠️ DEBUG BUILD SUCCESS</b>
 
           <b>Repo:</b> ${GITHUB_REPOSITORY}
           <b>Branch:</b> <code>${GITHUB_REF_NAME}</code>
           <b>Commit:</b> <code>${GITHUB_SHA::7}</code>
-          <b>Author:</b> ${GITHUB_ACTOR}"
-
-          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument" \
-            -F chat_id="${CHAT_ID}" \
-            -F document=@"${APK_PATH}" \
-            -F caption="${CAPTION}" \
+          <b>Author:</b> ${GITHUB_ACTOR}" \
             -F parse_mode="HTML"
 
       - name: Send Failure Log to Telegram
