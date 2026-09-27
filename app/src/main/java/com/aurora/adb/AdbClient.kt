@@ -1,20 +1,20 @@
-package com.cyrust.fftoolspromaxnew.adb
+package com.aurora.adb
 
 import android.os.Build
 import android.util.Log
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.ADB_AUTH_RSAPUBLICKEY
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.ADB_AUTH_SIGNATURE
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.ADB_AUTH_TOKEN
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_AUTH
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_CLSE
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_CNXN
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_MAXDATA
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_OKAY
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_OPEN
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_STLS
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_STLS_VERSION
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_VERSION
-import com.cyrust.fftoolspromaxnew.adb.AdbProtocol.A_WRTE
+import com.aurora.adb.AdbProtocol.ADB_AUTH_RSAPUBLICKEY
+import com.aurora.adb.AdbProtocol.ADB_AUTH_SIGNATURE
+import com.aurora.adb.AdbProtocol.ADB_AUTH_TOKEN
+import com.aurora.adb.AdbProtocol.A_AUTH
+import com.aurora.adb.AdbProtocol.A_CLSE
+import com.aurora.adb.AdbProtocol.A_CNXN
+import com.aurora.adb.AdbProtocol.A_MAXDATA
+import com.aurora.adb.AdbProtocol.A_OKAY
+import com.aurora.adb.AdbProtocol.A_OPEN
+import com.aurora.adb.AdbProtocol.A_STLS
+import com.aurora.adb.AdbProtocol.A_STLS_VERSION
+import com.aurora.adb.AdbProtocol.A_VERSION
+import com.aurora.adb.AdbProtocol.A_WRTE
 import java.io.Closeable
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -143,13 +143,37 @@ class AdbClient(private val host: String, private val port: Int, private val key
     }
 
     override fun close() {
-        try { plainInputStream.close() } catch (e: Throwable) {}
-        try { plainOutputStream.close() } catch (e: Throwable) {}
-        try { socket.close() } catch (e: Exception) {}
+        try { 
+            plainInputStream.close()
+        } catch (e: Throwable) {
+            
+        }
+        try {
+            plainOutputStream.close()
+        } catch (e: Throwable) {
+            
+        }
+        try {
+            socket.close()
+        } catch (e: Exception) {
+            
+        }
         if (useTls) {
-            try { tlsInputStream.close() } catch (e: Throwable) {}
-            try { tlsOutputStream.close() } catch (e: Throwable) {}
-            try { tlsSocket.close() } catch (e: Exception) {}
+            try {
+                tlsInputStream.close()
+            } catch (e: Throwable) {
+                
+            }
+            try {
+                tlsOutputStream.close()
+            } catch (e: Throwable) {
+                
+            }
+            try {
+                tlsSocket.close()
+            } catch (e: Exception) {
+                
+            }
         }
     }
 }
