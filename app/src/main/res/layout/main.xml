@@ -11,13 +11,13 @@
 		android:id="@+id/viewpager1"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent" />
-	<com.aurora.manager.view.MyBaseToolbar
+	<org.aurora.view.MyBaseToolbar
 		android:id="@+id/my_toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:padding="6dp"
 		android:layout_gravity="top" />
-	<com.aurora.manager.view.MyBaseNavigationBar
+	<org.aurora.view.MyBaseNavigationBar
 		android:id="@+id/nav_bar"
 		android:layout_width="wrap_content"
 		android:layout_height="48dp"

@@ -17,18 +17,17 @@ import android.view.View.*;
 import android.view.animation.*;
 import android.widget.*;
 import android.widget.LinearLayout;
+
 import androidx.annotation.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import com.aurora.manager.view.MyBaseLinearLayout;
-import java.io.*;
-import java.text.*;
-import java.util.*;
-import java.util.regex.*;
-import org.json.*;
+
+import com.aurora.R;
+
+import org.aurora.view.MyBaseLinearLayout;
 
 public class HomeFragmentActivity extends Fragment {
 	

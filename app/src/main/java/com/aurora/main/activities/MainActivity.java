@@ -16,21 +16,18 @@ import android.view.*;
 import android.view.View.*;
 import android.view.animation.*;
 import android.widget.*;
+
 import androidx.annotation.*;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager2.widget.ViewPager2;
-import java.io.*;
-import java.text.*;
-import java.util.*;
-import java.util.regex.*;
-import org.json.*;
 
 import com.aurora.adapter.MyBaseFragmentAdapter;
 import com.aurora.main.fragments.HomeFragment;
 import com.aurora.main.fragments.MenuFragment;
 import com.aurora.main.fragments.SettingsFragment;
+import com.aurora.R;
 
 import org.aurora.view.MyBaseNavigationBar;
 import org.aurora.view.MyBaseToolbar;

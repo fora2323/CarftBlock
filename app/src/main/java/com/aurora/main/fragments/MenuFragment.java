@@ -22,6 +22,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+
+import com.aurora.R;
+
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -47,5 +50,4 @@ public class MenuFragmentActivity extends Fragment {
 	
 	private void initializeLogic() {
 	}
-	
 }
