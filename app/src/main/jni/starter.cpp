@@ -33,7 +33,7 @@
 
 #define PACKAGE_NAME "org.aurora"
 #define SERVER_NAME "aurora_server"
-#define SERVER_CLASS_PATH "org.aurora.server.AuroraService"
+#define SERVER_CLASS_PATH "com.aurora.server.AuroraService"
 
 #if defined(__arm__)
 #define ABI "arm"

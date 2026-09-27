@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class FfxService {
+public class AuroraService {
     
     private static final String TAG = "FFX_DAEMON";
     private static final int DAEMON_PORT = 45678; 
