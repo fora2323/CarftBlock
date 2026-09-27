@@ -74,7 +74,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -83,14 +83,12 @@ dependencies {
     
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
-    
-    implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
-    implementation("org.bouncycastle:bcutil-jdk15on:1.70")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
     
     implementation("io.github.vvb2060.ndk:boringssl:20250114")
     
     implementation("org.conscrypt:conscrypt-android:2.5.2")
     implementation("org.lsposed.libcxx:libcxx:27.0.12077973")
-    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3")
+    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
 }

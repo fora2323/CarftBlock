@@ -20,33 +20,19 @@
     public static *** v(...);
 }
 
--keep class com.aurora.AuroraApplication { *; }
--keep class com.aurora.AuroraManagerProvider { *; }
-
--keep class com.aurora.adb.** { *; }
--keepnames class com.aurora.adb.**
--keepclassmembers class com.aurora.adb.** { *; }
-
 -keepclasseswithmembernames class * {
     native <methods>;
 }
 
--keep class org.bouncycastle.** { *; }
--dontwarn org.bouncycastle.**
-
--keep class org.conscrypt.** { *; }
--dontwarn org.conscrypt.**
-
--keep class org.lsposed.hiddenapibypass.** { *; }
-
--keep class rikka.shizuku.** { *; }
--keep class moe.shizuku.** { *; }
--keepnames class moe.shizuku.api.BinderContainer
-
--keep class androidx.** { *; }
--dontwarn androidx.**
+-keep class rikka.shizuku.ShizukuProvider { *; }
+-keep class rikka.shizuku.ShizukuProvider$* { *; }
+-keep class moe.shizuku.api.BinderContainer { *; }
+-keep class moe.shizuku.api.BinderContainer$* { *; }
 
 -allowaccessmodification
--repackageclasses aurora.x
--keepattributes SourceFile,LineNumberTable
--renamesourcefileattribute SourceFile
+-ignorewarnings
+-dontnote
+-dontwarn **
+-optimizations !code/simplification/arithmetic
+-optimizationpasses 5
+-overloadaggressively
