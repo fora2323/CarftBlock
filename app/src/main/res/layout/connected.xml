@@ -42,8 +42,8 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp">
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:src="@drawable/ic_wifi"
                         android:contentDescription="@null"
                         android:tint="@color/primary" />
@@ -51,18 +51,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/title_wareless_connected"
-                        android:textSize="20sp"
+                        android:textSize="@dimen/radius_18sp"
                         android:textStyle="bold"
                         android:textColor="@color/onSurface"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginStart="4dp" />
                 </LinearLayout>
                 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/title_dec_wareless_connected"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/radius_12sp"
                     android:textColor="@color/onSurfaceVariant"
                     android:lineSpacingExtra="4dp" />
                 
@@ -79,7 +78,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="45dp"
                         android:text="Step-by-step"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="4dp"
                         app:icon="@drawable/ic_open" />
                     
                     <com.google.android.material.button.MaterialButton
@@ -88,7 +87,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="45dp"
                         android:text="Pairing"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginBottom="4dp"
                         app:icon="@drawable/ic_link" />
                     
                     <com.google.android.material.button.MaterialButton
