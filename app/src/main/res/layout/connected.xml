@@ -40,10 +40,10 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="10dp">
                     <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:src="@drawable/ic_wifi"
                         android:contentDescription="@null"
                         android:tint="@color/primary" />
@@ -51,7 +51,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/title_wareless_connected"
-                        android:textSize="@dimen/size_text_20sp"
+                        android:textSize="@dimen/size_text_18sp"
                         android:textStyle="bold"
                         android:textColor="@color/onSurface"
                         android:layout_marginStart="6dp" />
@@ -61,7 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/title_dec_wareless_connected"
-                    android:textSize="@dimen/radius_14sp"
+                    android:textSize="@dimen/radius_12sp"
                     android:textColor="@color/onSurfaceVariant"
                     android:lineSpacingExtra="4dp" />
                 
@@ -70,7 +70,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="20dp">
+                    android:layout_marginTop="16dp">
                     
                     <com.google.android.material.button.MaterialButton
                         style="@style/Base.Theme.AuroraButton"
