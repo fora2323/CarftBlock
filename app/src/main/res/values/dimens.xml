@@ -16,4 +16,7 @@
     <dimen name="radius_14dp">14dp</dimen>
     <dimen name="radius_16dp">16dp</dimen>
     <dimen name="radius_18dp">18dp</dimen>
+    <dimen name="radius_20dp">20dp</dimen>
+    <dimen name="radius_22dp">22dp</dimen>
+    <dimen name="radius_24dp">24dp</dimen>
 </resources>
