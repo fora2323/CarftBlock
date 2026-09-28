@@ -11,12 +11,15 @@
         <item name="android:windowLightNavigationBar">false</item>
     </style>
         <style name="Base.Theme.AuroraButton" parent="Widget.Material3.Button">
-        <item name="android:backgroundTint">@color/primaryContainer</item>
+        <item name="android:backgroundTint">@color/primary</item>
         <item name="android:textColor">@color/surface</item>
         <item name="cornerRadius">@dimen/radius_8dp</item>
         <item name="iconGravity">textStart</item>
         <item name="iconPadding">8dp</item>
+        <item name="iconTint">@color/onSurface</item>
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
     </style>
 </resources>

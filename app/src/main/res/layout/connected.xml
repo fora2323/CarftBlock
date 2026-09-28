@@ -35,30 +35,32 @@
                 android:padding="24dp"
                 android:background="@drawable/bg_card_rounded">
                 
-                <!-- Icon -->
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_wifi"
-                    android:contentDescription="@null"
-                    android:tint="@color/primary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp">
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_wifi"
+                        android:contentDescription="@null"
+                        android:tint="@color/primary" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/title_wareless_connected"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/onSurface"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="12dp" />
+                </LinearLayout>
                 
-                <!-- Title -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_wareless_connected"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/onSurface"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="12dp" />
-                
-                <!-- Description -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="title_dec_wareless_connected"
+                    android:text="@string/title_dec_wareless_connected"
                     android:textSize="14sp"
                     android:textColor="@color/onSurfaceVariant"
                     android:lineSpacingExtra="4dp" />
@@ -73,8 +75,8 @@
                     <com.google.android.material.button.MaterialButton
                         style="@style/Base.Theme.AuroraButton"
                         android:id="@+id/btn_instruksi"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="45dp"
                         android:text="Step-by-step"
                         android:layout_marginBottom="8dp"
                         app:icon="@drawable/ic_open" />
@@ -82,8 +84,8 @@
                     <com.google.android.material.button.MaterialButton
                         style="@style/Base.Theme.AuroraButton"
                         android:id="@+id/btn_pairing"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="45dp"
                         android:text="Pairing"
                         android:layout_marginBottom="8dp"
                         app:icon="@drawable/ic_link" />
@@ -91,8 +93,8 @@
                     <com.google.android.material.button.MaterialButton
                         style="@style/Base.Theme.AuroraButton"
                         android:id="@+id/btn_start"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="45dp"
                         android:text="Start"
                         app:icon="@drawable/ic_play" />
                 </LinearLayout>
