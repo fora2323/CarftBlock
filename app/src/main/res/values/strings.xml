@@ -9,6 +9,7 @@
     <string name="title_toolbar_name_main_dec_game">Dasboard Game</string>
     <string name="title_toolbar_name_main_dec_menu">Management Feature</string>
     <string name="title_toolbar_name_main_dec_settings">System Preference</string>
+    <string name="title_toolbar_conected">Activation</string>
     <!--tag name service notification-->
     <string name="notification_channel_adb_pairing">ADB Pairing</string>
     <string name="notification_adb_pairing_succeed_title">Pairing Succeed</string>
