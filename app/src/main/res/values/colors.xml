@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#FF99DDFF</color>
-    <color name="onPrimary">#FF004466</color>
-    <color name="primaryContainer">#FF006699</color>
-    <color name="onPrimaryContainer">#FFCCEEFF</color>
-    <color name="inversePrimary">#FF0088CC</color>
-    <color name="secondary">#FFBDD1DB</color>
+    <color name="primary">#99DDFF</color>
+    <color name="onPrimary">#004466</color>
+    <color name="primaryContainer">#006699</color>
+    <color name="onPrimaryContainer">#CCEEFF</color>
+    <color name="inversePrimary">#0088CC</color>
+    <color name="secondary">#BDD1DB</color>
     <color name="onSecondary">#FF243842</color>
     <color name="secondaryContainer">#FF365463</color>
     <color name="onSecondaryContainer">#FFDEE8ED</color>
