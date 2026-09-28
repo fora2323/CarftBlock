@@ -1,4 +1,4 @@
-package com.aurora.manager
+package com.aurora
 
 import android.os.Bundle
 import android.view.View
