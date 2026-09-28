@@ -42,8 +42,8 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp">
                     <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
                         android:src="@drawable/ic_wifi"
                         android:contentDescription="@null"
                         android:tint="@color/primary" />
