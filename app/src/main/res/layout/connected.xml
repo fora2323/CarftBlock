@@ -2,24 +2,101 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/surface">
+    
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:title="@string/title_toolbar_conected"
+        app:title="@string/title_toolbar_connected"
         app:titleTextColor="@color/onSurface"
-        app:titleMarginStart="@dimen/main_margin_toollbar"
+        app:titleMarginStart="@dimen/main_margin_toolbar"
         app:navigationIconTint="@color/onSurface"
         app:contentInsetStartWithNavigation="0dp" />
-    <LinearLayout
-        android:id="@+id/linear1"
+    
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        android:orientation="vertical" />
+        android:layout_height="match_parent">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/pedding_16dp">
+            
+            <!-- Card Background dari Drawable -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:background="@drawable/bg_card_rounded">
+                
+                <!-- Icon -->
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/ic_wifi"
+                    android:contentDescription="@null"
+                    android:tint="@color/primary" />
+                
+                <!-- Title -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_wareless_connected"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/onSurface"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="12dp" />
+                
+                <!-- Description -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="title_dec_wareless_connected"
+                    android:textSize="14sp"
+                    android:textColor="@color/onSurfaceVariant"
+                    android:lineSpacingExtra="4dp" />
+                
+                <!-- Button Container -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp">
+                    
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Base.Theme.AuroraButton"
+                        android:id="@+id/btn_instruksi"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Step-by-step"
+                        android:layout_marginBottom="8dp"
+                        app:icon="@drawable/ic_open" />
+                    
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Base.Theme.AuroraButton"
+                        android:id="@+id/btn_pairing"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Pairing"
+                        android:layout_marginBottom="8dp"
+                        app:icon="@drawable/ic_link" />
+                    
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Base.Theme.AuroraButton"
+                        android:id="@+id/btn_start"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Start"
+                        app:icon="@drawable/ic_play" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

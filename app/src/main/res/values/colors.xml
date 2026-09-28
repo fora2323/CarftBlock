@@ -17,8 +17,8 @@
     <color name="onBackground">#FFE3E6E8</color>
     <color name="surface">#FF0E1011</color>
     <color name="onSurface">#FFE3E6E8</color>
-    <color name="surfaceVariant">#FF415058</color>
-    <color name="onSurfaceVariant">#FFC4CFD4</color>
+    <color name="surfaceVariant">#415058</color>
+    <color name="onSurfaceVariant">#C4CFD4</color>
     <color name="surfaceTint">#FF99DDFF</color>
     <color name="inverseSurface">#FFE3E6E8</color>
     <color name="inverseOnSurface">#FF2E3538</color>

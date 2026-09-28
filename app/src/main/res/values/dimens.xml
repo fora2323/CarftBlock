@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="main_margin_toollbar">2dp</dimen>
-    <dimen name="text_body">14sp</dimen>
+    <dimen name="pedding_16dp">16dp</dimen>
+    <!--size text-->
+    <dimen name="radius_8sp">8sp</dimen>
+    <dimen name="radius_10sp">10sp</dimen>
+    <dimen name="radius_12sp">12sp</dimen>
+    <dimen name="radius_14sp">14sp</dimen>
+    <dimen name="radius_16sp">16sp</dimen>
+    <dimen name="radius_18sp">18sp</dimen>
+    <!--size radius-->
+    <dimen name="radius_8dp">8dp</dimen>
+    <dimen name="radius_10dp">10dp</dimen>
+    <dimen name="radius_12dp">12dp</dimen>
+    <dimen name="radius_14dp">14dp</dimen>
+    <dimen name="radius_16dp">16dp</dimen>
+    <dimen name="radius_18dp">18dp</dimen>
 </resources>
