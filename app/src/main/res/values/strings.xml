@@ -10,7 +10,7 @@
     <string name="title_toolbar_name_main_dec_menu">Management Feature</string>
     <string name="title_toolbar_name_main_dec_settings">System Preference</string>
     <!--tag name connected.xml-->
-    <string name="title_toolbar_conected">Activation</string>
+    <string name="title_toolbar_connected">Activation</string>
     <string name="title_wareless_connected">Start via Wireless Debugging</string>
     <string name="title_dec_wareless_connected">On Android 11 or later, you can enable Wireless debugging and start Aurora directly from your device, without connecting to shizuku or a computer.\n\nPlease see the step-by-step guide </string>
     <!--tag name service notification-->
