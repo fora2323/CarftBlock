@@ -7,7 +7,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.appcompat.widget.Toolbar
 
-import com.aurora.manager.activity.BaseCompatActivity
+import org.aurora.core.BaseCompatActivity
 
 class ConnectedActivity : BaseCompatActivity() {
 
