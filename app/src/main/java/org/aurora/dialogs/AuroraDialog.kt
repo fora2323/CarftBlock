@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.Window
@@ -23,6 +25,10 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
     private lateinit var buttonContainer: LinearLayout
 
     private val buttons = mutableListOf<ButtonConfig>()
+    
+    private var pendingTitle: String? = null
+    private var pendingMessage: String? = null
+    private var pendingIcon: Int? = null
 
     data class ButtonConfig(val text: String, val color: Int, val onClick: (AuroraDialog) -> Unit)
 
@@ -39,31 +45,42 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         iconView = findViewById(R.id.dialog_icon)
         buttonContainer = findViewById(R.id.button_container)
 
+        // Apply pending values
+        pendingTitle?.let { titleView.text = it }
+        pendingMessage?.let { messageView.text = it }
+        pendingIcon?.let { iconView.setImageResource(it) }
+
         renderButtons()
     }
 
     fun setTitle(title: String): AuroraDialog {
         if (::titleView.isInitialized) {
-           titleView.text = title
+            titleView.text = title
+        } else {
+            pendingTitle = title
         }
-    return this
+        return this
     }
 
     fun setMessage(message: String): AuroraDialog {
         if (::messageView.isInitialized) {
-           messageView.text = message
+            messageView.text = message
+        } else {
+            pendingMessage = message
         }
-    return this
+        return this
     }
 
     fun setIcon(resId: Int): AuroraDialog {
         if (::iconView.isInitialized) {
             iconView.setImageResource(resId)
+        } else {
+            pendingIcon = resId
         }
         return this
     }
 
-    fun addButton(text: String, color: Int = Color.parseColor("#0F7B8E"), onClick: (AuroraDialog) -> Unit): AuroraDialog {
+    fun addButton(text: String, color: Int = context.getColor(R.color.primary), onClick: (AuroraDialog) -> Unit): AuroraDialog {
         buttons.add(ButtonConfig(text, color, onClick))
         return this
     }
@@ -74,17 +91,19 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         val density = context.resources.displayMetrics.density
         val largeRadius = 24f * density
         val smallRadius = 4f * density
+        val primaryColor = context.getColor(R.color.primary)
+        val onPrimaryColor = context.getColor(R.color.onPrimary)
 
         buttons.forEachIndexed { index, config ->
             val button = AppCompatButton(context).apply {
                 text = config.text
                 isAllCaps = false
-                setTextColor(Color.WHITE)
+                setTextColor(onPrimaryColor)
                 textSize = 14f
 
                 val params = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    (48 * density).toInt()
+                    (40 * density).toInt()
                 )
                 if (index > 0) {
                     params.topMargin = (8 * density).toInt()
@@ -108,7 +127,11 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
                         shape.cornerRadius = smallRadius
                     }
                 }
-                background = shape
+                
+                // Tambah ripple effect
+                val ripple = RippleDrawable(ColorStateList.valueOf(Color.parseColor("#33FFFFFF")), shape, null)
+                background = ripple
+                
                 setOnClickListener {
                     config.onClick(this@AuroraDialog)
                 }
@@ -136,15 +159,15 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         }
 
         fun setPositiveButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
-            buttons.add(ButtonConfig(text, Color.parseColor("#0F7B8E"), onClick))
+            buttons.add(ButtonConfig(text, context.getColor(R.color.primary), onClick))
         }
 
         fun setNegativeButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
-            buttons.add(ButtonConfig(text, Color.parseColor("#757575"), onClick))
+            buttons.add(ButtonConfig(text, context.getColor(R.color.onSurfaceVariant), onClick))
         }
 
         fun setNeutralButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
-            buttons.add(ButtonConfig(text, Color.parseColor("#999999"), onClick))
+            buttons.add(ButtonConfig(text, context.getColor(R.color.secondary), onClick))
         }
 
         fun addButton(text: String, color: Int, onClick: (AuroraDialog) -> Unit) = apply {
@@ -156,7 +179,9 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
                 setTitle(title)
                 setMessage(message)
                 setIcon(icon)
-                buttons.forEach { addButton(it.text, it.color, it.onClick) }
+                buttons.forEach {
+                    addButton(it.text, it.color, it.onClick)
+                }
                 show()
             }
         }
@@ -166,7 +191,9 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
                 setTitle(title)
                 setMessage(message)
                 setIcon(icon)
-                buttons.forEach { addButton(it.text, it.color, it.onClick) }
+                buttons.forEach {
+                    addButton(it.text, it.color, it.onClick)
+                }
             }
         }
     }
