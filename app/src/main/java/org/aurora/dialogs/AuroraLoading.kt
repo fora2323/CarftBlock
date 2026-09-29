@@ -37,8 +37,7 @@ class AuroraLoading : DialogFragment() {
      */
     fun updateProgress(progress: Int) {
         activity?.runOnUiThread {
-            // Mengubah nilai progress pada LoadingIndicator
-            loadingIndicator?.progress = progress
+            loadingIndicator?.setProgress(progress)
         }
     }
 
