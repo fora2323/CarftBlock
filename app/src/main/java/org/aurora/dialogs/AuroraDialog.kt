@@ -43,17 +43,23 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
     }
 
     fun setTitle(title: String): AuroraDialog {
-        titleView.text = title
+        if (::titleView.isInitialized) {
+            titleView.text = title
+        }
         return this
     }
 
     fun setMessage(message: String): AuroraDialog {
-        messageView.text = message
+        if (::messageView.isInitialized) {
+            messageView.text = message
+        }
         return this
     }
 
     fun setIcon(resId: Int): AuroraDialog {
-        iconView.setImageResource(resId)
+        if (::iconView.isInitialized) {
+            iconView.setImageResource(resId)
+        }
         return this
     }
 
@@ -66,8 +72,8 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         buttonContainer.removeAllViews()
 
         val density = context.resources.displayMetrics.density
-        val largeRadius = 24f * density // Radius melengkung penuh
-        val smallRadius = 4f * density  // Radius kecil untuk sisi yang bersentuhan
+        val largeRadius = 24f * density
+        val smallRadius = 4f * density
 
         buttons.forEachIndexed { index, config ->
             val button = AppCompatButton(context).apply {
@@ -81,21 +87,25 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
                     (48 * density).toInt()
                 )
                 if (index > 0) {
-                    params.topMargin = (2 * density).toInt()
+                    params.topMargin = (8 * density).toInt()
                 }
                 layoutParams = params
 
-                // Logika Radius Dinamis
                 val shape = GradientDrawable()
                 shape.setColor(config.color)
 
-                if (buttons.size == 1) {
-                    shape.cornerRadius = largeRadius
-                } else if (buttons.size >= 2) {
-                    if (index == 0) {
+                when {
+                    buttons.size == 1 -> {
+                        shape.cornerRadius = largeRadius
+                    }
+                    index == 0 -> {
                         shape.cornerRadii = floatArrayOf(largeRadius, largeRadius, largeRadius, largeRadius, smallRadius, smallRadius, smallRadius, smallRadius)
-                    } else if (index == buttons.size - 1) {
+                    }
+                    index == buttons.size - 1 -> {
                         shape.cornerRadii = floatArrayOf(smallRadius, smallRadius, smallRadius, smallRadius, largeRadius, largeRadius, largeRadius, largeRadius)
+                    }
+                    else -> {
+                        shape.cornerRadius = smallRadius
                     }
                 }
                 background = shape
@@ -104,6 +114,60 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
                 }
             }
             buttonContainer.addView(button)
+        }
+    }
+
+    class Builder(val context: Context) {
+        private var title: String = ""
+        private var message: String = ""
+        private var icon: Int = R.drawable.ic_notifications
+        private val buttons = mutableListOf<ButtonConfig>()
+
+        fun setTitle(title: String) = apply {
+            this.title = title
+        }
+
+        fun setMessage(message: String) = apply {
+            this.message = message
+        }
+
+        fun setIcon(resId: Int) = apply {
+            this.icon = resId
+        }
+
+        fun setPositiveButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
+            buttons.add(ButtonConfig(text, Color.parseColor("#0F7B8E"), onClick))
+        }
+
+        fun setNegativeButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
+            buttons.add(ButtonConfig(text, Color.parseColor("#757575"), onClick))
+        }
+
+        fun setNeutralButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
+            buttons.add(ButtonConfig(text, Color.parseColor("#999999"), onClick))
+        }
+
+        fun addButton(text: String, color: Int, onClick: (AuroraDialog) -> Unit) = apply {
+            buttons.add(ButtonConfig(text, color, onClick))
+        }
+
+        fun show(): AuroraDialog {
+            return AuroraDialog(context).apply {
+                setTitle(title)
+                setMessage(message)
+                setIcon(icon)
+                buttons.forEach { addButton(it.text, it.color, it.onClick) }
+                show()
+            }
+        }
+
+        fun build(): AuroraDialog {
+            return AuroraDialog(context).apply {
+                setTitle(title)
+                setMessage(message)
+                setIcon(icon)
+                buttons.forEach { addButton(it.text, it.color, it.onClick) }
+            }
         }
     }
 }
