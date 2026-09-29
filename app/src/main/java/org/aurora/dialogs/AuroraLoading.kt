@@ -10,8 +10,6 @@ import androidx.fragment.app.FragmentManager
 
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
-import org.aurora.dialogs.AuroraLoading
-
 import com.aurora.R
 
 class AuroraLoading : DialogFragment() {
