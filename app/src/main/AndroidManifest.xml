@@ -33,11 +33,17 @@
             android:name=".DebugActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
-            android:exported="true" />    
+            android:exported="true" />
+            
+        <activity
+            android:name=".ConnectedActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:exported="true" />        
 
         <!-- Add activity connected pair -->
         <activity
-            android:name=".ConnectedActivity"
+            android:name=".SplashActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
             android:exported="true">
