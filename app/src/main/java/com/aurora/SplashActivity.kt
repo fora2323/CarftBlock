@@ -33,7 +33,7 @@ class SplashActivity : BaseCompatActivity() {
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: ""
         
         // Menentukan 32 atau 64 dari string arsitektur (contoh: arm64-v8a -> 64, armeabi-v7a -> 32)
-        val archBit = if (abi.contains("64")) "64" else "32"
+        val archBit = if (abi.contains("64")) "arm64-v8a" else "armeabi-v7a"
         tvArchitecture.text = archBit
     }
 
