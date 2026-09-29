@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
 import org.aurora.SettingsUtility
+import org.aurora.Config
 
 import com.aurora.adb.AdbClient
 import com.aurora.adb.AdbKey
@@ -95,7 +96,7 @@ class ConnectedActivity : BaseCompatActivity() {
         btn3.setOnClickListener {
             // 1. Tampilkan loading dialog
             val loading = AuroraLoading.newInstance()
-            loading.showDialog(supportFragmentManager, "adb_connect_loading")
+            loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
 
             btn3.isEnabled = false
 
