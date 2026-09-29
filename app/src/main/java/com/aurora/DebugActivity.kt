@@ -8,12 +8,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.NestedScrollView
+
 import com.google.android.material.button.MaterialButton
+
 import org.aurora.core.BaseCompatActivity
 
 class DebugActivity : BaseCompatActivity() {
