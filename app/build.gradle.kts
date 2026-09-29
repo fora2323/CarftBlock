@@ -1,6 +1,5 @@
 plugins {
     id("com.android.application")
-    kotlin("android")
 }
 
 android {
@@ -94,4 +93,6 @@ dependencies {
     implementation("org.lsposed.libcxx:libcxx:27.0.12077973")
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
+    
+    compileOnly("dev.rikka.hidden:stub:4.4.0")
 }
