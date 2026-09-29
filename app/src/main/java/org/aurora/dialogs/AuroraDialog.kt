@@ -44,16 +44,16 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
 
     fun setTitle(title: String): AuroraDialog {
         if (::titleView.isInitialized) {
-            titleView.text = title
+           titleView.text = title
         }
-        return this
+    return this
     }
 
     fun setMessage(message: String): AuroraDialog {
         if (::messageView.isInitialized) {
-            messageView.text = message
+           messageView.text = message
         }
-        return this
+    return this
     }
 
     fun setIcon(resId: Int): AuroraDialog {
