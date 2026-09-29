@@ -27,7 +27,7 @@
     <color name="surfaceContainerLowest">#FF090B0B</color>
     <color name="surfaceContainerLow">#FF171A1C</color>
     <color name="surfaceContainer">#FF1C2022</color>
-    <color name="surfaceContainerHigh">#FF272D30</color>
+    <color name="surfaceContainerHigh">#272D30</color>
     <color name="surfaceContainerHighest">#FF323A3E</color>
     <color name="error">#FFF5A3A3</color>
     <color name="onError">#FF5C0A0A</color>
