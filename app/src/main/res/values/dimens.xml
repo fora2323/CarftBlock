@@ -3,11 +3,11 @@
     <dimen name="main_margin_toolbar">2dp</dimen>
     <dimen name="pedding_16dp">16dp</dimen>
     <!--size text-->
-    <dimen name="radius_8sp">8sp</dimen>
-    <dimen name="radius_10sp">10sp</dimen>
-    <dimen name="radius_12sp">12sp</dimen>
-    <dimen name="radius_14sp">14sp</dimen>
-    <dimen name="radius_16sp">16sp</dimen>
+    <dimen name="size_text_8sp">8sp</dimen>
+    <dimen name="size_text_10sp">10sp</dimen>
+    <dimen name="size_text_12sp">12sp</dimen>
+    <dimen name="size_text_14sp">14sp</dimen>
+    <dimen name="size_text_16sp">16sp</dimen>
     <dimen name="size_text_18sp">18sp</dimen>
     <dimen name="size_text_20sp">20sp</dimen>
     <!--size radius-->
@@ -20,4 +20,12 @@
     <dimen name="radius_20dp">20dp</dimen>
     <dimen name="radius_22dp">22dp</dimen>
     <dimen name="radius_24dp">24dp</dimen>
+    <!--size pedding-->
+    <dimen name="size_pedding_4dp">4dp</dimen>
+    <dimen name="size_pedding_6dp">6dp</dimen>
+    <dimen name="size_pedding_8dp">8dp</dimen>
+    <dimen name="size_pedding_10dp">10dp</dimen>
+    <dimen name="size_pedding_12dp">12dp</dimen>
+    <dimen name="size_pedding_14dp">14dp</dimen>
+    <dimen name="size_pedding_16dp">16dp</dimen>
 </resources>

@@ -45,7 +45,6 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         iconView = findViewById(R.id.dialog_icon)
         buttonContainer = findViewById(R.id.button_container)
 
-        // Apply pending values
         pendingTitle?.let { titleView.text = it }
         pendingMessage?.let { messageView.text = it }
         pendingIcon?.let { iconView.setImageResource(it) }
@@ -91,7 +90,6 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         val density = context.resources.displayMetrics.density
         val largeRadius = 24f * density
         val smallRadius = 4f * density
-        val primaryColor = context.getColor(R.color.primary)
         val onPrimaryColor = context.getColor(R.color.onPrimary)
 
         buttons.forEachIndexed { index, config ->
@@ -128,7 +126,6 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
                     }
                 }
                 
-                // Tambah ripple effect
                 val ripple = RippleDrawable(ColorStateList.valueOf(Color.parseColor("#33FFFFFF")), shape, null)
                 background = ripple
                 
@@ -175,26 +172,22 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         }
 
         fun show(): AuroraDialog {
-            return AuroraDialog(context).apply {
-                setTitle(title)
-                setMessage(message)
-                setIcon(icon)
-                buttons.forEach {
-                    addButton(it.text, it.color, it.onClick)
-                }
-                show()
-            }
+            val dialog = AuroraDialog(context)
+            dialog.setTitle(title)
+            dialog.setMessage(message)
+            dialog.setIcon(icon)
+            this.buttons.forEach { dialog.addButton(it.text, it.color, it.onClick) }
+            dialog.show()
+            return dialog
         }
 
         fun build(): AuroraDialog {
-            return AuroraDialog(context).apply {
-                setTitle(title)
-                setMessage(message)
-                setIcon(icon)
-                buttons.forEach {
-                    addButton(it.text, it.color, it.onClick)
-                }
-            }
+            val dialog = AuroraDialog(context)
+            dialog.setTitle(title)
+            dialog.setMessage(message)
+            dialog.setIcon(icon)
+            this.buttons.forEach { dialog.addButton(it.text, it.color, it.onClick) }
+            return dialog
         }
     }
 }

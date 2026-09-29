@@ -6,7 +6,7 @@
     android:layout_margin="22dp"
     android:background="@drawable/bg_dialogs_rounded"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="@dimen/size_pedding_16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
