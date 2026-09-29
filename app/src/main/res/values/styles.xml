@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Base.Theme.Aurora" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowBackground">@color/surface</item>
@@ -10,7 +9,8 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
     </style>
-        <style name="Base.Theme.AuroraButton" parent="Widget.Material3.Button">
+
+    <style name="Base.Theme.AuroraButton" parent="Widget.Material3.Button">
         <item name="android:backgroundTint">@color/primary</item>
         <item name="android:textColor">@color/onPrimary</item>
         <item name="cornerRadius">@dimen/radius_24dp</item>
@@ -22,7 +22,23 @@
         <item name="android:paddingTop">2dp</item>
         <item name="android:paddingBottom">2dp</item>
     </style>
-        <style name="Base.Theme.AuroraDialog" parent="Theme.Material3.Dark.Dialog">
+
+    <style name="Base.Theme.AuroraOutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:backgroundTint">@color/surfaceContainer</item>
+        <item name="android:textColor">@color/onSurface</item>
+        <item name="strokeColor">@color/outlineVariant</item>
+        <item name="strokeWidth">@dimen/size_outline_1dp</item>
+        <item name="cornerRadius">@dimen/radius_24dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconTint">@color/onSurface</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+    </style>
+
+    <style name="Base.Theme.AuroraDialog" parent="Theme.Material3.Dark.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>

@@ -28,4 +28,6 @@
     <dimen name="size_pedding_12dp">12dp</dimen>
     <dimen name="size_pedding_14dp">14dp</dimen>
     <dimen name="size_pedding_16dp">16dp</dimen>
+    <!--size outline-->
+    <dimen name="size_outline_1dp">1dp</dimen>
 </resources>
