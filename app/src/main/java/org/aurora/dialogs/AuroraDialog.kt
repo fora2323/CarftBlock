@@ -13,6 +13,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 
+import com.aurora.R
+
 class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_AuroraDialog) {
 
     private lateinit var titleView: TextView
