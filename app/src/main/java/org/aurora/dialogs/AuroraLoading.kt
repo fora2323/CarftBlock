@@ -32,23 +32,19 @@ class AuroraLoading : DialogFragment() {
         isCancelable = false
     }
 
+    /**
+     * Menerima nilai progress real-time (0 - 100)
+     */
     fun updateProgress(progress: Int) {
         activity?.runOnUiThread {
-            loadingIndicator?.apply {
-                if (isIndeterminate) {
-                    isIndeterminate = false
-                }
-                setProgress(progress, true)
-            }
+            // Mengubah nilai progress pada LoadingIndicator
+            loadingIndicator?.progress = progress
         }
     }
 
-    fun setIndeterminate(isIndeterminate: Boolean) {
-        activity?.runOnUiThread {
-            loadingIndicator?.isIndeterminate = isIndeterminate
-        }
-    }
-
+    /**
+     * Menampilkan dialog secara aman
+     */
     @JvmOverloads
     fun showDialog(fragmentManager: FragmentManager, tag: String = "AuroraLoading") {
         if (!isAdded && !fragmentManager.isStateSaved) {
@@ -56,6 +52,9 @@ class AuroraLoading : DialogFragment() {
         }
     }
 
+    /**
+     * Menutup dialog secara aman
+     */
     fun dismissDialog() {
         if (isAdded) {
             dismissAllowingStateLoss()
