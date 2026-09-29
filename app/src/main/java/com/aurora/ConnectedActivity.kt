@@ -21,6 +21,8 @@ class ConnectedActivity : BaseCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         val rootView: View = findViewById(android.R.id.content)
         val btn1: MaterialButton = findViewById(R.id.btn_instruksi) 
+        val btn2: MaterialButton = findViewById(R.id.btn_pairing) 
+        val btn3: MaterialButton = findViewById(R.id.btn_start) 
         
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -32,15 +34,15 @@ class ConnectedActivity : BaseCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        btn1.setOnClickListener {
-            AuroraDialog(this)
+        btn2.setOnClickListener {
+            AuroraDialog.Builder(this)
                 .setTitle("Izin Notifikasi Diperlukan")
                 .setMessage("Izin notifikasi wajib diaktifkan agar aplikasi dapat menampilkan status sistem, informasi penting, dan informasi saat aplikasi berjalan atau ditutup.")
-                .addButton("Izinkan") { dialog ->
+                .setPositiveButton("Izinkan") { dialog ->
                     dialog.dismiss() 
                 }
                 .setNegativeButton("Batal") { dialog ->
-                    dialog.cancel()
+                    dialog.dismiss()
                 }
                 .show()
         }
