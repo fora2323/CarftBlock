@@ -7,11 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import com.aurora.R
-import com.google.android.material.loadingindicator.LoadingIndicator
 
 class AuroraLoading : DialogFragment() {
-
-    private var loadingIndicator: LoadingIndicator? = null
 
     override fun getTheme(): Int {
         return R.style.Base_Theme_AuroraDialog
@@ -27,23 +24,9 @@ class AuroraLoading : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        loadingIndicator = view.findViewById(R.id.loadingIndicator)
         isCancelable = false
     }
 
-    /**
-     * Menerima nilai progress real-time (0 - 100)
-     */
-    fun updateProgress(progress: Int) {
-        activity?.runOnUiThread {
-            loadingIndicator?.setProgress(progress)
-        }
-    }
-
-    /**
-     * Menampilkan dialog secara aman
-     */
     @JvmOverloads
     fun showDialog(fragmentManager: FragmentManager, tag: String = "AuroraLoading") {
         if (!isAdded && !fragmentManager.isStateSaved) {
@@ -51,9 +34,6 @@ class AuroraLoading : DialogFragment() {
         }
     }
 
-    /**
-     * Menutup dialog secara aman
-     */
     fun dismissDialog() {
         if (isAdded) {
             dismissAllowingStateLoss()
