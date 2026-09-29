@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface"
-        app:title="Crash Log"
+        app:title="@string/title_toolbar_debug"
         app:titleTextColor="@color/onSurface" />
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
@@ -43,7 +43,7 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             app:icon="@drawable/ic_copy"
-            android:text="Copy Log" />
+            android:text="@string/title_button_copy_debug" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_restart"
             style="@style/Base.Theme.AuroraButton"
@@ -52,6 +52,6 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             app:icon="@drawable/ic_restart"
-            android:text="Restart" />
+            android:text="@string/title_button_restart_debug" />
     </LinearLayout>
 </LinearLayout>

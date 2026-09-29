@@ -13,6 +13,10 @@
     <string name="title_toolbar_connected">Activation</string>
     <string name="title_wareless_connected">Start via Wireless Debugging</string>
     <string name="title_dec_wareless_connected">On Android 11 or later, you can enable Wireless debugging and start Aurora directly from your device, without connecting to shizuku or a computer.\n\nPlease see the step-by-step guide </string>
+    <!--tag name debug.xml-->
+    <string name="title_toolbar_debug">Aww Crash!!</string>
+    <string name="title_button_copy_debug">Copy Logs</string>
+    <string name="title_button_restart_debug">Restart</string>
     <!--tag name service notification-->
     <string name="notification_channel_adb_pairing">ADB Pairing</string>
     <string name="notification_adb_pairing_succeed_title">Pairing Succeed</string>
