@@ -11,6 +11,7 @@ import com.google.android.material.button.MaterialButton
 
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
+import org.aurora.SettingsUtility
 
 class ConnectedActivity : BaseCompatActivity() {
 
@@ -35,16 +36,19 @@ class ConnectedActivity : BaseCompatActivity() {
         }
 
         btn2.setOnClickListener {
-            AuroraDialog.Builder(this)
-                .setTitle("Izin Notifikasi Diperlukan")
-                .setMessage("Izin notifikasi wajib diaktifkan agar aplikasi dapat menampilkan status sistem, informasi penting, dan informasi saat aplikasi berjalan atau ditutup.")
-                .setPositiveButton("Izinkan") { dialog ->
-                    dialog.dismiss() 
-                }
-                .setNegativeButton("Batal") { dialog ->
-                    dialog.dismiss()
-                }
-                .show()
+            if (!SettingsUtility.isNotificationEnabled(this)) {
+                AuroraDialog.Builder(this)
+                    .setTitle("Izin Notifikasi Diperlukan")
+                    .setMessage("Izin notifikasi wajib diaktifkan agar aplikasi dapat menampilkan status sistem, informasi penting, dan informasi saat aplikasi berjalan atau ditutup.")
+                    .setPositiveButton("Izinkan") { dialog ->
+                        SettingsUtility.openNotificationSettings(this)
+                        dialog.dismiss() 
+                    }
+                    .setNegativeButton("Batal") { dialog ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
         }
 
         applySystemBarInsets(rootView, toolbar, null)
