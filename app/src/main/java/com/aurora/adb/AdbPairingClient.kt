@@ -3,6 +3,7 @@ package com.aurora.adb
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.android.org.conscrypt.Conscrypt
 import java.io.Closeable
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -35,6 +36,7 @@ private class PeerInfo(val type: Byte, data: ByteArray) {
             put(type)
             put(data)
         }
+        Log.d(TAG, "write PeerInfo type=$type")
     }
     companion object {
         fun readFrom(buffer: ByteBuffer): PeerInfo {
@@ -57,33 +59,46 @@ private class PairingPacketHeader(val version: Byte, val type: Byte, val payload
             put(type)
             putInt(payload)
         }
+        Log.d(TAG, "write PairingPacketHeader version=$version type=$type payload=$payload")
     }
     companion object {
         fun readFrom(buffer: ByteBuffer): PairingPacketHeader? {
             val version = buffer.get()
             val type = buffer.get()
             val payload = buffer.int
-            if (version < kMinSupportedKeyHeaderVersion || version > kMaxSupportedKeyHeaderVersion) return null
-            if (type != Type.SPAKE2_MSG.value && type != Type.PEER_INFO.value) return null
-            if (payload <= 0 || payload > kMaxPayloadSize) return null
+            if (version < kMinSupportedKeyHeaderVersion || version > kMaxSupportedKeyHeaderVersion) {
+                Log.e(TAG, "PairingPacketHeader version mismatch (us=$kCurrentKeyHeaderVersion them=$version)")
+                return null
+            }
+            if (type != Type.SPAKE2_MSG.value && type != Type.PEER_INFO.value) {
+                Log.e(TAG, "Unknown PairingPacket type=$type")
+                return null
+            }
+            if (payload <= 0 || payload > kMaxPayloadSize) {
+                Log.e(TAG, "header payload not within a safe payload size (size=$payload)")
+                return null
+            }
             return PairingPacketHeader(version, type, payload)
         }
     }
 }
 
-// CATATAN: PairingContext versi Kotlin saya hapus agar aplikasi Anda 
-// murni menggunakan file 'PairingContext.java' yang sudah Anda buat sebelumnya.
-
 @RequiresApi(Build.VERSION_CODES.R)
-class AdbPairingClient(private val host: String, private val port: Int, private val pairCode: String, private val key: AdbKey) : Closeable {
+class AdbPairingClient(
+    private val host: String,
+    private val port: Int,
+    private val pairCode: String,
+    private val key: AdbKey
+) : Closeable {
+
     private enum class State { Ready, ExchangingMsgs, ExchangingPeerInfo, Stopped }
+
     private lateinit var socket: Socket
     private lateinit var inputStream: DataInputStream
     private lateinit var outputStream: DataOutputStream
+
     private val peerInfo: PeerInfo = PeerInfo(PeerInfo.Type.ADB_RSA_PUB_KEY.value, key.adbPublicKey)
-    
-    // Kotlin akan membaca PairingContext.java Anda sebagai objek
-    private lateinit var pairingContext: PairingContext 
+    private lateinit var pairingContext: PairingContext
     private var state: State = State.Ready
 
     fun start(): Boolean {
@@ -99,35 +114,24 @@ class AdbPairingClient(private val host: String, private val port: Int, private 
     private fun setupTlsConnection() {
         socket = Socket(host, port)
         socket.tcpNoDelay = true
+
         val sslContext = key.sslContext
         val sslSocket = sslContext.socketFactory.createSocket(socket, host, port, true) as SSLSocket
         sslSocket.startHandshake()
+        Log.d(TAG, "Handshake succeeded.")
+
         inputStream = DataInputStream(sslSocket.inputStream)
         outputStream = DataOutputStream(sslSocket.outputStream)
-        
+
         val pairCodeBytes = pairCode.toByteArray()
-        
-        // =========================================================
-        // PENGAMBILAN KUNCI ENKRIPSI
-        // Karena blokir API sudah dihancurkan oleh HiddenApiBypass di SketchApplication,
-        // kita bisa langsung memanggil kelas rahasia Conscrypt dengan Reflection bersih.
-        // =========================================================
-        try {
-            val conscryptClass = Class.forName("com.android.org.conscrypt.Conscrypt")
-            val exportMethod = conscryptClass.getMethod("exportKeyingMaterial", SSLSocket::class.java, String::class.java, ByteArray::class.java, Int::class.javaPrimitiveType)
-            val keyMaterial = exportMethod.invoke(null, sslSocket, kExportedKeyLabel, null, kExportedKeySize) as ByteArray
-            
-            val passwordBytes = ByteArray(pairCode.length + keyMaterial.size)
-            pairCodeBytes.copyInto(passwordBytes)
-            keyMaterial.copyInto(passwordBytes, pairCodeBytes.size)
-            
-            // Memanggil PairingContext.java
-            this.pairingContext = PairingContext(true, passwordBytes)
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Gagal mengambil exportKeyingMaterial! Pastikan SketchApplication berjalan dengan benar.", e)
-            throw e
-        }
+        val keyMaterial = Conscrypt.exportKeyingMaterial(sslSocket, kExportedKeyLabel, null, kExportedKeySize)
+        val passwordBytes = ByteArray(pairCode.length + keyMaterial.size)
+        pairCodeBytes.copyInto(passwordBytes)
+        keyMaterial.copyInto(passwordBytes, pairCodeBytes.size)
+
+        // Pakai PairingContext.java yang sudah ada (native)
+        val pairingContext = PairingContext(true, passwordBytes)
+        this.pairingContext = pairingContext
     }
 
     private fun createHeader(type: PairingPacketHeader.Type, payloadSize: Int): PairingPacketHeader {
@@ -146,16 +150,17 @@ class AdbPairingClient(private val host: String, private val port: Int, private 
         header.writeTo(buffer)
         outputStream.write(buffer.array())
         outputStream.write(payload)
+        Log.d(TAG, "write payload size=${payload.size}")
     }
 
     private fun doExchangeMsgs(): Boolean {
-        // Otomatis memanggil getMsg() dari file Java Anda
         val msg = pairingContext.msg
-        val size = msg.size
-        val ourHeader = createHeader(PairingPacketHeader.Type.SPAKE2_MSG, size)
+        val ourHeader = createHeader(PairingPacketHeader.Type.SPAKE2_MSG, msg.size)
         writeHeader(ourHeader, msg)
+
         val theirHeader = readHeader() ?: return false
         if (theirHeader.type != PairingPacketHeader.Type.SPAKE2_MSG.value) return false
+
         val theirMessage = ByteArray(theirHeader.payload)
         inputStream.readFully(theirMessage)
         if (!pairingContext.initCipher(theirMessage)) return false
@@ -165,15 +170,24 @@ class AdbPairingClient(private val host: String, private val port: Int, private 
     private fun doExchangePeerInfo(): Boolean {
         val buf = ByteBuffer.allocate(kMaxPeerInfoSize).order(ByteOrder.BIG_ENDIAN)
         peerInfo.writeTo(buf)
+
         val outbuf = pairingContext.encrypt(buf.array()) ?: return false
         val ourHeader = createHeader(PairingPacketHeader.Type.PEER_INFO, outbuf.size)
         writeHeader(ourHeader, outbuf)
+
         val theirHeader = readHeader() ?: return false
         if (theirHeader.type != PairingPacketHeader.Type.PEER_INFO.value) return false
+
         val theirMessage = ByteArray(theirHeader.payload)
         inputStream.readFully(theirMessage)
+
         val decrypted = pairingContext.decrypt(theirMessage) ?: throw AdbInvalidPairingCodeException()
-        if (decrypted.size != kMaxPeerInfoSize) return false
+        if (decrypted.size != kMaxPeerInfoSize) {
+            Log.e(TAG, "Got size=${decrypted.size} PeerInfo.size=$kMaxPeerInfoSize")
+            return false
+        }
+        val theirPeerInfo = PeerInfo.readFrom(ByteBuffer.wrap(decrypted))
+        Log.d(TAG, "theirPeerInfo type=${theirPeerInfo.type}")
         return true
     }
 
@@ -182,5 +196,11 @@ class AdbPairingClient(private val host: String, private val port: Int, private 
         try { outputStream.close() } catch (e: Throwable) {}
         try { socket.close() } catch (e: Exception) {}
         if (state != State.Ready) { pairingContext.destroy() }
+    }
+
+    companion object {
+        init {
+            System.loadLibrary("adb")
+        }
     }
 }
