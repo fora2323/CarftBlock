@@ -6,6 +6,7 @@ import android.widget.TextView
 
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
+import org.aurora.SettingsUtility
 
 class SplashActivity : BaseCompatActivity() {
 
