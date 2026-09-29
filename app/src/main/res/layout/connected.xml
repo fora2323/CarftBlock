@@ -61,7 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/title_dec_wareless_connected"
-                    android:textSize="@dimen/radius_12sp"
+                    android:textSize="@dimen/size_text_12sp"
                     android:textColor="@color/onSurfaceVariant"
                     android:lineSpacingExtra="4dp" />
                 
