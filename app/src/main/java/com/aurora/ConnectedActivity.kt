@@ -93,8 +93,11 @@ class ConnectedActivity : BaseCompatActivity() {
 
         // ── START ENGINE BUTTON ──────────────────────────────────────
         btn3.setOnClickListener {
+            // 1. Tampilkan loading dialog
+            val loading = AuroraLoading.newInstance()
+            loading.showDialog(supportFragmentManager, "adb_connect_loading")
+
             btn3.isEnabled = false
-            btn3.text = "Menghubungkan..."
 
             activityScope.launch {
                 val result = runCatching {
@@ -110,8 +113,10 @@ class ConnectedActivity : BaseCompatActivity() {
                 }
 
                 withContext(Dispatchers.Main) {
+                    // 2. Tutup loading dialog setelah koneksi selesai
+                    loading.dismissDialog()
+
                     btn3.isEnabled = true
-                    btn3.text = "Start Engine"
 
                     if (result.isSuccess) {
                         Log.i(TAG, "ADB connect success")
