@@ -104,7 +104,7 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
                     (40 * density).toInt()
                 )
                 if (index > 0) {
-                    params.topMargin = (8 * density).toInt()
+                    params.topMargin = (4 * density).toInt()
                 }
                 layoutParams = params
 
@@ -160,11 +160,7 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
         }
 
         fun setNegativeButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
-            buttons.add(ButtonConfig(text, context.getColor(R.color.onSurfaceVariant), onClick))
-        }
-
-        fun setNeutralButton(text: String, onClick: (AuroraDialog) -> Unit) = apply {
-            buttons.add(ButtonConfig(text, context.getColor(R.color.secondary), onClick))
+            buttons.add(ButtonConfig(text, context.getColor(R.color.primary), onClick))
         }
 
         fun addButton(text: String, color: Int, onClick: (AuroraDialog) -> Unit) = apply {
@@ -176,7 +172,9 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
             dialog.setTitle(title)
             dialog.setMessage(message)
             dialog.setIcon(icon)
-            this.buttons.forEach { dialog.addButton(it.text, it.color, it.onClick) }
+            this.buttons.forEach {
+                dialog.addButton(it.text, it.color, it.onClick)
+            }
             dialog.show()
             return dialog
         }
@@ -186,7 +184,9 @@ class AuroraDialog(context: Context) : Dialog(context, R.style.Base_Theme_Aurora
             dialog.setTitle(title)
             dialog.setMessage(message)
             dialog.setIcon(icon)
-            this.buttons.forEach { dialog.addButton(it.text, it.color, it.onClick) }
+            this.buttons.forEach {
+                dialog.addButton(it.text, it.color, it.onClick)
+            }
             return dialog
         }
     }
