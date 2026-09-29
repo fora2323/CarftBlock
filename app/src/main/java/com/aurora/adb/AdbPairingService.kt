@@ -169,8 +169,8 @@ class AdbPairingService : Service() {
                     this@AdbPairingService 
                 }
                 
-                val prefs = storageContext.getSharedPreferences("ffx_adb_prefs", Context.MODE_PRIVATE)
-                AdbKey(PreferenceAdbKeyStore(prefs), "ffx")
+                val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", Context.MODE_PRIVATE)
+                AdbKey(PreferenceAdbKeyStore(prefs), "aurora")
                 
             } catch (e: Throwable) {
                 Log.e(tag, "Failed to load ADB key", e)
