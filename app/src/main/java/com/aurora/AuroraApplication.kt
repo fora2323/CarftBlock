@@ -3,6 +3,8 @@ package com.aurora
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.system.exitProcess
@@ -13,6 +15,12 @@ class AuroraApplication : Application() {
         private lateinit var mApplicationContext: Context
 
         fun getContext(): Context = mApplicationContext
+
+        init {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                HiddenApiBypass.setHiddenApiExemptions("")
+            }
+        }
     }
 
     override fun onCreate() {
