@@ -3,18 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:background="@drawable/bg_contained_loading"
-    android:padding="12dp">
+    android:layout_gravity="center">
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progressIndicator"
+    <com.google.android.material.loadingindicator.LoadingIndicator
+        android:id="@+id/loadingIndicator"
+        style="@style/Widget.Material3.LoadingIndicator.Contained"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:indeterminate="true"
         app:indicatorColor="@color/onPrimary"
-        app:indicatorSize="32dp"
-        app:trackColor="@android:color/transparent"
-        app:trackThickness="4dp" />
+        app:containerColor="@color/primary" />
 </FrameLayout>

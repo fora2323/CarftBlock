@@ -4,36 +4,38 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-
-import com.google.android.material.progressindicator.CircularProgressIndicator
-
+import com.aurora.Config
 import com.aurora.R
+import com.google.android.material.loadingindicator.LoadingIndicator
 
 class AuroraLoading : DialogFragment() {
 
-    private var progressIndicator: CircularProgressIndicator? = null
+    private var loadingIndicator: LoadingIndicator? = null
 
     override fun getTheme(): Int {
         return R.style.Base_Theme_AuroraDialog
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.dialog_loading, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        progressIndicator = view.findViewById(R.id.progressIndicator)
+        loadingIndicator = view.findViewById(R.id.loadingIndicator)
         isCancelable = false
     }
 
     fun updateProgress(progress: Int) {
         activity?.runOnUiThread {
-            progressIndicator?.apply {
+            loadingIndicator?.apply {
                 if (isIndeterminate) {
                     isIndeterminate = false
                 }
@@ -44,11 +46,12 @@ class AuroraLoading : DialogFragment() {
 
     fun setIndeterminate(isIndeterminate: Boolean) {
         activity?.runOnUiThread {
-            progressIndicator?.isIndeterminate = isIndeterminate
+            loadingIndicator?.isIndeterminate = isIndeterminate
         }
     }
 
-    fun showDialog(fragmentManager: FragmentManager, tag: String = "AuroraLoading") {
+    @JvmOverloads
+    fun showDialog(fragmentManager: FragmentManager, tag: String = Config.DIALOG_LOADING_TAG) {
         if (!isAdded && !fragmentManager.isStateSaved) {
             show(fragmentManager, tag)
         }
