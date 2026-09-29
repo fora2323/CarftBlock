@@ -39,6 +39,9 @@ class ConnectedActivity : BaseCompatActivity() {
                 .addButton("Izinkan") { dialog ->
                     dialog.dismiss() 
                 }
+                .setNegativeButton("Batal") { dialog ->
+                    dialog.cancel()
+                }
                 .show()
         }
 
