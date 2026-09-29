@@ -94,5 +94,6 @@ dependencies {
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
     
+    implementation(libs.rikka.hidden.compat)
     compileOnly("dev.rikka.hidden:stub:4.4.0")
 }
