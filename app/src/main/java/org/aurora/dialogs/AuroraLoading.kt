@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import com.aurora.Config
 import com.aurora.R
 import com.google.android.material.loadingindicator.LoadingIndicator
 
@@ -51,7 +50,7 @@ class AuroraLoading : DialogFragment() {
     }
 
     @JvmOverloads
-    fun showDialog(fragmentManager: FragmentManager, tag: String = Config.DIALOG_LOADING_TAG) {
+    fun showDialog(fragmentManager: FragmentManager, tag: String = "AuroraLoading") {
         if (!isAdded && !fragmentManager.isStateSaved) {
             show(fragmentManager, tag)
         }
