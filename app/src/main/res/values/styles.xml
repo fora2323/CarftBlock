@@ -5,6 +5,7 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="fontFamily">@font/roboto_condensed</item>
 
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
@@ -45,5 +46,13 @@
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowMinWidthMajor">90%</item>
         <item name="android:windowMinWidthMinor">90%</item>
+    </style>
+    
+    <style name="TextAppearance.Aurora.Title" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="fontFamily">@font/ge_force</item>
+    </style>
+    
+    <style name="TextAppearance.Aurora.Highlight" parent="TextAppearance.Material3.BodyLarge">
+        <item name="fontFamily">@font/roboto_medium</item>
     </style>
 </resources>

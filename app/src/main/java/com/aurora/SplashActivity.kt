@@ -2,7 +2,12 @@ package com.aurora
 
 import android.os.Build
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.TextView
+
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
@@ -28,11 +33,27 @@ class SplashActivity : BaseCompatActivity() {
 
     private fun setupArchitectureText() {
         val tvArchitecture = findViewById<TextView>(R.id.tv_architecture)
-        
+    
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: ""
-        
         val archBit = if (abi.contains("64")) "arm64-v8a" else "armeabi-v7a"
         tvArchitecture.text = archBit
+
+        // 1. Simpan margin bawah asli dari XML agar tidak berlipat ganda
+        val initialBottomMargin = (tvArchitecture.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
+
+        // 2. Terapkan WindowInsets untuk mendeteksi tinggi Navigation Bar
+        ViewCompat.setOnApplyWindowInsetsListener(tvArchitecture) { view, windowInsets ->
+            // Ambil ukuran inset khusus untuk sistem bar (navigasi bawah)
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            
+            // Update layout params dengan margin asli + tinggi navigasi
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = initialBottomMargin + insets.bottom
+            }
+            
+            // Kembalikan insets agar tetap bisa dipakai oleh view lain (jika ada)
+            windowInsets
+        }
     }
 
     private fun checkRequiredPermissions() {
@@ -45,7 +66,9 @@ class SplashActivity : BaseCompatActivity() {
                 showPermissionDialog(
                     title = "Izin Notifikasi",
                     message = "Aplikasi ini memerlukan izin notifikasi untuk memberikan pembaruan penting. Silakan izinkan di pengaturan.",
-                    onGrant = { SettingsUtility.openNotificationSettings(this) }
+                    onGrant = {
+                        SettingsUtility.openNotificationSettings(this)
+                    }
                 )
             }
             // 2. Jika notifikasi diizinkan, cek Write System Settings (Abaikan izin Overlay)
@@ -53,7 +76,9 @@ class SplashActivity : BaseCompatActivity() {
                 showPermissionDialog(
                     title = "Izin Modifikasi Sistem",
                     message = "Aplikasi memerlukan izin untuk mengubah pengaturan sistem agar dapat berfungsi maksimal.",
-                    onGrant = { SettingsUtility.openWriteSettings(this) }
+                    onGrant = {
+                        SettingsUtility.openWriteSettings(this)
+                    }
                 )
             }
             // 3. Semua izin sudah diberikan

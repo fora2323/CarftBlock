@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 
 public class AuroraService {
     
-    private static final String TAG = "FFX_DAEMON";
+    private static final String TAG = "AURORA_DAEMON";
     private static final int DAEMON_PORT = 45678; 
     private static final long START_TIME = System.currentTimeMillis();
     
@@ -21,15 +21,15 @@ public class AuroraService {
 
     public static void main(String[] args) {
         // 1. Sinyal bahwa mesin sukses mengambil alih Hak Akses ADB (UID 2000)
-        System.out.println("info: ffx_starter exit with 0");
-        System.out.println("FFX_PID_REPORT:" + android.os.Process.myPid());
+        System.out.println("info: aurora_starter exit with 0");
+        System.out.println("auroa_PID_REPORT:" + android.os.Process.myPid());
 
         ServerSocket serverSocket = null;
         try {
             // 2. Buka jalur. Jika port sudah dipakai, berarti ini duplikat. 
             // Kita matikan proses yang baru ini saja.
             serverSocket = new ServerSocket(DAEMON_PORT);
-            System.out.println("FFX Daemon started on Private Port: " + DAEMON_PORT);
+            System.out.println("Aurora Daemon started on Private Port: " + DAEMON_PORT);
         } catch (Exception e) {
             System.out.println("info: FfxService already running. Exiting duplicate.");
             System.exit(0);

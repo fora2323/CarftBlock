@@ -34,8 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="48dp"
         android:textColor="?attr/colorOnSurface"
-        android:textSize="14sp"
-        android:textStyle="bold"
+        android:textSize="@string/size_text_12sp"
+        android:textAppearance="@style/TextAppearance.Aurora.Title"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
