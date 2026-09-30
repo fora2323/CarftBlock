@@ -35,15 +35,12 @@ class SplashActivity : BaseCompatActivity() {
         val tvArchitecture = findViewById<TextView>(R.id.tv_architecture)
     
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: ""
-        val archBit = if (abi.contains("64")) "arm64-v8a" else "armeabi-v7a"
+        val archBit = if (abi.contains("64")) getString(R.string.title_abi64_splash) else getString(R.string.title_abi32_splash)
         tvArchitecture.text = archBit
 
-        // 1. Simpan margin bawah asli dari XML agar tidak berlipat ganda
         val initialBottomMargin = (tvArchitecture.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
 
-        // 2. Terapkan WindowInsets untuk mendeteksi tinggi Navigation Bar
         ViewCompat.setOnApplyWindowInsetsListener(tvArchitecture) { view, windowInsets ->
-            // Ambil ukuran inset khusus untuk sistem bar (navigasi bawah)
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
             
             // Update layout params dengan margin asli + tinggi navigasi
