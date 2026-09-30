@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.View
 
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
 
 import com.google.android.material.button.MaterialButton
 
@@ -77,7 +76,6 @@ class ConnectedActivity : BaseCompatActivity() {
                         .show()
                 }
                 else -> {
-                    // Start pairing service — notif kode pairing akan muncul
                     try {
                         startForegroundService(AdbPairingService.startIntent(this))
                     } catch (e: Exception) {
@@ -89,13 +87,11 @@ class ConnectedActivity : BaseCompatActivity() {
                             .show()
                     }
 
-                    // Buka Developer Options → Wireless Debugging langsung
                     try {
                         val intent = Intent("com.android.settings.APPLICATION_DEVELOPMENT_SETTINGS")
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivity(intent)
                     } catch (e: Exception) {
-                        // Fallback ke Settings biasa jika intent khusus tidak tersedia
                         try {
                             val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
                             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -109,100 +105,78 @@ class ConnectedActivity : BaseCompatActivity() {
         }
 
         // ── START ENGINE BUTTON ──────────────────────────────────────
- btnStart.setOnClickListener {
-    val loading = AuroraLoading.newInstance()
-    loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
-    btnStart.isEnabled = false
+        btnStart.setOnClickListener {
+            val loading = AuroraLoading.newInstance()
+            loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
+            btnStart.isEnabled = false
 
-    activityScope.launch {
-        val result = runCatching {
-            // Step 1: Scan port ADB wireless via mDNS
-            Log.d(TAG, "Step 1: Scan port ADB via mDNS")
-            var adbPort = -1
-            val portLatch = java.util.concurrent.CountDownLatch(1)
+            activityScope.launch {
+                val result = runCatching {
+                    // Step 1: Scan port ADB wireless via mDNS
+                    Log.d(TAG, "Step 1: Scan port ADB via mDNS")
+                    var adbPort = -1
+                    val portLatch = java.util.concurrent.CountDownLatch(1)
 
-            val mdns = AdbMdns(this@ConnectedActivity, AdbMdns.TLS_CONNECT,
-                androidx.lifecycle.Observer { port ->
-                    if (port > 0 && adbPort == -1) {
-                        adbPort = port
-                        portLatch.countDown()
+                    val mdns = AdbMdns(this@ConnectedActivity, AdbMdns.TLS_CONNECT,
+                        androidx.lifecycle.Observer { port ->
+                            if (port > 0 && adbPort == -1) {
+                                adbPort = port
+                                portLatch.countDown()
+                            }
+                        }
+                    )
+                    mdns.start()
+
+                    val found = portLatch.await(10, java.util.concurrent.TimeUnit.SECONDS)
+                    mdns.stop()
+
+                    if (!found || adbPort <= 0) throw Exception("Tidak dapat menemukan port ADB wireless. Pastikan Wireless Debugging aktif.")
+                    Log.d(TAG, "Step 2: ADB port = $adbPort")
+
+                    // Step 2: Load key
+                    val storageContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        createDeviceProtectedStorageContext()
+                    else
+                        this@ConnectedActivity
+                    val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", android.content.Context.MODE_PRIVATE)
+                    val key = AdbKey(PreferenceAdbKeyStore(prefs), "aurora")
+
+                    // Step 3: Konek ADB
+                    Log.d(TAG, "Step 3: Konek ke 127.0.0.1:$adbPort")
+                    val client = AdbClient("127.0.0.1", adbPort, key)
+                    client.connect()
+                    Log.d(TAG, "Step 4: ADB connected")
+
+                    // Step 4: Jalankan daemon via shell
+                    val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
+                    Log.d(TAG, "Step 5: Eksekusi = $command")
+                    client.shellCommand(command, null)
+                    client.close()
+                    Log.d(TAG, "Step 6: Shell selesai — daemon launched")
+                    Log.d(TAG, "Step 7: Done")
+                }
+
+                withContext(Dispatchers.Main) {
+                    loading.dismissDialog()
+                    btnStart.isEnabled = true
+
+                    if (result.isSuccess) {
+                        Log.i(TAG, "Daemon started successfully")
+                        startActivity(Intent(this@ConnectedActivity, MainActivity::class.java))
+                        finish()
+                    } else {
+                        val err = result.exceptionOrNull()
+                        Log.e(TAG, "Daemon failed: ${err?.message}", err)
+                        AuroraDialog.Builder(this@ConnectedActivity)
+                            .setTitle("Gagal Menjalankan Engine")
+                            .setMessage(err?.message ?: "Error tidak diketahui")
+                            .setPositiveButton("OK") { d -> d.dismiss() }
+                            .show()
                     }
                 }
-            )
-            mdns.start()
-
-            // Tunggu max 10 detik sampai port ketemu
-            val found = portLatch.await(10, java.util.concurrent.TimeUnit.SECONDS)
-            mdns.stop()
-
-            if (!found || adbPort <= 0) throw Exception("Tidak dapat menemukan port ADB wireless. Pastikan Wireless Debugging aktif.")
-            Log.d(TAG, "Step 2: ADB port = $adbPort")
-
-            // Step 2: Load key
-            val storageContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                createDeviceProtectedStorageContext()
-            else
-                this@ConnectedActivity
-            val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", android.content.Context.MODE_PRIVATE)
-            val key = AdbKey(PreferenceAdbKeyStore(prefs), "aurora")
-
-            // Step 3: Konek ADB
-            Log.d(TAG, "Step 3: Konek ke 127.0.0.1:$adbPort")
-            val client = AdbClient("127.0.0.1", adbPort, key)
-            client.connect()
-            Log.d(TAG, "Step 4: ADB connected")
-
-            // Step 4: Jalankan daemon via shell
-            val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-            Log.d(TAG, "Step 5: Eksekusi = $command")
-            client.shellCommand(command, null)
-            client.close()
-            Log.d(TAG, "Step 6: Shell selesai")
-
-            // Step 5: Polling daemon aktif
-            var ready = false
-            repeat(10) { i ->
-                Thread.sleep(500)
-                val active = isDaemonActive()
-                Log.d(TAG, "Poll ke-$i → active=$active")
-                if (active) { ready = true; return@repeat }
-            }
-            if (!ready) throw Exception("Daemon tidak merespons setelah dijalankan")
-            Log.d(TAG, "Step 7: Daemon aktif!")
-        }
-
-        withContext(Dispatchers.Main) {
-            loading.dismissDialog()
-            btnStart.isEnabled = true
-
-            if (result.isSuccess) {
-                Log.i(TAG, "Daemon started successfully")
-                startActivity(Intent(this@ConnectedActivity, MainActivity::class.java))
-                finish()
-            } else {
-                val err = result.exceptionOrNull()
-                Log.e(TAG, "Daemon failed: ${err?.message}", err)
-                AuroraDialog.Builder(this@ConnectedActivity)
-                    .setTitle("Gagal Menjalankan Engine")
-                    .setMessage(err?.message ?: "Error tidak diketahui")
-                    .setPositiveButton("OK") { d -> d.dismiss() }
-                    .show()
             }
         }
-    }
-}
 
         applySystemBarInsets(rootView, toolbar, null)
-    }
-
-    private fun isDaemonActive(): Boolean {
-        return try {
-            val result = Runtime.getRuntime()
-                .exec("pgrep -f libaurora.so")
-                .inputStream.bufferedReader().readLine()
-            !result.isNullOrEmpty()
-        } catch (e: Exception) {
-            false
-        }
     }
 }
