@@ -32,7 +32,6 @@
         android:id="@+id/tv_architecture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="48dp"
         android:textColor="?attr/colorOnSurface"
         android:textSize="@dimen/size_text_12sp"
         android:textAppearance="@style/TextAppearance.Aurora.Title"
