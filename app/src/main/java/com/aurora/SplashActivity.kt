@@ -1,5 +1,6 @@
 package com.aurora
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
@@ -12,6 +13,9 @@ import androidx.core.view.updateLayoutParams
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
 import org.aurora.SettingsUtility
+
+import com.aurora.main.activities.MainActivity
+import com.aurora.starter.AuroraStarter
 
 class SplashActivity : BaseCompatActivity() {
 
@@ -27,61 +31,44 @@ class SplashActivity : BaseCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Cek kembali status izin setiap kali activity kembali aktif (setelah dari Settings)
         checkRequiredPermissions()
     }
 
     private fun setupArchitectureText() {
         val tvArchitecture = findViewById<TextView>(R.id.tv_architecture)
-    
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: ""
-        val archBit = if (abi.contains("64")) getString(R.string.title_abi64_splash) else getString(R.string.title_abi32_splash)
+        val archBit = if (abi.contains("64")) getString(R.string.title_abi64_splash)
+                      else getString(R.string.title_abi32_splash)
         tvArchitecture.text = archBit
 
         val initialBottomMargin = (tvArchitecture.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
-
         ViewCompat.setOnApplyWindowInsetsListener(tvArchitecture) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            
-            // Update layout params dengan margin asli + tinggi navigasi
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = initialBottomMargin + insets.bottom
             }
-            
-            // Kembalikan insets agar tetap bisa dipakai oleh view lain (jika ada)
             windowInsets
         }
     }
 
     private fun checkRequiredPermissions() {
-        // Tutup dialog sebelumnya agar tidak menumpuk
         permissionDialog?.dismiss()
-
         when {
-            // 1. Cek izin Notifikasi terlebih dahulu
             !SettingsUtility.isNotificationEnabled(this) -> {
                 showPermissionDialog(
                     title = "Izin Notifikasi",
-                    message = "Aplikasi ini memerlukan izin notifikasi untuk memberikan pembaruan penting. Silakan izinkan di pengaturan.",
-                    onGrant = {
-                        SettingsUtility.openNotificationSettings(this)
-                    }
+                    message = "Aplikasi ini memerlukan izin notifikasi untuk memberikan pembaruan penting.",
+                    onGrant = { SettingsUtility.openNotificationSettings(this) }
                 )
             }
-            // 2. Jika notifikasi diizinkan, cek Write System Settings (Abaikan izin Overlay)
             !SettingsUtility.canWriteSettings(this) -> {
                 showPermissionDialog(
                     title = "Izin Modifikasi Sistem",
                     message = "Aplikasi memerlukan izin untuk mengubah pengaturan sistem agar dapat berfungsi maksimal.",
-                    onGrant = {
-                        SettingsUtility.openWriteSettings(this)
-                    }
+                    onGrant = { SettingsUtility.openWriteSettings(this) }
                 )
             }
-            // 3. Semua izin sudah diberikan
-            else -> {
-                proceedToMain()
-            }
+            else -> proceedToMain()
         }
     }
 
@@ -89,24 +76,41 @@ class SplashActivity : BaseCompatActivity() {
         permissionDialog = AuroraDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
-            // .setIcon(R.drawable.ic_warning) // Hapus komentar jika Anda punya icon khusus
             .setPositiveButton(getString(R.string.title_button_dialog_allow_splash)) { dialog ->
                 onGrant()
                 dialog.dismiss()
             }
             .setNegativeButton(getString(R.string.title_button_dialog_close_splash)) { dialog ->
                 dialog.dismiss()
-                finish() // Keluar dari aplikasi jika izin ditolak
+                finish()
             }
             .build()
-        
-        permissionDialog?.setCancelable(false) // Memaksa user untuk merespon dialog
+        permissionDialog?.setCancelable(false)
         permissionDialog?.show()
     }
 
     private fun proceedToMain() {
-        // Lanjut ke Activity utama di sini
-        // startActivity(Intent(this, MainActivity::class.java))
-        // finish()
+        val isDaemonRunning = try {
+            AuroraStarter.getInternalCommand(this) // binary ada
+            isDaemonActive()
+        } catch (e: Exception) {
+            false
+        }
+
+        if (isDaemonRunning) {
+            startActivity(Intent(this, MainActivity::class.java))
+        } else {
+            startActivity(Intent(this, ConnectedActivity::class.java))
+        }
+        finish()
+    }
+
+    private fun isDaemonActive(): Boolean {
+        return try {
+            val result = Runtime.getRuntime().exec("pgrep -f libaurora.so").inputStream.bufferedReader().readLine()
+            !result.isNullOrEmpty()
+        } catch (e: Exception) {
+            false
+        }
     }
 }

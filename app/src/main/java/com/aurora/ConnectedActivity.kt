@@ -1,9 +1,6 @@
 package com.aurora
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -25,17 +22,14 @@ import org.aurora.dialogs.AuroraLoading
 import org.aurora.SettingsUtility
 import org.aurora.Config
 
-import com.aurora.adb.AdbClient
-import com.aurora.adb.AdbKey
 import com.aurora.adb.AdbPairingService
-import com.aurora.adb.PreferenceAdbKeyStore
+import com.aurora.main.activities.MainActivity
+import com.aurora.starter.AuroraStarter
 
 class ConnectedActivity : BaseCompatActivity() {
 
     companion object {
         private const val TAG = "ConnectedActivity"
-        private const val RESULT_CHANNEL = "aurora_result_channel"
-        private const val RESULT_NOTIF_ID = 100
     }
 
     private val activityScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -46,8 +40,8 @@ class ConnectedActivity : BaseCompatActivity() {
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         val rootView: View = findViewById(android.R.id.content)
-        val btn2: MaterialButton = findViewById(R.id.btn_pairing)
-        val btn3: MaterialButton = findViewById(R.id.btn_start)
+        val btnPairing: MaterialButton = findViewById(R.id.btn_pairing)
+        val btnStart: MaterialButton = findViewById(R.id.btn_start)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -56,84 +50,99 @@ class ConnectedActivity : BaseCompatActivity() {
         }
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        createResultNotificationChannel()
-
         // ── PAIRING BUTTON ───────────────────────────────────────────
-        btn2.setOnClickListener {
-            if (!SettingsUtility.isNotificationEnabled(this)) {
-                // Minta izin notifikasi dulu
-                AuroraDialog.Builder(this)
-                    .setTitle("Izin Notifikasi Diperlukan")
-                    .setMessage("Izin notifikasi wajib diaktifkan agar kode pairing 6-digit bisa muncul di notifikasi.")
-                    .setPositiveButton("Izinkan") { dialog ->
-                        SettingsUtility.openNotificationSettings(this)
-                        dialog.dismiss()
-                    }
-                    .setNegativeButton("Batal") { dialog -> dialog.dismiss() }
-                    .show()
-            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                AuroraDialog.Builder(this)
-                    .setTitle("Tidak Didukung")
-                    .setMessage("ADB Wireless Pairing membutuhkan Android 11 atau lebih baru.")
-                    .setPositiveButton("OK") { d -> d.dismiss() }
-                    .show()
-            } else {
-                // Izin OK + Android 11+ → start service
-                val intent = AdbPairingService.startIntent(this)
-                try {
-                    startForegroundService(intent)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Gagal start AdbPairingService", e)
+        btnPairing.setOnClickListener {
+            when {
+                !SettingsUtility.isNotificationEnabled(this) -> {
                     AuroraDialog.Builder(this)
-                        .setTitle("Gagal Memulai Layanan")
-                        .setMessage(e.message ?: "Error tidak diketahui")
+                        .setTitle("Izin Notifikasi Diperlukan")
+                        .setMessage("Izin notifikasi wajib diaktifkan agar kode pairing 6-digit bisa muncul.")
+                        .setPositiveButton("Izinkan") { dialog ->
+                            SettingsUtility.openNotificationSettings(this)
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton("Batal") { dialog -> dialog.dismiss() }
+                        .show()
+                }
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.R -> {
+                    AuroraDialog.Builder(this)
+                        .setTitle("Tidak Didukung")
+                        .setMessage("ADB Wireless Pairing membutuhkan Android 11 atau lebih baru.")
                         .setPositiveButton("OK") { d -> d.dismiss() }
                         .show()
+                }
+                else -> {
+                    // Start pairing service — notif kode pairing akan muncul
+                    try {
+                        startForegroundService(AdbPairingService.startIntent(this))
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Gagal start AdbPairingService", e)
+                        AuroraDialog.Builder(this)
+                            .setTitle("Gagal Memulai Layanan")
+                            .setMessage(e.message ?: "Error tidak diketahui")
+                            .setPositiveButton("OK") { d -> d.dismiss() }
+                            .show()
+                    }
+
+                    // Buka Developer Options → Wireless Debugging langsung
+                    try {
+                        val intent = Intent("com.android.settings.APPLICATION_DEVELOPMENT_SETTINGS")
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        // Fallback ke Settings biasa jika intent khusus tidak tersedia
+                        try {
+                            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            startActivity(intent)
+                        } catch (ex: Exception) {
+                            Log.e(TAG, "Tidak bisa buka Developer Options", ex)
+                        }
+                    }
                 }
             }
         }
 
         // ── START ENGINE BUTTON ──────────────────────────────────────
-        btn3.setOnClickListener {
-            // 1. Tampilkan loading dialog
+        btnStart.setOnClickListener {
             val loading = AuroraLoading.newInstance()
             loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
-
-            btn3.isEnabled = false
+            btnStart.isEnabled = false
 
             activityScope.launch {
                 val result = runCatching {
-                    val storageContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                        createDeviceProtectedStorageContext()
-                    else
-                        this@ConnectedActivity
-
-                    val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", Context.MODE_PRIVATE)
-                    val key = AdbKey(PreferenceAdbKeyStore(prefs), "aurora")
-
-                    AdbClient("127.0.0.1", 5555, key).also { it.connect() }
+                    val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
+                    // Jalankan daemon
+                    val process = Runtime.getRuntime().exec(command)
+                    process.waitFor()
+                    // Tunggu daemon siap (max 5 detik)
+                    var ready = false
+                    repeat(10) {
+                        Thread.sleep(500)
+                        if (isDaemonActive()) {
+                            ready = true
+                            return@repeat
+                        }
+                    }
+                    if (!ready) throw Exception("Daemon tidak merespons setelah dijalankan")
                 }
 
                 withContext(Dispatchers.Main) {
-                    // 2. Tutup loading dialog setelah koneksi selesai
                     loading.dismissDialog()
-
-                    btn3.isEnabled = true
+                    btnStart.isEnabled = true
 
                     if (result.isSuccess) {
-                        Log.i(TAG, "ADB connect success")
-                        showResultNotification(
-                            title = "Aurora Engine Terhubung ✓",
-                            text = "Koneksi ADB ke 127.0.0.1:5555 berhasil. Aurora siap digunakan."
-                        )
-                        result.getOrNull()?.close()
+                        Log.i(TAG, "Daemon started successfully")
+                        startActivity(Intent(this@ConnectedActivity, MainActivity::class.java))
+                        finish()
                     } else {
                         val err = result.exceptionOrNull()
-                        Log.e(TAG, "ADB connect failed", err)
-                        showResultNotification(
-                            title = "Koneksi Gagal ✗",
-                            text = "Tidak dapat terhubung ke ADB: ${err?.message ?: err.toString()}"
-                        )
+                        Log.e(TAG, "Daemon failed", err)
+                        AuroraDialog.Builder(this@ConnectedActivity)
+                            .setTitle("Gagal Menjalankan Engine")
+                            .setMessage(err?.message ?: "Error tidak diketahui")
+                            .setPositiveButton("OK") { d -> d.dismiss() }
+                            .show()
                     }
                 }
             }
@@ -142,25 +151,14 @@ class ConnectedActivity : BaseCompatActivity() {
         applySystemBarInsets(rootView, toolbar, null)
     }
 
-    // ── HELPERS ──────────────────────────────────────────────────────
-
-    private fun createResultNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val ch = NotificationChannel(RESULT_CHANNEL, "Aurora Connection Result", NotificationManager.IMPORTANCE_DEFAULT)
-                .apply { setSound(null, null); setShowBadge(false) }
-            getSystemService(NotificationManager::class.java).createNotificationChannel(ch)
+    private fun isDaemonActive(): Boolean {
+        return try {
+            val result = Runtime.getRuntime()
+                .exec("pgrep -f libaurora.so")
+                .inputStream.bufferedReader().readLine()
+            !result.isNullOrEmpty()
+        } catch (e: Exception) {
+            false
         }
-    }
-
-    private fun showResultNotification(title: String, text: String) {
-        if (!SettingsUtility.isNotificationEnabled(this)) return
-        val notif = Notification.Builder(this, RESULT_CHANNEL)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setStyle(Notification.BigTextStyle().bigText(text))
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setAutoCancel(true)
-            .build()
-        getSystemService(NotificationManager::class.java).notify(RESULT_NOTIF_ID, notif)
     }
 }
