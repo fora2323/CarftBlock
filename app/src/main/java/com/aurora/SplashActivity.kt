@@ -9,6 +9,17 @@ import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.lifecycleScope
+
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.net.Socket
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
@@ -20,18 +31,118 @@ import com.aurora.starter.AuroraStarter
 class SplashActivity : BaseCompatActivity() {
 
     private var permissionDialog: AuroraDialog? = null
+    
+    // Mencegah pengecekan berjalan ganda saat lifecycle berubah
+    private var isCheckingFlow = false 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.splash)
-
         setupArchitectureText()
-        checkRequiredPermissions()
     }
 
     override fun onResume() {
         super.onResume()
-        checkRequiredPermissions()
+        // onResume akan terpanggil saat awal buka aplikasi ATAU 
+        // saat pengguna baru saja kembali dari layar Settings (setelah memberi izin).
+        if (!isCheckingFlow) {
+            startSplashFlow()
+        }
+    }
+
+    private fun startSplashFlow() {
+        isCheckingFlow = true
+        
+        lifecycleScope.launch {
+            // 1. Efek Loading Splash Screen (Jeda 1 detik agar UI muncul dengan baik)
+            delay(1000)
+
+            // 2. Cek Izin (Permission)
+            val hasAllPermissions = checkRequiredPermissions()
+            if (!hasAllPermissions) {
+                // Jika izin belum lengkap, hentikan flow. 
+                // isCheckingFlow di-reset agar saat user kembali dari pengaturan, flow bisa diulang.
+                isCheckingFlow = false
+                return@launch 
+            }
+
+            // 3. Cek Status Daemon via Socket TCP
+            val isDaemonRunning = checkDaemonViaSocket()
+
+            // 4. Routing Activity
+            if (isDaemonRunning) {
+                startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+            } else {
+                startActivity(Intent(this@SplashActivity, ConnectedActivity::class.java))
+            }
+            
+            // Hancurkan SplashActivity agar tidak bisa di-back
+            finish()
+        }
+    }
+
+    private fun checkRequiredPermissions(): Boolean {
+        permissionDialog?.dismiss()
+        
+        return when {
+            !SettingsUtility.isNotificationEnabled(this) -> {
+                showPermissionDialog(
+                    title = "Izin Notifikasi",
+                    message = "Aplikasi ini memerlukan izin notifikasi untuk memberikan pembaruan penting.",
+                    onGrant = { SettingsUtility.openNotificationSettings(this) }
+                )
+                false
+            }
+            !SettingsUtility.canWriteSettings(this) -> {
+                showPermissionDialog(
+                    title = "Izin Modifikasi Sistem",
+                    message = "Aplikasi memerlukan izin untuk mengubah pengaturan sistem agar dapat berfungsi maksimal.",
+                    onGrant = { SettingsUtility.openWriteSettings(this) }
+                )
+                false
+            }
+            else -> true
+        }
+    }
+
+    private fun showPermissionDialog(title: String, message: String, onGrant: () -> Unit) {
+        permissionDialog = AuroraDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.title_button_dialog_allow_splash)) { dialog ->
+                onGrant()
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.title_button_dialog_close_splash)) { dialog ->
+                dialog.dismiss()
+                finish() // Tutup aplikasi jika user menolak memberi izin
+            }
+            .build()
+            
+        permissionDialog?.setCancelable(false)
+        permissionDialog?.show()
+    }
+
+    private suspend fun checkDaemonViaSocket(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Mencoba terhubung ke Java Server AuroraService di background
+                Socket("127.0.0.1", 45678).use { socket ->
+                    socket.soTimeout = 1500 // Waktu tunggu maksimal 1.5 detik
+                    
+                    val out = PrintWriter(socket.getOutputStream(), true)
+                    val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
+                    
+                    out.println("PING")
+                    val response = `in`.readLine()
+                    
+                    response != null && response.startsWith("PONG")
+                }
+            } catch (e: Exception) {
+                // Exception (Connection Refused / Timeout) menandakan daemon belum berjalan
+                false
+            }
+        }
     }
 
     private fun setupArchitectureText() {
@@ -48,69 +159,6 @@ class SplashActivity : BaseCompatActivity() {
                 bottomMargin = initialBottomMargin + insets.bottom
             }
             windowInsets
-        }
-    }
-
-    private fun checkRequiredPermissions() {
-        permissionDialog?.dismiss()
-        when {
-            !SettingsUtility.isNotificationEnabled(this) -> {
-                showPermissionDialog(
-                    title = "Izin Notifikasi",
-                    message = "Aplikasi ini memerlukan izin notifikasi untuk memberikan pembaruan penting.",
-                    onGrant = { SettingsUtility.openNotificationSettings(this) }
-                )
-            }
-            !SettingsUtility.canWriteSettings(this) -> {
-                showPermissionDialog(
-                    title = "Izin Modifikasi Sistem",
-                    message = "Aplikasi memerlukan izin untuk mengubah pengaturan sistem agar dapat berfungsi maksimal.",
-                    onGrant = { SettingsUtility.openWriteSettings(this) }
-                )
-            }
-            else -> proceedToMain()
-        }
-    }
-
-    private fun showPermissionDialog(title: String, message: String, onGrant: () -> Unit) {
-        permissionDialog = AuroraDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(getString(R.string.title_button_dialog_allow_splash)) { dialog ->
-                onGrant()
-                dialog.dismiss()
-            }
-            .setNegativeButton(getString(R.string.title_button_dialog_close_splash)) { dialog ->
-                dialog.dismiss()
-                finish()
-            }
-            .build()
-        permissionDialog?.setCancelable(false)
-        permissionDialog?.show()
-    }
-
-    private fun proceedToMain() {
-        val isDaemonRunning = try {
-            AuroraStarter.getInternalCommand(this) // binary ada
-            isDaemonActive()
-        } catch (e: Exception) {
-            false
-        }
-
-        if (isDaemonRunning) {
-            startActivity(Intent(this, MainActivity::class.java))
-        } else {
-            startActivity(Intent(this, ConnectedActivity::class.java))
-        }
-        finish()
-    }
-
-    private fun isDaemonActive(): Boolean {
-        return try {
-            val result = Runtime.getRuntime().exec("pgrep -f libaurora.so").inputStream.bufferedReader().readLine()
-            !result.isNullOrEmpty()
-        } catch (e: Exception) {
-            false
         }
     }
 }
