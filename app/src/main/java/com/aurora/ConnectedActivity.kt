@@ -104,49 +104,69 @@ class ConnectedActivity : BaseCompatActivity() {
         }
 
         // ── START ENGINE BUTTON ──────────────────────────────────────
-        btnStart.setOnClickListener {
-            val loading = AuroraLoading.newInstance()
-            loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
-            btnStart.isEnabled = false
+ btnStart.setOnClickListener {
+    val loading = AuroraLoading.newInstance()
+    loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
+    btnStart.isEnabled = false
 
-            activityScope.launch {
-                val result = runCatching {
-                    val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-                    // Jalankan daemon
-                    val process = Runtime.getRuntime().exec(command)
-                    process.waitFor()
-                    // Tunggu daemon siap (max 5 detik)
-                    var ready = false
-                    repeat(10) {
-                        Thread.sleep(500)
-                        if (isDaemonActive()) {
-                            ready = true
-                            return@repeat
-                        }
-                    }
-                    if (!ready) throw Exception("Daemon tidak merespons setelah dijalankan")
-                }
+    activityScope.launch {
+        val result = runCatching {
+            Log.d(TAG, "Step 1: Ambil command dari AuroraStarter")
+            val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
+            Log.d(TAG, "Step 2: Command = $command")
 
-                withContext(Dispatchers.Main) {
-                    loading.dismissDialog()
-                    btnStart.isEnabled = true
+            Log.d(TAG, "Step 3: Eksekusi proses")
+            val process = Runtime.getRuntime().exec(command)
 
-                    if (result.isSuccess) {
-                        Log.i(TAG, "Daemon started successfully")
-                        startActivity(Intent(this@ConnectedActivity, MainActivity::class.java))
-                        finish()
-                    } else {
-                        val err = result.exceptionOrNull()
-                        Log.e(TAG, "Daemon failed", err)
-                        AuroraDialog.Builder(this@ConnectedActivity)
-                            .setTitle("Gagal Menjalankan Engine")
-                            .setMessage(err?.message ?: "Error tidak diketahui")
-                            .setPositiveButton("OK") { d -> d.dismiss() }
-                            .show()
-                    }
+            Log.d(TAG, "Step 4: Tunggu proses selesai")
+            val exitCode = process.waitFor()
+            Log.d(TAG, "Step 5: Exit code = $exitCode")
+
+            // Baca output error dari proses
+            val stderr = process.errorStream.bufferedReader().readText()
+            val stdout = process.inputStream.bufferedReader().readText()
+            Log.d(TAG, "Step 6: stdout = $stdout")
+            Log.d(TAG, "Step 7: stderr = $stderr")
+
+            Log.d(TAG, "Step 8: Mulai polling daemon (max 5 detik)")
+            var ready = false
+            repeat(10) { i ->
+                Thread.sleep(500)
+                val active = isDaemonActive()
+                Log.d(TAG, "Step 9: Poll ke-$i → active=$active")
+                if (active) {
+                    ready = true
+                    return@repeat
                 }
             }
+
+            if (!ready) {
+                Log.e(TAG, "Step 10: Daemon tidak aktif setelah 5 detik")
+                throw Exception("Daemon tidak merespons setelah dijalankan (exitCode=$exitCode, stderr=$stderr)")
+            }
+            Log.d(TAG, "Step 10: Daemon aktif!")
         }
+
+        withContext(Dispatchers.Main) {
+            loading.dismissDialog()
+            btnStart.isEnabled = true
+
+            if (result.isSuccess) {
+                Log.i(TAG, "Daemon started successfully")
+                startActivity(Intent(this@ConnectedActivity, MainActivity::class.java))
+                finish()
+            } else {
+                val err = result.exceptionOrNull()
+                Log.e(TAG, "Daemon failed: ${err?.message}", err)
+                AuroraDialog.Builder(this@ConnectedActivity)
+                    .setTitle("Gagal Menjalankan Engine")
+                    .setMessage(err?.message ?: "Error tidak diketahui")
+                    .setPositiveButton("OK") { d -> d.dismiss() }
+                    .show()
+            }
+        }
+    }
+}
 
         applySystemBarInsets(rootView, toolbar, null)
     }
