@@ -29,10 +29,8 @@ class SplashActivity : BaseCompatActivity() {
     private fun setupArchitectureText() {
         val tvArchitecture = findViewById<TextView>(R.id.tv_architecture)
         
-        // Membaca arsitektur perangkat utama (ABI pertama)
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: ""
         
-        // Menentukan 32 atau 64 dari string arsitektur (contoh: arm64-v8a -> 64, armeabi-v7a -> 32)
         val archBit = if (abi.contains("64")) "arm64-v8a" else "armeabi-v7a"
         tvArchitecture.text = archBit
     }
@@ -70,11 +68,11 @@ class SplashActivity : BaseCompatActivity() {
             .setTitle(title)
             .setMessage(message)
             // .setIcon(R.drawable.ic_warning) // Hapus komentar jika Anda punya icon khusus
-            .setPositiveButton("Beri Izin") { dialog ->
+            .setPositiveButton(getString(R.string.title_button_dialog_allow_splash)) { dialog ->
                 onGrant()
                 dialog.dismiss()
             }
-            .setNegativeButton("Keluar") { dialog ->
+            .setNegativeButton(getString(R.string.title_button_dialog_close_splash)) { dialog ->
                 dialog.dismiss()
                 finish() // Keluar dari aplikasi jika izin ditolak
             }
