@@ -11,6 +11,8 @@
     <dimen name="size_text_18sp">18sp</dimen>
     <dimen name="size_text_20sp">20sp</dimen>
     <!--size radius-->
+    <dimen name="radius_4dp">2dp</dimen>
+    <dimen name="radius_6dp">6dp</dimen>
     <dimen name="radius_8dp">8dp</dimen>
     <dimen name="radius_10dp">10dp</dimen>
     <dimen name="radius_12dp">12dp</dimen>
