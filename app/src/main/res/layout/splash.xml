@@ -17,11 +17,13 @@
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress_bar"
-        android:layout_width="160dp"
+        android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:indeterminate="true"
         app:trackCornerRadius="4dp"
+        app:indicatorColor="@color/primary"
+        app:trackColor="@color/secondaryContainer"
         app:layout_constraintBottom_toTopOf="@+id/tv_architecture"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
