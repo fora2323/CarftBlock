@@ -20,6 +20,7 @@
     <!--tag name splash.xml-->
     <string name="title_button_dialog_allow_splash">Allowed</string>
     <string name="title_button_dialog_close_splash">Close</string>
+    <string name="title_abi32_splash">
     <!--tag name service notification-->
     <string name="notification_channel_adb_pairing">ADB Pairing</string>
     <string name="notification_adb_pairing_succeed_title">Pairing Succeed</string>
