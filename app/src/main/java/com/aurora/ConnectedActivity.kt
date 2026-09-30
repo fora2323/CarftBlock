@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
 
 import com.google.android.material.button.MaterialButton
 
@@ -23,6 +24,10 @@ import org.aurora.SettingsUtility
 import org.aurora.Config
 
 import com.aurora.adb.AdbPairingService
+import com.aurora.adb.AdbMdns
+import com.aurora.adb.AdbKey
+import com.aurora.adb.AdbClient
+import com.aurora.adb.PreferenceAdbKeyStore
 import com.aurora.main.activities.MainActivity
 import com.aurora.starter.AuroraStarter
 
@@ -111,40 +116,59 @@ class ConnectedActivity : BaseCompatActivity() {
 
     activityScope.launch {
         val result = runCatching {
-            Log.d(TAG, "Step 1: Ambil command dari AuroraStarter")
+            // Step 1: Scan port ADB wireless via mDNS
+            Log.d(TAG, "Step 1: Scan port ADB via mDNS")
+            var adbPort = -1
+            val portLatch = java.util.concurrent.CountDownLatch(1)
+
+            val mdns = AdbMdns(this@ConnectedActivity, AdbMdns.TLS_CONNECT,
+                androidx.lifecycle.Observer { port ->
+                    if (port > 0 && adbPort == -1) {
+                        adbPort = port
+                        portLatch.countDown()
+                    }
+                }
+            )
+            mdns.start()
+
+            // Tunggu max 10 detik sampai port ketemu
+            val found = portLatch.await(10, java.util.concurrent.TimeUnit.SECONDS)
+            mdns.stop()
+
+            if (!found || adbPort <= 0) throw Exception("Tidak dapat menemukan port ADB wireless. Pastikan Wireless Debugging aktif.")
+            Log.d(TAG, "Step 2: ADB port = $adbPort")
+
+            // Step 2: Load key
+            val storageContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                createDeviceProtectedStorageContext()
+            else
+                this@ConnectedActivity
+            val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", android.content.Context.MODE_PRIVATE)
+            val key = AdbKey(PreferenceAdbKeyStore(prefs), "aurora")
+
+            // Step 3: Konek ADB
+            Log.d(TAG, "Step 3: Konek ke 127.0.0.1:$adbPort")
+            val client = AdbClient("127.0.0.1", adbPort, key)
+            client.connect()
+            Log.d(TAG, "Step 4: ADB connected")
+
+            // Step 4: Jalankan daemon via shell
             val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-            Log.d(TAG, "Step 2: Command = $command")
+            Log.d(TAG, "Step 5: Eksekusi = $command")
+            client.shellCommand(command, null)
+            client.close()
+            Log.d(TAG, "Step 6: Shell selesai")
 
-            Log.d(TAG, "Step 3: Eksekusi proses")
-            val process = Runtime.getRuntime().exec(command)
-
-            Log.d(TAG, "Step 4: Tunggu proses selesai")
-            val exitCode = process.waitFor()
-            Log.d(TAG, "Step 5: Exit code = $exitCode")
-
-            // Baca output error dari proses
-            val stderr = process.errorStream.bufferedReader().readText()
-            val stdout = process.inputStream.bufferedReader().readText()
-            Log.d(TAG, "Step 6: stdout = $stdout")
-            Log.d(TAG, "Step 7: stderr = $stderr")
-
-            Log.d(TAG, "Step 8: Mulai polling daemon (max 5 detik)")
+            // Step 5: Polling daemon aktif
             var ready = false
             repeat(10) { i ->
                 Thread.sleep(500)
                 val active = isDaemonActive()
-                Log.d(TAG, "Step 9: Poll ke-$i → active=$active")
-                if (active) {
-                    ready = true
-                    return@repeat
-                }
+                Log.d(TAG, "Poll ke-$i → active=$active")
+                if (active) { ready = true; return@repeat }
             }
-
-            if (!ready) {
-                Log.e(TAG, "Step 10: Daemon tidak aktif setelah 5 detik")
-                throw Exception("Daemon tidak merespons setelah dijalankan (exitCode=$exitCode, stderr=$stderr)")
-            }
-            Log.d(TAG, "Step 10: Daemon aktif!")
+            if (!ready) throw Exception("Daemon tidak merespons setelah dijalankan")
+            Log.d(TAG, "Step 7: Daemon aktif!")
         }
 
         withContext(Dispatchers.Main) {
