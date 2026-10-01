@@ -2,19 +2,26 @@ package com.aurora
 
 import android.app.Application
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
-import org.lsposed.hiddenapibypass.HiddenApiBypass
+
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.system.exitProcess
+
+import org.aurora.EmptySharedPreferencesImpl
+import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 class AuroraApplication : Application() {
 
     companion object {
         private lateinit var mApplicationContext: Context
+        private lateinit var mDeviceProtectedPrefs: SharedPreferences
 
         fun getContext(): Context = mApplicationContext
+        fun getAdbPrefs(): SharedPreferences = mDeviceProtectedPrefs
 
         init {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -26,6 +33,7 @@ class AuroraApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         mApplicationContext = applicationContext
+        mDeviceProtectedPrefs = getStorageContext().getSharedPreferences("aurora_adb_prefs", Context.MODE_PRIVATE)
 
         Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
             val sw = StringWriter()
@@ -38,6 +46,24 @@ class AuroraApplication : Application() {
             }
             startActivity(intent)
             exitProcess(1)
+        }
+    }
+
+    private fun getStorageContext(): Context {
+        val base = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            createDeviceProtectedStorageContext()
+        else
+            this
+
+        // Fallback ke EmptySharedPreferencesImpl kalau storage belum unlock (sama seperti Shizuku)
+        return object : ContextWrapper(base) {
+            override fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
+                return try {
+                    super.getSharedPreferences(name, mode)
+                } catch (e: IllegalStateException) {
+                    EmptySharedPreferencesImpl()
+                }
+            }
         }
     }
 }
