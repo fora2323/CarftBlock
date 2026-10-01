@@ -31,7 +31,7 @@
 #define EXIT_FATAL_KILL 9
 #define EXIT_FATAL_BINDER_BLOCKED_BY_SELINUX 10
 
-#define PACKAGE_NAME "org.aurora"
+#define PACKAGE_NAME "com.aurora"
 #define SERVER_NAME "aurora_server"
 #define SERVER_CLASS_PATH "com.aurora.server.AuroraService"
 

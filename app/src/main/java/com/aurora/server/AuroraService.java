@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 public class AuroraService {
     
     private static final String TAG = "AURORA_DAEMON";
-    private static final int DAEMON_PORT = 45678; 
+    private static final int DAEMON_PORT = 52847;
     private static final long START_TIME = System.currentTimeMillis();
     
     // Mencegah memory leak dengan membatasi proses bersamaan
@@ -31,7 +31,7 @@ public class AuroraService {
             serverSocket = new ServerSocket(DAEMON_PORT);
             System.out.println("Aurora Daemon started on Private Port: " + DAEMON_PORT);
         } catch (Exception e) {
-            System.out.println("info: FfxService already running. Exiting duplicate.");
+            System.out.println("info: Aurora daemon already running. Exiting duplicate.");
             System.exit(0);
             return;
         }
