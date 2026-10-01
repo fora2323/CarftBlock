@@ -20,6 +20,7 @@ import android.util.Log
 
 import androidx.core.app.NotificationCompat
 import androidx.core.app.RemoteInput
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +31,6 @@ import kotlinx.coroutines.launch
 import java.net.ConnectException
 
 import com.aurora.AuroraApplication
-
 import com.aurora.R
 
 @TargetApi(Build.VERSION_CODES.R)
@@ -195,7 +195,8 @@ class AdbPairingService : Service() {
                 } else {
                     this@AdbPairingService 
                 }
-                //add name getSharedPreferences aurora_adb_prefs
+                // Mengambil shared preference menggunakan AuroraApplication sesuai kodemu
+                @Suppress("UNUSED_VARIABLE")
                 val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", Context.MODE_PRIVATE)
                 AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
             } catch (e: Throwable) {
@@ -239,8 +240,8 @@ class AdbPairingService : Service() {
             }
         }
 
-        // Menggunakan NotificationCompat
         val builder = NotificationCompat.Builder(this, notificationChannel)
+            .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(title)
             .setContentText(text)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -261,7 +262,11 @@ class AdbPairingService : Service() {
             this, stopRequestId, stopIntent(this),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE else 0
         )
-        NotificationCompat.Action.Builder(0, getString(R.string.notification_adb_pairing_stop_searching), pendingIntent).build()
+        NotificationCompat.Action.Builder(
+            0, 
+            getString(R.string.notification_adb_pairing_stop_searching), 
+            pendingIntent
+        ).build()
     }
 
     private val retryNotificationAction by lazy {
@@ -277,7 +282,6 @@ class AdbPairingService : Service() {
     }
 
     private fun replyNotificationAction(port: Int): NotificationCompat.Action {
-        // Menggunakan RemoteInput dari AndroidX Core
         val remoteInput = RemoteInput.Builder(remoteInputResultKey).run {
             setLabel(getString(R.string.dialog_adb_pairing_paring_code))
             build()
@@ -303,6 +307,7 @@ class AdbPairingService : Service() {
 
     private val searchingNotification by lazy {
         NotificationCompat.Builder(this, notificationChannel)
+            .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(getString(R.string.notification_adb_pairing_searching_for_service_title))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(getSettingsPendingIntent()) 
@@ -312,6 +317,7 @@ class AdbPairingService : Service() {
 
     private val workingNotification by lazy {
         NotificationCompat.Builder(this, notificationChannel)
+            .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(getString(R.string.notification_adb_pairing_working_title))
             .setSmallIcon(R.mipmap.ic_launcher)
             .build()
@@ -319,6 +325,7 @@ class AdbPairingService : Service() {
 
     private fun createInputNotification(port: Int): Notification {
         return NotificationCompat.Builder(this, notificationChannel)
+            .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(getString(R.string.notification_adb_pairing_service_found_title))
             .setSmallIcon(R.mipmap.ic_launcher)
             .addAction(replyNotificationAction(port)) 
