@@ -54,7 +54,6 @@ class ConnectedActivity : BaseCompatActivity() {
         }
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // ── PAIRING BUTTON ───────────────────────────────────────────
         btnPairing.setOnClickListener {
             when {
                 !SettingsUtility.isNotificationEnabled(this) -> {
@@ -104,7 +103,6 @@ class ConnectedActivity : BaseCompatActivity() {
             }
         }
 
-        // ── START ENGINE BUTTON ──────────────────────────────────────
         btnStart.setOnClickListener {
             val loading = AuroraLoading.newInstance()
             loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
@@ -112,8 +110,6 @@ class ConnectedActivity : BaseCompatActivity() {
 
             activityScope.launch {
                 val result = runCatching {
-                    // Step 1: Scan port ADB wireless via mDNS
-                    Log.d(TAG, "Step 1: Scan port ADB via mDNS")
                     var adbPort = -1
                     val portLatch = java.util.concurrent.CountDownLatch(1)
 
@@ -139,7 +135,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     else
                         this@ConnectedActivity
                     val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", android.content.Context.MODE_PRIVATE)
-                    val key = AdbKey(PreferenceAdbKeyStore(prefs), "aurora")
+                    val key = AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
 
                     // Step 3: Konek ADB
                     Log.d(TAG, "Step 3: Konek ke 127.0.0.1:$adbPort")

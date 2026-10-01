@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 
 import java.net.ConnectException
 
+import com.aurora.AuroraApplication
+
 import com.aurora.R
 
 @TargetApi(Build.VERSION_CODES.R)
@@ -109,7 +111,7 @@ class AdbPairingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         timeoutHandler.removeCallbacks(timeoutRunnable)
-        timeoutHandler.postDelayed(timeoutRunnable, 150000) // 2.5 Menit
+        timeoutHandler.postDelayed(timeoutRunnable, 150000)
 
         val notification = when (intent?.action) {
             startAction -> { 
@@ -193,8 +195,9 @@ class AdbPairingService : Service() {
                 } else {
                     this@AdbPairingService 
                 }
+                //add name getSharedPreferences aurora_adb_prefs
                 val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", Context.MODE_PRIVATE)
-                AdbKey(PreferenceAdbKeyStore(prefs), "aurora")
+                AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
             } catch (e: Throwable) {
                 handleResult(false, e)
                 return@launch
