@@ -52,7 +52,9 @@ class ConnectedActivity : BaseCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
         }
-        toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        toolbar.setNavigationOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
 
         btnPairing.setOnClickListener {
             when {
@@ -137,12 +139,9 @@ class ConnectedActivity : BaseCompatActivity() {
                     val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", android.content.Context.MODE_PRIVATE)
                     val key = AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
 
-                    // Step 3: Konek ADB
-                    Log.d(TAG, "Step 3: Konek ke 127.0.0.1:$adbPort")
                     val client = AdbClient("127.0.0.1", adbPort, key)
                     client.connect()
-                    Log.d(TAG, "Step 4: ADB connected")
-
+                    
                     // Step 4: Jalankan daemon via shell
                     val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
                     Log.d(TAG, "Step 5: Eksekusi = $command")
