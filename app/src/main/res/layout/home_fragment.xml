@@ -1,34 +1,159 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.core.widget.NestedScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/surface"
-	android:id="@+id/_main">
-	<androidx.core.widget.NestedScrollView
-		android:id="@+id/vscroll2"
+	android:paddingTop="80dp"
+	android:paddingBottom="100dp"
+	android:fillViewport="true"
+	android:clipToPadding="false">
+	<LinearLayout
+		android:id="@+id/scroll_view"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:paddingTop="80dp"
-		android:paddingBottom="100dp"
-		android:background="@color/surface"
-		android:fillViewport="true"
-		android:clipToPadding="false">
-		<LinearLayout
-			android:id="@+id/scroll_view"
+		android:layout_height="wrap_content"
+		android:padding="14dp">
+		<com.aurora.manager.view.MyBaseLinearLayout
+			android:id="@+id/container"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:padding="14dp">
-			<org.aurora.view.MyBaseLinearLayout
-				android:id="@+id/container"
-				android:layout_width="match_parent"
-				android:layout_height="160dp"
-				android:background="@drawable/bg_gradient"
+			android:background="@drawable/bg_gradient"
+			android:orientation="horizontal"
+			app:ax_shapeType="hexagon"
+			app:ax_radius="@dimen/radius_12dp">
+			<LinearLayout
+				android:id="@+id/linear1"
+				android:layout_width="0dp"
+				android:layout_height="match_parent"
+				android:paddingLeft="14dp"
+				android:paddingTop="14dp"
+				android:paddingRight="10dp"
+				android:paddingBottom="10dp"
 				android:orientation="vertical"
-				app:ax_shapeType="hexagon"
-				app:ax_radius="12dp" />
-		</LinearLayout>
-	</androidx.core.widget.NestedScrollView>
-</LinearLayout>
+				android:layout_weight="1">
+				<LinearLayout
+					android:id="@+id/linear4"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:orientation="vertical">
+					<TextView
+						android:id="@+id/textview2"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/tag_title_dex_space"
+						android:textSize="23sp"
+						android:textStyle="bold"
+						android:fontFamily="@font/hx" />
+					<TextView
+						android:id="@+id/textview3"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="V0.0.1-BETA"
+						android:textSize="12sp"
+						android:letterSpacing="0.05"
+						android:fontFamily="@font/hx" />
+					<LinearLayout
+						android:id="@+id/linear5"
+						android:layout_width="match_parent"
+						android:layout_height="match_parent"
+						android:orientation="horizontal">
+						<LinearLayout
+							android:id="@+id/linear6"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:paddingBottom="8dp"
+							android:gravity="bottom"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/textview6"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:layout_marginLeft="1dp"
+								android:text="@string/tag_title_uptime"
+								android:textSize="11sp"
+								android:textStyle="bold"
+								android:letterSpacing="0.05"
+								android:fontFamily="@font/hx" />
+							<TextView
+								android:id="@+id/textview7"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:text="2006:23:08"
+								android:textSize="13sp"
+								android:textStyle="bold"
+								android:letterSpacing="0.08"
+								android:fontFamily="@font/hx" />
+						</LinearLayout>
+						<LinearLayout
+							android:id="@+id/linear7"
+							android:layout_width="wrap_content"
+							android:layout_height="match_parent"
+							android:paddingBottom="8dp"
+							android:gravity="bottom"
+							android:orientation="vertical"
+							android:layout_weight="1">
+							<TextView
+								android:id="@+id/textview5"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:text="@string/tag_title_pid"
+								android:textSize="11sp"
+								android:textStyle="bold"
+								android:letterSpacing="0.05"
+								android:fontFamily="@font/hx" />
+							<TextView
+								android:id="@+id/textview4"
+								android:layout_width="match_parent"
+								android:layout_height="wrap_content"
+								android:text="86232"
+								android:textSize="13sp"
+								android:textStyle="bold"
+								android:letterSpacing="0.08"
+								android:fontFamily="@font/hx" />
+						</LinearLayout>
+					</LinearLayout>
+				</LinearLayout>
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/linear2"
+				android:layout_width="0dp"
+				android:layout_height="match_parent"
+				android:padding="10dp"
+				android:gravity="right"
+				android:orientation="vertical"
+				android:layout_weight="1">
+				<ImageView
+					android:id="@+id/imageview1"
+					android:layout_width="75dp"
+					android:layout_height="75dp"
+					android:layout_marginBottom="6dp"
+					android:padding="4dp"
+					android:src="@drawable/ic_dex_space"
+					android:scaleType="centerInside" />
+				<com.google.android.material.button.MaterialButton
+					android:id="@+id/materialbutton1"
+					android:layout_width="wrap_content"
+					android:layout_height="45dp"
+					android:layout_marginTop="6dp"
+					android:layout_marginRight="4dp"
+					android:paddingLeft="25dp"
+					android:paddingTop="4dp"
+					android:paddingRight="25dp"
+					android:paddingBottom="4dp"
+					android:gravity="center_horizontal|center_vertical"
+					android:text="@string/tag_launch_dex_space"
+					android:textSize="14sp"
+					app:backgroundTint="@color/primaryContainer"
+					android:letterSpacing="0.05"
+					android:fontFamily="@font/hx"
+					app:cornerRadius="50dp"
+					app:icon="@drawable/ic_launch"
+					app:iconGravity="textEnd"
+					app:iconPadding="8dp"
+					app:iconSize="18dp"
+					app:iconTint="@color/onSurface" />
+			</LinearLayout>
+		</com.aurora.manager.view.MyBaseLinearLayout>
+	</LinearLayout>
+</androidx.core.widget.NestedScrollView>

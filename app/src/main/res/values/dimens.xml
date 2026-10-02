@@ -2,6 +2,8 @@
 <resources>
     <dimen name="main_margin_toolbar">2dp</dimen>
     <dimen name="pedding_16dp">16dp</dimen>
+    <dimen name="size_width_135dp">135dp</dimen>
+    <dimen name="size_height_135dp">135dp</dimen>
     <!--size text-->
     <dimen name="size_text_8sp">8sp</dimen>
     <dimen name="size_text_10sp">10sp</dimen>

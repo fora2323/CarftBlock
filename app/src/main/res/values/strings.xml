@@ -2,6 +2,13 @@
 <resources>
     <string name="app_name" translatable="false">Aurora</string>
     <string name="title_developer">By fora2323</string>
+    <string name="tag_launch_dex_space">Launch</string>
+    <string name="tag_title_dex_space">Dexs Space</string>
+    <string name="tag_title_uptime">UPTIME</string>
+    <string name="tag_title_pid">PID</string>
+    <string name="tag_title_config">Config</string>
+    <string name="tag_title_visual">Visual</string>
+    <string name="tag_title_tools">Tools</string>
     <!--tag name main.xml-->
     <string name="title_toolbar_name_main_game">Game</string>
     <string name="title_toolbar_name_main_menu">Feature</string>
