@@ -148,16 +148,12 @@ public class HomeFragment extends Fragment {
                         
                         long seconds = (millis / 1000) % 60;
                         long minutes = (millis / (1000 * 60)) % 60;
-                        long hours = (millis / (1000 * 60 * 60)) % 24;
-                        long days = (millis / (1000 * 60 * 60 * 24));
                         
-                        String uptimeFormatted;
-                        if (days > 0) {
-                            uptimeFormatted = String.format(Locale.US, "%d DAYS %02d:%02d:%02d", days, hours, minutes, seconds);
-                        } else {
-                            // Agar lebih rapi, hilangkan "0 DAYS" jika umurnya belum 1 hari
-                            uptimeFormatted = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds);
-                        }
+                        // Menghapus "% 24" agar jam bisa lebih dari 24 (misal: 48:00:00)
+                        long hours = (millis / (1000 * 60 * 60));
+                        
+                        // Format konsisten sesuai permintaan
+                        String uptimeFormatted = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds);
                         
                         if (tv_uptime != null) tv_uptime.setText(uptimeFormatted);
                         if (tv_pid != null) tv_pid.setText(finalPid);
