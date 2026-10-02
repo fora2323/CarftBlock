@@ -90,6 +90,8 @@ dependencies {
     
     implementation("io.github.vvb2060.ndk:boringssl:20250114")
     
+    implementation("com.airbnb.android:lottie:6.4.0")
+    
     implementation("org.lsposed.libcxx:libcxx:27.0.12077973")
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.80")

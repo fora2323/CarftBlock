@@ -1,5 +1,7 @@
 package com.aurora
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -9,10 +11,16 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
+
+// Import tambahan untuk Lottie & Coroutine
+import com.airbnb.lottie.LottieAnimationView
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
 import org.aurora.SettingsUtility
@@ -26,8 +34,6 @@ import java.net.Socket
 class SplashActivity : BaseCompatActivity() {
 
     private var permissionDialog: AuroraDialog? = null
-    
-    // Mencegah pengecekan berjalan ganda saat lifecycle berubah
     private var isCheckingFlow = false 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,8 +44,6 @@ class SplashActivity : BaseCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // onResume akan terpanggil saat awal buka aplikasi ATAU 
-        // saat pengguna baru saja kembali dari layar Settings (setelah memberi izin).
         if (!isCheckingFlow) {
             startSplashFlow()
         }
@@ -49,31 +53,50 @@ class SplashActivity : BaseCompatActivity() {
         isCheckingFlow = true
         
         lifecycleScope.launch {
-            // 1. Efek Loading Splash Screen (Jeda 1 detik agar UI muncul dengan baik)
-            delay(1000)
+            // 1. Eksekusi pengecekan Daemon secara ASYNC (berjalan di background bersamaan dengan animasi)
+            val daemonCheckDeferred = async { checkDaemonViaSocket() }
 
-            // 2. Cek Izin (Permission)
+            // 2. Tahan coroutine sampai animasi Lottie selesai berputar
+            waitForLottieAnimation()
+
+            // 3. Setelah animasi selesai, cek izin (biar dialog tidak menimpa animasi awal)
             val hasAllPermissions = checkRequiredPermissions()
             if (!hasAllPermissions) {
-                // Jika izin belum lengkap, hentikan flow. 
-                // isCheckingFlow di-reset agar saat user kembali dari pengaturan, flow bisa diulang.
                 isCheckingFlow = false
                 return@launch 
             }
 
-            // 3. Cek Status Daemon via Socket TCP
-            val isDaemonRunning = checkDaemonViaSocket()
+            // 4. Ambil hasil dari pengecekan daemon yang berjalan di langkah 1
+            val isDaemonRunning = daemonCheckDeferred.await()
 
-            // 4. Routing Activity
+            // 5. Lakukan Routing Activity
             if (isDaemonRunning) {
                 startActivity(Intent(this@SplashActivity, MainActivity::class.java))
             } else {
                 startActivity(Intent(this@SplashActivity, ConnectedActivity::class.java))
             }
             
-            // Hancurkan SplashActivity agar tidak bisa di-back
             finish()
         }
+    }
+
+    // Fungsi canggih untuk menahan proses Kotlin sampai animasi Lottie selesai
+    private suspend fun waitForLottieAnimation() = suspendCancellableCoroutine<Unit> { cont ->
+        val lottieView = findViewById<LottieAnimationView>(R.id.splash_icon)
+        
+        lottieView.addAnimatorListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                lottieView.removeAllAnimatorListeners()
+                if (cont.isActive) cont.resume(Unit)
+            }
+            override fun onAnimationCancel(animation: Animator) {
+                lottieView.removeAllAnimatorListeners()
+                if (cont.isActive) cont.resume(Unit)
+            }
+        })
+        
+        // Mulai mainkan animasi
+        lottieView.playAnimation()
     }
 
     private fun checkRequiredPermissions(): Boolean {
@@ -110,7 +133,7 @@ class SplashActivity : BaseCompatActivity() {
             }
             .setNegativeButton(getString(R.string.title_button_dialog_close_splash)) { dialog ->
                 dialog.dismiss()
-                finish() // Tutup aplikasi jika user menolak memberi izin
+                finish()
             }
             .build()
             
@@ -121,9 +144,8 @@ class SplashActivity : BaseCompatActivity() {
     private suspend fun checkDaemonViaSocket(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                // Mencoba terhubung ke Java Server AuroraService di background
                 Socket("127.0.0.1", 52847).use { socket ->
-                    socket.soTimeout = 1500 // Waktu tunggu maksimal 1.5 detik
+                    socket.soTimeout = 1500
                     
                     val out = PrintWriter(socket.getOutputStream(), true)
                     val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -134,7 +156,6 @@ class SplashActivity : BaseCompatActivity() {
                     response != null && response.startsWith("PONG")
                 }
             } catch (e: Exception) {
-                // Exception (Connection Refused / Timeout) menandakan daemon belum berjalan
                 false
             }
         }
