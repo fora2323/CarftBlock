@@ -18,7 +18,8 @@ import android.view.animation.*;
 import android.widget.*;
 import android.widget.LinearLayout;
 
-import androidx.annotation.*;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.DialogFragment;
@@ -31,7 +32,6 @@ import org.aurora.view.MyBaseLinearLayout;
 
 public class HomeFragment extends Fragment {
 	
-	private NestedScrollView vscroll2;
 	private LinearLayout scroll_view;
 	private MyBaseLinearLayout container;
 	
@@ -45,7 +45,6 @@ public class HomeFragment extends Fragment {
 	}
 	
 	private void initialize(Bundle _savedInstanceState, View _view) {
-		vscroll2 = _view.findViewById(R.id.vscroll2);
 		scroll_view = _view.findViewById(R.id.scroll_view);
 		container = _view.findViewById(R.id.container);
 	}
