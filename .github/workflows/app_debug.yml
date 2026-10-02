@@ -10,6 +10,9 @@ on:
 jobs:
   build-debug:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read  # Diperlukan untuk membaca riwayat build via GitHub API
 
     steps:
       - name: Checkout Code
@@ -24,6 +27,15 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      # --- NOTIFIKASI AWAL MULAI BUILD ---
+      - name: Send Start Notification to Telegram
+        env:
+          BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILE: 'app_debug.yml'
+        run: python send_telegram_start.py
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug 2>&1 | tee build.log

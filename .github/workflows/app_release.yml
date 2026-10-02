@@ -9,6 +9,9 @@ on:
 jobs:
   build-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
 
     steps:
       - name: Checkout Code
@@ -23,6 +26,15 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      # --- NOTIFIKASI AWAL MULAI BUILD ---
+      - name: Send Start Notification to Telegram
+        env:
+          BOT_TOKEN: ${{ secrets.TOKEN_BOT }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILE: 'app_release.yml'
+        run: python send_telegram_start.py
 
       - name: Build Release APK
         run: |
