@@ -75,7 +75,7 @@
 								android:letterSpacing="0.05"
                                 android:textAppearance="@style/TextAppearance.Aurora.Title" />
 							<TextView
-								android:id="@+id/textview7"
+								android:id="@+id/tv_uptime"
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
 								android:text="2006:23:08"
@@ -101,7 +101,7 @@
 								android:letterSpacing="0.05"
                                 android:textAppearance="@style/TextAppearance.Aurora.Title" />
 							<TextView
-								android:id="@+id/textview4"
+								android:id="@+id/tv_pid"
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
 								android:text="86232"
