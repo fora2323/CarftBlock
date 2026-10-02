@@ -77,29 +77,22 @@ class ConnectedActivity : BaseCompatActivity() {
                         .show()
                 }
                 else -> {
-                    try {
-                        startForegroundService(AdbPairingService.startIntent(this))
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Gagal start AdbPairingService", e)
+                    // FITUR BARU: Cek apakah Kunci ADB sudah ada di memori
+                    val keyStore = PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs())
+                    if (keyStore.get() != null) {
+                        // Jika sudah ada kunci, munculkan dialog peringatan
                         AuroraDialog.Builder(this)
-                            .setTitle("Gagal Memulai Layanan")
-                            .setMessage(e.message ?: "Error tidak diketahui")
-                            .setPositiveButton("OK") { d -> d.dismiss() }
+                            .setTitle("Sudah Ter-Pairing?")
+                            .setMessage("Aplikasi mendeteksi bahwa kunci rahasia ADB sudah tersimpan. Anda biasanya hanya perlu menekan tombol 'Start'.\n\nApakah Anda yakin ingin melakukan Pairing ulang? (Lakukan ini hanya jika 'Start' selalu gagal).")
+                            .setPositiveButton("Ya, Pairing Ulang") { d ->
+                                d.dismiss()
+                                startPairingFlow()
+                            }
+                            .setNegativeButton("Batal") { d -> d.dismiss() }
                             .show()
-                    }
-
-                    try {
-                        val intent = Intent("com.android.settings.APPLICATION_DEVELOPMENT_SETTINGS")
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(intent)
-                    } catch (e: Exception) {
-                        try {
-                            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            startActivity(intent)
-                        } catch (ex: Exception) {
-                            Log.e(TAG, "Tidak bisa buka Developer Options", ex)
-                        }
+                    } else {
+                        // Jika memang baru pertama kali buka, langsung jalankan pairing
+                        startPairingFlow()
                     }
                 }
             }
@@ -131,24 +124,20 @@ class ConnectedActivity : BaseCompatActivity() {
                     if (!found || adbPort <= 0) throw Exception("Tidak dapat menemukan port ADB wireless. Pastikan Wireless Debugging aktif.")
                     Log.d(TAG, "Step 2: ADB port = $adbPort")
 
-                    // Step 2: Load key
-                    val storageContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                        createDeviceProtectedStorageContext()
-                    else
-                        this@ConnectedActivity
-                    val prefs = storageContext.getSharedPreferences("aurora_adb_prefs", android.content.Context.MODE_PRIVATE)
+                    // Step 2: Load key (Dirapikan, langsung ambil dari AuroraApplication)
                     val key = AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
 
                     val client = AdbClient("127.0.0.1", adbPort, key)
                     client.connect()
                     
-                    // Step 4: Jalankan daemon via shell
+                    // Step 4: Jalankan daemon via shell (Ditambahkan sh -c agar binary terbaca aman)
                     val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
                     Log.d(TAG, "Step 5: Eksekusi = $command")
-                    client.shellCommand(command, null)
+                    client.shellCommand("sh -c \"$command\"") { output ->
+                        Log.d(TAG, "Daemon Output: " + String(output))
+                    }
                     client.close()
                     Log.d(TAG, "Step 6: Shell selesai — daemon launched")
-                    Log.d(TAG, "Step 7: Done")
                 }
 
                 withContext(Dispatchers.Main) {
@@ -173,5 +162,36 @@ class ConnectedActivity : BaseCompatActivity() {
         }
 
         applySystemBarInsets(rootView, toolbar, null)
+    }
+
+    // Fungsi terpisah agar kode tombol Pairing lebih bersih
+    private fun startPairingFlow() {
+        try {
+            startForegroundService(AdbPairingService.startIntent(this))
+        } catch (e: Exception) {
+            Log.e(TAG, "Gagal start AdbPairingService", e)
+            AuroraDialog.Builder(this)
+                .setTitle("Gagal Memulai Layanan")
+                .setMessage(e.message ?: "Error tidak diketahui")
+                .setPositiveButton("OK") { d -> d.dismiss() }
+                .show()
+            return // Stop eksekusi agar tidak lanjut buka pengaturan
+        }
+
+        try {
+            val intent = Intent("com.android.settings.APPLICATION_DEVELOPMENT_SETTINGS")
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            // Opsional: Langsung menyorot (highlight) menu ADB Wireless
+            intent.putExtra(":settings:fragment_args_key", "toggle_adb_wireless")
+            startActivity(intent)
+        } catch (e: Exception) {
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+            } catch (ex: Exception) {
+                Log.e(TAG, "Tidak bisa buka Developer Options", ex)
+            }
+        }
     }
 }

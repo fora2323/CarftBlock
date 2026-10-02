@@ -20,18 +20,16 @@ import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
 import org.aurora.SettingsUtility
 import com.aurora.main.activities.MainActivity
-import com.aurora.starter.AuroraStarter
 
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
+import java.net.InetSocketAddress
 import java.net.Socket
 
 class SplashActivity : BaseCompatActivity() {
 
     private var permissionDialog: AuroraDialog? = null
-    
-    // Mencegah pengecekan berjalan ganda saat lifecycle berubah
     private var isCheckingFlow = false 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,33 +49,24 @@ class SplashActivity : BaseCompatActivity() {
         isCheckingFlow = true
         
         lifecycleScope.launch {
-            // 1. Eksekusi pengecekan Daemon di background secara ASYNC
-            // Ini berjalan paralel bersamaan dengan efek animasi
             val daemonCheckDeferred = async { checkDaemonViaSocket() }
 
-            // 2. Tahan layar Splash selama tepat 2 detik (2000 milidetik)
-            // Biar user bisa menikmati animasi Lottie yang sedang berputar (loop)
             delay(2000)
 
-            // 3. Setelah 2 detik, barulah cek Permission
             val hasAllPermissions = checkRequiredPermissions()
             if (!hasAllPermissions) {
-                // Jika izin kurang, tahan di sini (animasi akan tetap berputar di background)
                 isCheckingFlow = false
                 return@launch 
             }
 
-            // 4. Ambil hasil dari pengecekan daemon yang sudah berjalan di langkah 1
             val isDaemonRunning = daemonCheckDeferred.await()
 
-            // 5. Pindah halaman
             if (isDaemonRunning) {
                 startActivity(Intent(this@SplashActivity, MainActivity::class.java))
             } else {
                 startActivity(Intent(this@SplashActivity, ConnectedActivity::class.java))
             }
             
-            // Tutup SplashActivity
             finish()
         }
     }
@@ -116,7 +105,7 @@ class SplashActivity : BaseCompatActivity() {
             }
             .setNegativeButton(getString(R.string.title_button_dialog_close_splash)) { dialog ->
                 dialog.dismiss()
-                finish() // Keluar dari aplikasi jika izin ditolak
+                finish() 
             }
             .build()
             
@@ -126,23 +115,32 @@ class SplashActivity : BaseCompatActivity() {
 
     private suspend fun checkDaemonViaSocket(): Boolean {
         return withContext(Dispatchers.IO) {
-            try {
-                // Mencoba terhubung ke Java Server AuroraService di background
-                Socket("127.0.0.1", 52847).use { socket ->
-                    socket.soTimeout = 1500 // Waktu tunggu maksimal 1.5 detik
-                    
-                    val out = PrintWriter(socket.getOutputStream(), true)
-                    val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
-                    
-                    out.println("PING")
-                    val response = `in`.readLine()
-                    
-                    response != null && response.startsWith("PONG")
+            var isRunning = false
+            // PERBAIKAN: Retry loop. Coba 2 kali untuk mencegah "False Negative"
+            for (i in 1..2) {
+                try {
+                    Socket().use { socket ->
+                        socket.connect(InetSocketAddress("127.0.0.1", 52847), 1000)
+                        socket.soTimeout = 1000
+                        
+                        val out = PrintWriter(socket.getOutputStream(), true)
+                        val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
+                        
+                        out.println("PING")
+                        val response = `in`.readLine()
+                        
+                        if (response != null && response.startsWith("PONG")) {
+                            isRunning = true
+                            return@use // Berhasil, keluar dari 'use'
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Abaikan dan biarkan mengulang percobaan
                 }
-            } catch (e: Exception) {
-                // Jika error/timeout, berarti daemon belum berjalan
-                false
+                if (isRunning) break
+                delay(300) // Jeda 0.3 detik sebelum mencoba konek ulang
             }
+            isRunning
         }
     }
 

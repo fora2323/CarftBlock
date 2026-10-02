@@ -30,11 +30,9 @@ public class HomeFragment extends Fragment {
     private LinearLayout scroll_view;
     private MyBaseLinearLayout container;
     
-    // Tambahkan deklarasi TextView
     private TextView tv_uptime;
     private TextView tv_pid;
     
-    // Variabel untuk proses background & timer
     private ExecutorService bgExecutor;
     private Handler uiHandler;
     private Runnable uptimeRunnable;
@@ -51,23 +49,17 @@ public class HomeFragment extends Fragment {
     private void initialize(Bundle _savedInstanceState, View _view) {
         scroll_view = _view.findViewById(R.id.scroll_view);
         container = _view.findViewById(R.id.container);
-        
-        // Hubungkan id XML dengan variabel Java
         tv_uptime = _view.findViewById(R.id.tv_uptime);
         tv_pid = _view.findViewById(R.id.tv_pid);
     }
 	
     private void initializeLogic() {
-        // Inisialisasi Thread Background dan Handler UI
-        bgExecutor = Executors.newSingleThreadExecutor();
         uiHandler = new Handler(Looper.getMainLooper());
         
-        // Buat tugas (Runnable) yang akan dipanggil berulang kali
         uptimeRunnable = new Runnable() {
             @Override
             public void run() {
                 updateUptimeService();
-                // Jalankan ulang fungsi ini setiap 1000 milidetik (1 detik)
                 uiHandler.postDelayed(this, 1000);
             }
         };
@@ -76,8 +68,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Mulai menjalankan timer saat halaman ini dibuka/terlihat
+        // PERBAIKAN: Selalu buat Thread baru jika kembali dari halaman lain
+        if (bgExecutor == null || bgExecutor.isShutdown()) {
+            bgExecutor = Executors.newSingleThreadExecutor();
+        }
+        // Bersihkan antrean agar tidak dobel, lalu jalankan langsung
         if (uiHandler != null && uptimeRunnable != null) {
+            uiHandler.removeCallbacks(uptimeRunnable);
             uiHandler.post(uptimeRunnable);
         }
     }
@@ -85,21 +82,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        // Hentikan timer saat halaman disembunyikan agar baterai hemat
         if (uiHandler != null && uptimeRunnable != null) {
             uiHandler.removeCallbacks(uptimeRunnable);
         }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        // Tutup bersih semua thread saat fragment dihancurkan
+        // PERBAIKAN: Matikan thread saat pindah halaman agar memori tidak bocor
         if (bgExecutor != null) {
             bgExecutor.shutdownNow();
-        }
-        if (uiHandler != null && uptimeRunnable != null) {
-            uiHandler.removeCallbacks(uptimeRunnable);
+            bgExecutor = null;
         }
     }
 
@@ -111,10 +100,11 @@ public class HomeFragment extends Fragment {
             String daemonPid = "---";
             long daemonStartTime = 0;
 
-            // Membuka Socket ke Daemon Aurora
             try (Socket socket = new Socket()) {
-                // PENTING: Port diubah menjadi 52847 sesuai dengan settingan AuroraService milikmu
-                socket.connect(new InetSocketAddress("127.0.0.1", 52847), 300);
+                // Diperbesar sedikit agar tidak gagal saat HP sedang lemot
+                socket.connect(new InetSocketAddress("127.0.0.1", 52847), 500);
+                socket.setSoTimeout(500);
+                
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 
@@ -130,14 +120,12 @@ public class HomeFragment extends Fragment {
                     }
                 }
             } catch (Exception ignored) {
-                // Gagal konek, berarti daemon sedang mati
             }
 
             final boolean finalIsRunning = isRunning;
             final String finalPid = daemonPid;
             final long finalStartTime = daemonStartTime;
 
-            // Update UI harus dilakukan di Main Thread (UI Thread)
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     if (!isAdded()) return;
@@ -148,18 +136,13 @@ public class HomeFragment extends Fragment {
                         
                         long seconds = (millis / 1000) % 60;
                         long minutes = (millis / (1000 * 60)) % 60;
-                        
-                        // Menghapus "% 24" agar jam bisa lebih dari 24 (misal: 48:00:00)
                         long hours = (millis / (1000 * 60 * 60));
                         
-                        // Format konsisten sesuai permintaan
                         String uptimeFormatted = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds);
                         
                         if (tv_uptime != null) tv_uptime.setText(uptimeFormatted);
                         if (tv_pid != null) tv_pid.setText(finalPid);
-
                     } else {
-                        // Kondisi saat daemon belum dijalankan
                         if (tv_uptime != null) tv_uptime.setText("Offline");
                         if (tv_pid != null) tv_pid.setText("---");
                     }
