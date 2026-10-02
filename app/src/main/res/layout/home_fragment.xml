@@ -99,7 +99,7 @@
 								android:textSize="11sp"
 								android:textStyle="bold"
 								android:letterSpacing="0.05"
-								android:fontFamily="@font/hx" />
+                                android:textAppearance="@style/TextAppearance.Aurora.Title" />
 							<TextView
 								android:id="@+id/textview4"
 								android:layout_width="match_parent"
@@ -108,7 +108,7 @@
 								android:textSize="13sp"
 								android:textStyle="bold"
 								android:letterSpacing="0.08"
-								android:fontFamily="@font/hx" />
+							    android:textAppearance="@style/TextAppearance.Aurora.Title" />
 						</LinearLayout>
 					</LinearLayout>
 				</LinearLayout>
@@ -133,14 +133,11 @@
                     style="@style/Base.Theme.AuroraButton"
 					android:id="@+id/materialbutton1"
 					android:layout_width="wrap_content"
-					android:layout_height="45dp"
+					android:layout_height="42dp"
 					android:layout_marginTop="6dp"
 					android:layout_marginRight="4dp"
 					android:gravity="center_horizontal|center_vertical"
 					android:text="@string/tag_launch_dex_space"
-					android:textSize="14sp"
-					android:letterSpacing="0.05"
-                    android:textAppearance="@style/TextAppearance.Aurora.Title"
 					app:icon="@drawable/ic_launch"/>
 			</LinearLayout>
 		</com.aurora.manager.view.MyBaseLinearLayout>
