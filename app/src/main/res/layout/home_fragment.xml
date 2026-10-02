@@ -140,6 +140,6 @@
 					android:text="@string/tag_launch_dex_space"
 					app:icon="@drawable/ic_launch"/>
 			</LinearLayout>
-		</com.aurora.manager.view.MyBaseLinearLayout>
+		</org.aurora.view.MyBaseLinearLayout>
 	</LinearLayout>
 </androidx.core.widget.NestedScrollView>
