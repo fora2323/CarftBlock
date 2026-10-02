@@ -50,6 +50,7 @@
     
     <style name="TextAppearance.Aurora.Title" parent="TextAppearance.Material3.HeadlineMedium">
         <item name="fontFamily">@font/ge_force</item>
+        <item name="android:textStyle">bold</item>
     </style>
     
     <style name="TextAppearance.Aurora.Highlight" parent="TextAppearance.Material3.BodyLarge">
