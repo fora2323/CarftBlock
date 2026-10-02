@@ -7,14 +7,22 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.Observer
+
 import com.google.android.material.button.MaterialButton
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.CountDownLatch
@@ -60,9 +68,6 @@ class ConnectedActivity : BaseCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        // ==========================================
-        // LOGIKA TOMBOL PAIRING
-        // ==========================================
         btnPairing.setOnClickListener {
             when {
                 !SettingsUtility.isNotificationEnabled(this) -> {
@@ -84,7 +89,6 @@ class ConnectedActivity : BaseCompatActivity() {
                         .show()
                 }
                 else -> {
-                    // Pengecekan Kunci ADB: Hindari Pairing tidak sengaja jika sudah ada kunci
                     val keyStore = PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs())
                     if (keyStore.get() != null) {
                         AuroraDialog.Builder(this)
@@ -103,9 +107,6 @@ class ConnectedActivity : BaseCompatActivity() {
             }
         }
 
-        // ==========================================
-        // LOGIKA TOMBOL START
-        // ==========================================
         btnStart.setOnClickListener {
             val loading = AuroraLoading.newInstance()
             loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
@@ -116,7 +117,6 @@ class ConnectedActivity : BaseCompatActivity() {
                     var adbPort = -1
                     val portLatch = CountDownLatch(1)
 
-                    // 1. Coba deteksi port via mDNS (Tunggu maksimal 3 detik)
                     val mdns = AdbMdns(this@ConnectedActivity, AdbMdns.TLS_CONNECT, Observer { port ->
                         if (port > 0 && adbPort == -1) {
                             adbPort = port
@@ -128,56 +128,89 @@ class ConnectedActivity : BaseCompatActivity() {
                     val found = portLatch.await(3, TimeUnit.SECONDS)
                     mdns.stop()
 
-                    // 2. Logika Fallback: Jika mDNS gagal, coba ketuk port TCP 5555
                     if (found && adbPort > 0) {
                         Log.d(TAG, "Step 1: Ditemukan port Wireless mDNS = $adbPort")
                     } else {
                         Log.d(TAG, "Step 1: mDNS gagal/timeout. Fallback ke TCP Port 5555...")
-                        
                         val isPort5555Open = try {
                             Socket().use { socket ->
                                 socket.connect(InetSocketAddress("127.0.0.1", 5555), 1000)
                                 true
                             }
-                        } catch (e: Exception) {
-                            false
-                        }
+                        } catch (e: Exception) { false }
 
                         if (isPort5555Open) {
                             adbPort = 5555
-                            Log.d(TAG, "Step 1: Fallback sukses! Menggunakan port 5555.")
                         } else {
                             throw Exception("Tidak dapat menemukan port ADB. Pastikan Wireless Debugging aktif atau port TCP 5555 terbuka.")
                         }
                     }
 
-                    // 3. Load Key & Connect
+                    // Load Key & Connect
                     val key = AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
                     val client = AdbClient("127.0.0.1", adbPort, key)
                     client.connect()
                     
-                    // 4. Jalankan Daemon dengan nohup agar kebal terhadap putusnya sesi ADB
+                    // ==========================================
+                    // PERBAIKAN: EKSEKUSI AMAN & DETACH SEMPURNA
+                    // ==========================================
                     val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-                    Log.d(TAG, "Step 5: Eksekusi = $command")
-                    client.shellCommand("nohup sh -c \"$command\" > /dev/null 2>&1 &") { output ->
-                        Log.d(TAG, "Daemon Output: " + String(output))
+                    
+                    // Menjalankan langsung dari lokasi aslinya. 
+                    // Perintah diarahkan ke /dev/null dan ditaruh di background (&) agar terlepas dari jalur ADB.
+                    val detachCommand = "sh -c \"$command >/dev/null 2>&1 &\""
+                    
+                    Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $detachCommand")
+                    client.shellCommand(detachCommand) { _ -> 
+                        // Output sengaja kosong karena stream sudah dialihkan ke /dev/null
                     }
                     client.close()
-                    Log.d(TAG, "Step 6: Shell selesai — daemon launched")
+
+                    // ==========================================
+                    // PERBAIKAN: VERIFIKASI DAEMON
+                    // ==========================================
+                    Log.d(TAG, "Step 3: Memverifikasi apakah daemon berhasil hidup...")
+                    var isDaemonReady = false
+                    
+                    for (i in 1..10) {
+                        delay(500) // Tunggu 0.5 detik setiap percobaan
+                        try {
+                            Socket().use { socket ->
+                                socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
+                                socket.soTimeout = 500
+                                val out = PrintWriter(socket.getOutputStream(), true)
+                                val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
+                                
+                                out.println("PING")
+                                val response = `in`.readLine()
+                                if (response != null && response.startsWith("PONG")) {
+                                    isDaemonReady = true
+                                    return@use
+                                }
+                            }
+                        } catch (e: Exception) {
+                            // Abaikan error, loop akan mencoba lagi
+                        }
+                        if (isDaemonReady) break
+                    }
+
+                    if (!isDaemonReady) {
+                        throw Exception("Daemon terhubung tetapi langsung mati. Pastikan libaurora.so kompatibel dengan perangkat ini.")
+                    }
+                    Log.d(TAG, "Step 4: Daemon terverifikasi hidup!")
                 }
 
-                // 5. Update UI di Main Thread
                 withContext(Dispatchers.Main) {
                     loading.dismissDialog()
                     btnStart.isEnabled = true
 
                     if (result.isSuccess) {
-                        Log.i(TAG, "Daemon started successfully")
+                        Log.i(TAG, "Berhasil masuk ke MainActivity!")
                         startActivity(Intent(this@ConnectedActivity, MainActivity::class.java))
                         finish()
                     } else {
                         val err = result.exceptionOrNull()
-                        Log.e(TAG, "Daemon failed: ${err?.message}", err)
+                        Log.e(TAG, "Gagal: ${err?.message}", err)
                         AuroraDialog.Builder(this@ConnectedActivity)
                             .setTitle("Gagal Menjalankan Engine")
                             .setMessage(err?.message ?: "Error tidak diketahui")
@@ -191,9 +224,6 @@ class ConnectedActivity : BaseCompatActivity() {
         applySystemBarInsets(rootView, toolbar, null)
     }
 
-    // ==========================================
-    // FUNGSI PEMBANTU (HELPERS)
-    // ==========================================
     private fun startPairingFlow() {
         try {
             startForegroundService(AdbPairingService.startIntent(this))
@@ -204,7 +234,7 @@ class ConnectedActivity : BaseCompatActivity() {
                 .setMessage(e.message ?: "Error tidak diketahui")
                 .setPositiveButton("OK") { d -> d.dismiss() }
                 .show()
-            return // Hentikan eksekusi jika service gagal dijalankan
+            return
         }
 
         try {
@@ -214,7 +244,6 @@ class ConnectedActivity : BaseCompatActivity() {
             startActivity(intent)
         } catch (e: Exception) {
             try {
-                // Fallback Settings Intent jika custom UI manufaktur berbeda
                 val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
