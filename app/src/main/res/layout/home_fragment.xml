@@ -43,15 +43,15 @@
 						android:text="@string/tag_title_dex_space"
 						android:textSize="23sp"
 						android:textStyle="bold"
-						android:fontFamily="@font/hx" />
+                        android:textAppearance="@style/TextAppearance.Aurora.Title" />
 					<TextView
 						android:id="@+id/textview3"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:text="V0.0.1-BETA"
-						android:textSize="12sp"
+						android:textSize="@dimen/size_text_12sp"
 						android:letterSpacing="0.05"
-						android:fontFamily="@font/hx" />
+                        android:textAppearance="@style/TextAppearance.Aurora.Title" />
 					<LinearLayout
 						android:id="@+id/linear5"
 						android:layout_width="match_parent"
@@ -71,7 +71,7 @@
 								android:layout_height="wrap_content"
 								android:layout_marginLeft="1dp"
 								android:text="@string/tag_title_uptime"
-								android:textSize="11sp"
+								android:textSize="@dimen/size_text_11sp"
 								android:letterSpacing="0.05"
                                 android:textAppearance="@style/TextAppearance.Aurora.Title" />
 							<TextView
@@ -96,7 +96,7 @@
 								android:layout_width="match_parent"
 								android:layout_height="wrap_content"
 								android:text="@string/tag_title_pid"
-								android:textSize="11sp"
+								android:textSize="@dimen/size_text_11sp"
 								android:textStyle="bold"
 								android:letterSpacing="0.05"
                                 android:textAppearance="@style/TextAppearance.Aurora.Title" />

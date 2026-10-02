@@ -7,6 +7,7 @@
     <!--size text-->
     <dimen name="size_text_8sp">8sp</dimen>
     <dimen name="size_text_10sp">10sp</dimen>
+    <dimen name="size_text_11sp">11sp</dimen>
     <dimen name="size_text_12sp">12sp</dimen>
     <dimen name="size_text_14sp">14sp</dimen>
     <dimen name="size_text_16sp">16sp</dimen>
