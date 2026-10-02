@@ -19,7 +19,7 @@
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progress_bar"
-        android:layout_width="@dimem/size_width_135dp"
+        android:layout_width="@dimen/size_width_135dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:indeterminate="true"
