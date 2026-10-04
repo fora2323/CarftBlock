@@ -19,23 +19,84 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.colorResource
+
 @Composable
-fun ToastUI(message: String, isVisible: Boolean) {
+fun ToastUI(message: String, isVisible: Boolean, durationMs: Long = 2500L) {
+    val progressAnim = remember { Animatable(1f) }
+
+    LaunchedEffect(isVisible) {
+        if (isVisible) {
+            progressAnim.snapTo(1f)
+            progressAnim.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(
+                    durationMillis = durationMs.toInt(),
+                    easing = LinearEasing
+                )
+            )
+        }
+    }
+
+    val outlineColor = colorResource(id = com.aurora.R.color.primary)
+    val backgroundColor = colorResource(id = com.aurora.R.color.surfaceContainerHigh)
+    val iconColor = colorResource(id = com.aurora.R.color.primary)
+    val textColor = colorResource(id = com.aurora.R.color.onSurface)
+
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(),
-        exit = fadeOut()
+        enter = fadeIn(animationSpec = tween(300)),
+        exit = fadeOut(animationSpec = tween(300))
     ) {
         Surface(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .padding(16.dp)
+                .drawWithContent {
+                    drawContent()
+                    val cornerRadiusPx = 12.dp.toPx()
+                    val path = Path().apply {
+                        addRoundRect(
+                            RoundRect(
+                                0f, 0f, size.width, size.height,
+                                CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                            )
+                        )
+                    }
+                    val pathMeasure = PathMeasure()
+                    pathMeasure.setPath(path, forceClosed = false)
+                    
+                    val destPath = Path()
+                    pathMeasure.getSegment(
+                        startDistance = 0f,
+                        stopDistance = pathMeasure.length * progressAnim.value,
+                        destination = destPath,
+                        startWithMoveTo = true
+                    )
+                    
+                    drawPath(
+                        path = destPath,
+                        color = outlineColor,
+                        style = Stroke(width = 2.dp.toPx())
+                    )
+                },
             shape = RoundedCornerShape(12.dp),
-            color = Color(0xFF2C2C2C), // Background Toast
+            color = backgroundColor,
             shadowElevation = 6.dp
         ) {
             Row(
@@ -45,12 +106,12 @@ fun ToastUI(message: String, isVisible: Boolean) {
                 Icon(
                     imageVector = Icons.Default.Info, 
                     contentDescription = "Info",
-                    tint = Color(0xFF4CAF50) // Warna icon hijau
+                    tint = iconColor 
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = message, 
-                    color = Color.White, 
+                    color = textColor, 
                     fontSize = 14.sp
                 )
             }
@@ -58,37 +119,69 @@ fun ToastUI(message: String, isVisible: Boolean) {
     }
 }
 
-fun Activity.showComposeToast(message: String, durationMs: Long = 2500) {
-    val rootView = findViewById<ViewGroup>(android.R.id.content)
-    
-    val composeView = ComposeView(this)
-    
-    val layoutParams = FrameLayout.LayoutParams(
-        FrameLayout.LayoutParams.WRAP_CONTENT,
-        FrameLayout.LayoutParams.WRAP_CONTENT
-    ).apply {
-        gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        bottomMargin = 150 
+class AuroraToast private constructor(
+    private val activity: Activity,
+    private val message: String,
+    private val durationMs: Long
+) {
+    companion object {
+        const val LENGTH_SHORT = 2500L
+        const val LENGTH_LONG = 4000L
     }
 
-    composeView.setContent {
-        var isVisible by remember { mutableStateOf(false) }
+    class Builder(private val activity: Activity) {
+        private var message: String = ""
+        private var durationMs: Long = LENGTH_SHORT
 
-        LaunchedEffect(Unit) {
-            isVisible = true
+        fun setMessage(message: String) = apply { this.message = message }
+        fun setDuration(duration: Long) = apply { this.durationMs = duration }
+
+        fun build(): AuroraToast = AuroraToast(activity, message, durationMs)
+
+        fun show() {
+            build().show()
         }
+    }
 
-        ToastUI(message = message, isVisible = isVisible)
+    fun show() {
+        val rootView = activity.findViewById<ViewGroup>(android.R.id.content)
+        val composeView = ComposeView(activity)
         
-        LaunchedEffect(Unit) {
-            delay(durationMs - 300) 
-            isVisible = false
+        val layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            bottomMargin = 150 
         }
+
+        composeView.setContent {
+            var isVisible by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                isVisible = true
+                delay(durationMs)
+                isVisible = false
+            }
+
+            ToastUI(message = message, isVisible = isVisible, durationMs = durationMs)
+        }
+
+        rootView.addView(composeView, layoutParams)
+
+        // Berikan waktu ekstra agar animasi fadeOut selesai sebelum view dihapus
+        Handler(Looper.getMainLooper()).postDelayed({
+            rootView.removeView(composeView)
+        }, durationMs + 300L)
     }
+}
 
-    rootView.addView(composeView, layoutParams)
-
-    Handler(Looper.getMainLooper()).postDelayed({
-        rootView.removeView(composeView)
-    }, durationMs)
+@Preview
+@Composable
+private fun ToastUIPreview() {
+    ToastUI(
+        message = "This is a sample toast message",
+        isVisible = true,
+        durationMs = 2500L
+    )
 }

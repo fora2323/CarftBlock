@@ -33,7 +33,7 @@ import org.aurora.dialogs.AuroraDialog
 import org.aurora.dialogs.AuroraLoading
 import org.aurora.SettingsUtility
 import org.aurora.Config
-import com.aurora.toasts.showComposeToast // Sesuaikan dengan nama packagenya
+import org.aurora.AuroraToast
 
 
 import com.aurora.adb.AdbPairingService
@@ -72,7 +72,10 @@ class ConnectedActivity : BaseCompatActivity() {
         }
         
         btnStep.setOnClickListener {
-            showComposeToast("Berhasil login!")
+            AuroraToast.Builder(this@ConnectedActivity)
+                .setMessage("Berhasil login!")
+                .setDuration(AuroraToast.LENGTH_SHORT)
+                .show()
         }
 
         btnPairing.setOnClickListener {

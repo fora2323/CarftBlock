@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -28,7 +29,6 @@ android {
     externalNativeBuild {
         cmake {
             path = file("src/main/jni/CMakeLists.txt")
-            version = "3.31.0+"
         }
     }
 
@@ -75,27 +75,23 @@ android {
         prefab = true
         compose = true 
     }
-    
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1" 
-    }
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.16.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.activity:activity-ktx:1.8.2")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.core:core-ktx:1.19.1")
+    implementation("androidx.appcompat:appcompat:1.8.0")
+    implementation("androidx.activity:activity-ktx:1.13.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.2")
     
     implementation("com.google.android.material:material:1.14.0")
     
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
     
     implementation("io.github.vvb2060.ndk:boringssl:20250114")
     
-    implementation("com.airbnb.android:lottie:6.4.0")
+    implementation("com.airbnb.android:lottie:6.7.1")
     
     implementation("org.lsposed.libcxx:libcxx:27.0.12077973")
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
