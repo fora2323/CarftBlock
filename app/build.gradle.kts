@@ -73,6 +73,11 @@ android {
 
     buildFeatures {
         prefab = true
+        compose = true 
+    }
+    
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1" 
     }
 }
 
@@ -94,7 +99,13 @@ dependencies {
     
     implementation("org.lsposed.libcxx:libcxx:27.0.12077973")
     implementation("org.lsposed.hiddenapibypass:hiddenapibypass:6.1")
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.80")
     
     compileOnly("dev.rikka.hidden:stub:4.4.0")
+    
+    val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
+    implementation(composeBom)
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3") 
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material:material-icons-extended")
 }

@@ -33,6 +33,8 @@ import org.aurora.dialogs.AuroraDialog
 import org.aurora.dialogs.AuroraLoading
 import org.aurora.SettingsUtility
 import org.aurora.Config
+import com.aurora.toasts.showComposeToast // Sesuaikan dengan nama packagenya
+
 
 import com.aurora.adb.AdbPairingService
 import com.aurora.adb.AdbMdns
@@ -56,6 +58,7 @@ class ConnectedActivity : BaseCompatActivity() {
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         val rootView: View = findViewById(android.R.id.content)
+        val btnStep: MaterialButton = findViewById(R.id.btn_step)
         val btnPairing: MaterialButton = findViewById(R.id.btn_pairing)
         val btnStart: MaterialButton = findViewById(R.id.btn_start)
 
@@ -66,6 +69,10 @@ class ConnectedActivity : BaseCompatActivity() {
         }
         toolbar.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
+        }
+        
+        btnStep.setOnClickListener {
+            showComposeToast("Berhasil login!")
         }
 
         btnPairing.setOnClickListener {
