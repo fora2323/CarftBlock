@@ -40,12 +40,6 @@ private const val TAG = "AdbKey"
 class AdbKey(private val adbKeyStore: AdbKeyStore, name: String) {
 
     companion object {
-        private const val ANDROID_KEYSTORE = "AndroidKeyStore"
-        private const val ENCRYPTION_KEY_ALIAS = "_adbkey_encryption_key_"
-        private const val TRANSFORMATION = "AES/GCM/NoPadding"
-        private const val IV_SIZE_IN_BYTES = 12
-        private const val TAG_SIZE_IN_BYTES = 16
-
         private val PADDING = byteArrayOf(
             0x00, 0x01, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -68,13 +62,11 @@ class AdbKey(private val adbKeyStore: AdbKeyStore, name: String) {
             0x04, 0x14)
     }
 
-    private val encryptionKey: Key
     private val privateKey: RSAPrivateKey
     private val publicKey: RSAPublicKey
     private val certificate: X509Certificate
 
     init {
-        this.encryptionKey = getOrCreateEncryptionKey() ?: error("Failed to generate encryption key with AndroidKeyManager.")
         this.privateKey = getOrCreatePrivateKey()
         this.publicKey = KeyFactory.getInstance("RSA").generatePublic(RSAPublicKeySpec(privateKey.modulus, RSAKeyGenParameterSpec.F4)) as RSAPublicKey
 
@@ -95,70 +87,29 @@ class AdbKey(private val adbKeyStore: AdbKeyStore, name: String) {
         publicKey.adbEncoded(name)
     }
 
-    private fun getOrCreateEncryptionKey(): Key? {
-        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
-        keyStore.load(null)
-
-        return keyStore.getKey(ENCRYPTION_KEY_ALIAS, null) ?: run {
-            val parameterSpec = KeyGenParameterSpec.Builder(ENCRYPTION_KEY_ALIAS, KeyProperties.PURPOSE_DECRYPT or KeyProperties.PURPOSE_ENCRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(256)
-                .build()
-            val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
-            keyGenerator.init(parameterSpec)
-            keyGenerator.generateKey()
-        }
-    }
-
-    private fun encrypt(plaintext: ByteArray, aad: ByteArray?): ByteArray? {
-        if (plaintext.size > Int.MAX_VALUE - IV_SIZE_IN_BYTES - TAG_SIZE_IN_BYTES) {
-            return null
-        }
-        val ciphertext = ByteArray(IV_SIZE_IN_BYTES + plaintext.size + TAG_SIZE_IN_BYTES)
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, encryptionKey)
-        cipher.updateAAD(aad)
-        cipher.doFinal(plaintext, 0, plaintext.size, ciphertext, IV_SIZE_IN_BYTES)
-        System.arraycopy(cipher.iv, 0, ciphertext, 0, IV_SIZE_IN_BYTES)
-        return ciphertext
-    }
-
-    private fun decrypt(ciphertext: ByteArray, aad: ByteArray?): ByteArray? {
-        if (ciphertext.size < IV_SIZE_IN_BYTES + TAG_SIZE_IN_BYTES) {
-            return null
-        }
-        val params = GCMParameterSpec(8 * TAG_SIZE_IN_BYTES, ciphertext, 0, IV_SIZE_IN_BYTES)
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, encryptionKey, params)
-        cipher.updateAAD(aad)
-        return cipher.doFinal(ciphertext, IV_SIZE_IN_BYTES, ciphertext.size - IV_SIZE_IN_BYTES)
-    }
-
     private fun getOrCreatePrivateKey(): RSAPrivateKey {
         var privateKey: RSAPrivateKey? = null
-        val aad = ByteArray(16)
-        "adbkey".toByteArray().copyInto(aad)
-
-        var ciphertext = adbKeyStore.get()
-        if (ciphertext != null) {
+        val encodedKey = adbKeyStore.get()
+        
+        if (encodedKey != null) {
             try {
-                val plaintext = decrypt(ciphertext, aad)
+                // Tambahkan validasi apakah ini format ciphertext AES GCM lama (biasanya gagal di PKCS8)
                 val keyFactory = KeyFactory.getInstance("RSA")
-                privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(plaintext)) as RSAPrivateKey
+                privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(encodedKey)) as RSAPrivateKey
+                Log.d(TAG, "Successfully loaded existing RSA key")
             } catch (e: Exception) {
+                Log.e(TAG, "Failed to load stored RSA key, generating new one", e)
             }
         }
+        
         if (privateKey == null) {
+            Log.d(TAG, "Generating new RSA key pair...")
             val keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA)
             keyPairGenerator.initialize(RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4))
             val keyPair = keyPairGenerator.generateKeyPair()
             privateKey = keyPair.private as RSAPrivateKey
 
-            ciphertext = encrypt(privateKey.encoded, aad)
-            if (ciphertext != null) {
-                adbKeyStore.put(ciphertext)
-            }
+            adbKeyStore.put(privateKey.encoded)
         }
         return privateKey
     }
@@ -220,12 +171,21 @@ interface AdbKeyStore {
 
 class PreferenceAdbKeyStore(private val preference: SharedPreferences) : AdbKeyStore {
     private val preferenceKey = "adbkey"
+
     override fun put(bytes: ByteArray) {
-        preference.edit { putString(preferenceKey, String(Base64.encode(bytes, Base64.NO_WRAP))) }
+        // commit = true memastikan key langsung tersimpan ke disk
+        preference.edit(commit = true) { putString(preferenceKey, Base64.encodeToString(bytes, Base64.NO_WRAP)) }
+        Log.d("AdbKeyStore", "Saved new RSA key to SharedPreferences. Bytes size: ${bytes.size}")
     }
+
     override fun get(): ByteArray? {
-        if (!preference.contains(preferenceKey)) return null
-        return Base64.decode(preference.getString(preferenceKey, null), Base64.NO_WRAP)
+        val base64 = preference.getString(preferenceKey, null) ?: return null
+        return try {
+            Base64.decode(base64, Base64.NO_WRAP)
+        } catch (e: Exception) {
+            Log.e("AdbKeyStore", "Failed to decode base64 key", e)
+            null
+        }
     }
 }
 

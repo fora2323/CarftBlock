@@ -8,7 +8,27 @@
         <item name="fontFamily">@font/roboto_condensed</item>
 
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="Base.Widget.AuroraChip" parent="Widget.Material3.Chip.Filter">
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Full</item>
+        <item name="android:textAppearance">@style/AuroraChip.TextAppearance</item>
+        <item name="chipStrokeColor">@color/chip_stroke_color</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <!--atur pedding-->
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="chipStartPadding">18dp</item>
+        <item name="chipEndPadding">18dp</item>
+        <item name="chipMinHeight">28dp</item>
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="chipBackgroundColor">@color/chip_background_color</item>
+        <item name="android:textColor">@color/chip_text_color</item>
+    </style>
+
+    <style name="AuroraChip.TextAppearance" parent="TextAppearance.Material3.LabelLarge">
+        <item name="fontFamily">@font/ge_force</item>
+        <item name="android:letterSpacing">0.05</item>
     </style>
 
     <style name="Base.Theme.AuroraButton" parent="Widget.Material3.Button">

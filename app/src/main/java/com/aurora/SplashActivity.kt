@@ -115,13 +115,13 @@ class SplashActivity : BaseCompatActivity() {
 
     private suspend fun checkDaemonViaSocket(): Boolean {
         return withContext(Dispatchers.IO) {
-            var isRunning = false
-            // PERBAIKAN: Retry loop. Coba 2 kali untuk mencegah "False Negative"
-            for (i in 1..2) {
+            // Retry hingga 3 kali dengan timeout yang lebih longgar (1.5s)
+            for (i in 1..3) {
                 try {
                     Socket().use { socket ->
-                        socket.connect(InetSocketAddress("127.0.0.1", 52847), 1000)
-                        socket.soTimeout = 1000
+                        socket.tcpNoDelay = true
+                        socket.connect(InetSocketAddress("127.0.0.1", 52847), 1500)
+                        socket.soTimeout = 1500
                         
                         val out = PrintWriter(socket.getOutputStream(), true)
                         val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
@@ -129,18 +129,16 @@ class SplashActivity : BaseCompatActivity() {
                         out.println("PING")
                         val response = `in`.readLine()
                         
-                        if (response != null && response.startsWith("PONG")) {
-                            isRunning = true
-                            return@use // Berhasil, keluar dari 'use'
+                        if (response != null && response.contains("PONG")) {
+                            return@withContext true
                         }
                     }
-                } catch (e: Exception) {
-                    // Abaikan dan biarkan mengulang percobaan
+                } catch (e: Throwable) {
+                    // Abaikan dan coba lagi
                 }
-                if (isRunning) break
-                delay(300) // Jeda 0.3 detik sebelum mencoba konek ulang
+                delay(300)
             }
-            isRunning
+            false
         }
     }
 

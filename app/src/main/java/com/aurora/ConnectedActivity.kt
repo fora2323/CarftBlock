@@ -80,17 +80,6 @@ class ConnectedActivity : BaseCompatActivity() {
 
         btnPairing.setOnClickListener {
             when {
-                !SettingsUtility.isNotificationEnabled(this) -> {
-                    AuroraDialog.Builder(this)
-                        .setTitle("Izin Notifikasi Diperlukan")
-                        .setMessage("Izin notifikasi wajib diaktifkan agar kode pairing 6-digit bisa muncul.")
-                        .setPositiveButton("Izinkan") { dialog ->
-                            SettingsUtility.openNotificationSettings(this)
-                            dialog.dismiss()
-                        }
-                        .setNegativeButton("Batal") { dialog -> dialog.dismiss() }
-                        .show()
-                }
                 Build.VERSION.SDK_INT < Build.VERSION_CODES.R -> {
                     AuroraDialog.Builder(this)
                         .setTitle("Tidak Didukung")
@@ -124,6 +113,82 @@ class ConnectedActivity : BaseCompatActivity() {
 
             activityScope.launch {
                 val result = runCatching {
+                    // Cek apakah daemon sudah jalan lebih dulu
+                    var isAlreadyRunning = false
+                    try {
+                        Socket().use { socket ->
+                            socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
+                            socket.soTimeout = 500
+                            val out = PrintWriter(socket.getOutputStream(), true)
+                            val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
+                            
+                            out.println("PING")
+                            val response = `in`.readLine()
+                            if (response != null && response.trim() == "PONG") {
+                                isAlreadyRunning = true
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Belum jalan
+                    }
+
+                    if (isAlreadyRunning) {
+                        Log.d(TAG, "Daemon sudah berjalan.")
+                        return@runCatching 
+                    }
+
+                    val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
+                    val detachCommand = "nohup \"$command\" >/dev/null 2>&1 &"
+
+                    // ==========================================
+                    // PERCOBAAN: START VIA ROOT (Untuk Perangkat Root)
+                    // ==========================================
+                    val isRooted = try {
+                        val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "echo root"))
+                        val reader = BufferedReader(InputStreamReader(process.inputStream))
+                        val isRoot = reader.readLine() == "root"
+                        process.waitFor()
+                        isRoot
+                    } catch (e: Exception) {
+                        false
+                    }
+
+                    if (isRooted) {
+                        Log.d(TAG, "Perangkat Root terdeteksi, mencoba start daemon via SU...")
+                        try {
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", detachCommand)).waitFor()
+                            
+                            // Verifikasi apakah daemon berhasil hidup via root
+                            var rootSuccess = false
+                            for (i in 1..5) {
+                                delay(500)
+                                try {
+                                    Socket().use { socket ->
+                                        socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
+                                        socket.soTimeout = 500
+                                        val out = PrintWriter(socket.getOutputStream(), true)
+                                        val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
+                                        out.println("PING")
+                                        if (`in`.readLine()?.trim() == "PONG") rootSuccess = true
+                                    }
+                                } catch (e: Exception) {}
+                                if (rootSuccess) break
+                            }
+                            
+                            if (rootSuccess) {
+                                Log.d(TAG, "Daemon berhasil dihidupkan via Root!")
+                                return@runCatching
+                            } else {
+                                Log.d(TAG, "Gagal menghidupkan via Root, fallback ke ADB...")
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Root execution failed", e)
+                        }
+                    }
+
+                    // ==========================================
+                    // FALLBACK: START VIA ADB
+                    // ==========================================
                     var adbPort = -1
                     val portLatch = CountDownLatch(1)
 
@@ -164,15 +229,13 @@ class ConnectedActivity : BaseCompatActivity() {
                     // ==========================================
                     // PERBAIKAN: EKSEKUSI AMAN & DETACH SEMPURNA
                     // ==========================================
-                    val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-                    
-                    // Menjalankan langsung dari lokasi aslinya. 
-                    // Perintah diarahkan ke /dev/null dan ditaruh di background (&) agar terlepas dari jalur ADB.
-                    val detachCommand = "sh -c \"$command >/dev/null 2>&1 &\""
-                    
-                    Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $detachCommand")
-                    client.shellCommand(detachCommand) { _ -> 
-                        // Output sengaja kosong karena stream sudah dialihkan ke /dev/null
+                    // Mengikuti metode Shizuku: cukup kirim eksekusi command secara mentah (raw string).
+                    // Proses ini mengandalkan cara kerja `libaurora.so` (seperti `libshizuku.so`) 
+                    // yang memang sejak awal di-desain menduplikasi dirinya sendiri (fork) di internal binary-nya
+                    // dan melakukan detaching (daemonize) lalu memutus stdin/stdout secara native.
+                    Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $command")
+                    client.shellCommand(command) { _ -> 
+                        // Output sengaja kosong karena daemon sudah memisahkan diri dan memutus output secara mandiri.
                     }
                     client.close()
 

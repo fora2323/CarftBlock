@@ -48,6 +48,36 @@ public class BaseCompatActivity extends AppCompatActivity {
 				bottomView.setLayoutParams(params);
 			}
 			
+			// Menyesuaikan padding ViewPager2 secara dinamis berdasarkan tinggi Toolbar & Navigation Bar + Insets
+			v.post(() -> {
+				View viewPager = v.findViewById(com.aurora.R.id.viewpager1);
+				if (viewPager != null) {
+					int topOffset = (topView != null) ? (systemBars.top + initialTopMargin + topView.getHeight()) : systemBars.top;
+					int bottomOffset = (bottomView != null) ? (systemBars.bottom + initialBottomMargin + bottomView.getHeight()) : systemBars.bottom;
+					
+					// Reset margins agar ViewPager2 memenuhi seluruh layar
+					if (viewPager.getLayoutParams() instanceof ViewGroup.MarginLayoutParams vpParams) {
+						vpParams.topMargin = 0;
+						vpParams.bottomMargin = 0;
+						viewPager.setLayoutParams(vpParams);
+					}
+
+					// Terapkan Padding & Matikan ClipToPadding agar konten bisa tembus saat discroll
+					viewPager.setPadding(0, topOffset, 0, bottomOffset);
+					if (viewPager instanceof ViewGroup vg) {
+						vg.setClipToPadding(false);
+						vg.setClipChildren(false);
+						if (vg.getChildCount() > 0) {
+							View child = vg.getChildAt(0);
+							if (child instanceof ViewGroup childVg) {
+								childVg.setClipToPadding(false);
+								childVg.setClipChildren(false);
+							}
+						}
+					}
+				}
+			});
+			
 			return insets;
 		});
 	}
