@@ -14,7 +14,7 @@
     <dimen name="size_text_18sp">18sp</dimen>
     <dimen name="size_text_20sp">20sp</dimen>
     <!--size radius-->
-    <dimen name="radius_4dp">2dp</dimen>
+    <dimen name="radius_4dp">4dp</dimen>
     <dimen name="radius_6dp">6dp</dimen>
     <dimen name="radius_8dp">8dp</dimen>
     <dimen name="radius_10dp">10dp</dimen>
@@ -35,4 +35,5 @@
     <dimen name="size_pedding_16dp">16dp</dimen>
     <!--size outline-->
     <dimen name="size_outline_1dp">1dp</dimen>
+    <dimen name="radius_2dp">2dp</dimen>
 </resources>

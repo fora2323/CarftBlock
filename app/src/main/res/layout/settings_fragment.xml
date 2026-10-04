@@ -1,9 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.core.widget.NestedScrollView
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical"
-	android:id="@+id/_main" />
+	android:fillViewport="true"
+	android:clipToPadding="false">
+
+	<LinearLayout
+		android:id="@+id/_main"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="14dp">
+
+		<!-- Card Hentikan Semua Fitur -->
+		<LinearLayout
+			android:id="@+id/card_stop_service"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="@drawable/bg_card_rounded"
+			android:orientation="horizontal"
+			android:paddingStart="@dimen/size_pedding_14dp"
+			android:paddingEnd="@dimen/size_pedding_14dp"
+			android:paddingTop="@dimen/size_pedding_6dp"
+			android:paddingBottom="@dimen/size_pedding_6dp"
+			android:gravity="center_vertical">
+
+			<LinearLayout
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				android:paddingEnd="@dimen/size_pedding_12dp">
+
+				<TextView
+					android:id="@+id/tv_stop_title"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Hentikan Semua Fitur"
+					android:textColor="@color/onSurface"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+
+				<TextView
+					android:id="@+id/tv_stop_subtitle"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="2dp"
+					android:text="Semua fitur dan service akan dihentikan"
+					android:textColor="@color/color_white_slow"
+					android:textSize="12sp" />
+			</LinearLayout>
+
+			<com.google.android.material.button.MaterialButton
+				android:id="@+id/btn_stop"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:paddingTop="@dimen/size_pedding_4dp"
+				android:paddingBottom="@dimen/size_pedding_4dp"
+				android:text="Berhenti"
+				android:textColor="@color/primary"
+				android:fontFamily="@font/roboto_medium"
+				android:textStyle="bold"
+				android:textSize="@dimen/size_text_12sp"
+				app:backgroundTint="@color/primaryContainer"
+				app:rippleColor="@color/primaryContainer"/>
+		</LinearLayout>
+
+	</LinearLayout>
+</androidx.core.widget.NestedScrollView>
