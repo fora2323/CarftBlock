@@ -58,9 +58,20 @@ class ConnectedActivity : BaseCompatActivity() {
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         val rootView: View = findViewById(android.R.id.content)
+        val cardTcp: View = findViewById(R.id.card_tcp)
+        val btnConnectTcp: MaterialButton = findViewById(R.id.btn_connect_tcp)
+        val btnStopTcp: MaterialButton = findViewById(R.id.btn_stop_tcp)
         val btnStep: MaterialButton = findViewById(R.id.btn_step)
         val btnPairing: MaterialButton = findViewById(R.id.btn_pairing)
         val btnStart: MaterialButton = findViewById(R.id.btn_start)
+
+        // Tampilkan card TCP hanya jika perangkat sudah pernah ter-pairing
+        val keyStore = PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs())
+        if (keyStore.get() != null) {
+            cardTcp.visibility = View.VISIBLE
+        } else {
+            cardTcp.visibility = View.GONE
+        }
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -69,6 +80,135 @@ class ConnectedActivity : BaseCompatActivity() {
         }
         toolbar.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
+        }
+
+        btnConnectTcp.setOnClickListener {
+            val loading = AuroraLoading.newInstance()
+            loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
+            btnConnectTcp.isEnabled = false
+
+            activityScope.launch {
+                val result = runCatching {
+                    // 1. Cek apakah daemon sudah jalan
+                    var isAlreadyRunning = false
+                    try {
+                        Socket().use { socket ->
+                            socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
+                            socket.soTimeout = 500
+                            val out = PrintWriter(socket.getOutputStream(), true)
+                            val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
+                            out.println("PING")
+                            val response = `in`.readLine()
+                            if (response != null && response.trim() == "PONG") {
+                                isAlreadyRunning = true
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Belum jalan
+                    }
+
+                    if (isAlreadyRunning) {
+                        Log.d(TAG, "Daemon TCP sudah berjalan.")
+                        return@runCatching
+                    }
+
+                    // 2. Hubungkan langsung ke TCP port 5555
+                    Log.d(TAG, "Menghubungkan langsung ke TCP 127.0.0.1:5555...")
+                    val isPort5555Open = try {
+                        Socket().use { socket ->
+                            socket.connect(InetSocketAddress("127.0.0.1", 5555), 1000)
+                            true
+                        }
+                    } catch (e: Exception) { false }
+
+                    if (!isPort5555Open) {
+                        throw Exception("Port TCP 5555 tidak terbuka. Pastikan 'ADB over TCP' aktif di perangkat Anda.")
+                    }
+
+                    val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
+                    val key = AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
+                    val client = AdbClient("127.0.0.1", 5555, key)
+                    client.connect()
+
+                    Log.d(TAG, "Eksekusi command via TCP 5555: $command")
+                    client.shellCommand(command) { _ -> }
+                    client.close()
+
+                    // 3. Verifikasi daemon
+                    var isDaemonReady = false
+                    for (i in 1..10) {
+                        delay(500)
+                        try {
+                            Socket().use { socket ->
+                                socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
+                                socket.soTimeout = 500
+                                val out = PrintWriter(socket.getOutputStream(), true)
+                                val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
+                                out.println("PING")
+                                if (`in`.readLine()?.trim() == "PONG") {
+                                    isDaemonReady = true
+                                    return@use
+                                }
+                            }
+                        } catch (e: Exception) {}
+                        if (isDaemonReady) break
+                    }
+
+                    if (!isDaemonReady) {
+                        throw Exception("Daemon TCP terhubung tetapi langsung mati.")
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    loading.dismissDialog()
+                    btnConnectTcp.isEnabled = true
+
+                    if (result.isSuccess) {
+                        Log.i(TAG, "Berhasil terhubung via TCP! Masuk ke MainActivity...")
+                        startActivity(Intent(this@ConnectedActivity, MainActivity::class.java))
+                        finish()
+                    } else {
+                        val err = result.exceptionOrNull()
+                        Log.e(TAG, "Gagal koneksi TCP: ${err?.message}", err)
+                        AuroraDialog.Builder(this@ConnectedActivity)
+                            .setTitle("Gagal Aktivasi TCP")
+                            .setMessage(err?.message ?: "Error tidak diketahui")
+                            .setPositiveButton("OK") { d -> d.dismiss() }
+                            .show()
+                    }
+                }
+            }
+        }
+
+        btnStopTcp.setOnClickListener {
+            val loading = AuroraLoading.newInstance()
+            loading.showDialog(supportFragmentManager, Config.DIALOG_ADB_CONNECT_TAG)
+
+            activityScope.launch {
+                try {
+                    Socket().use { socket ->
+                        socket.connect(InetSocketAddress("127.0.0.1", 52847), 1000)
+                        val out = PrintWriter(socket.getOutputStream(), true)
+                        out.println("QUIT")
+                        out.println("STOP")
+                    }
+                } catch (e: Exception) {}
+
+                try {
+                    Runtime.getRuntime().exec("pkill -f libaurora.so")
+                    Runtime.getRuntime().exec("pkill -f aurora_server")
+                } catch (e: Exception) {}
+
+                delay(1000)
+
+                withContext(Dispatchers.Main) {
+                    loading.dismissDialog()
+                    AuroraToast.Builder(this@ConnectedActivity)
+                        .setMessage("Layanan TCP / Daemon berhasil dihentikan.")
+                        .setDuration(AuroraToast.LENGTH_SHORT)
+                        .show()
+                }
+            }
         }
         
         btnStep.setOnClickListener {
