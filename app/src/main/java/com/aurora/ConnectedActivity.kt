@@ -126,12 +126,13 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
+                    val detachCommand = "sh -c \"( $command >/dev/null 2>&1 & )\""
                     val key = AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
                     val client = AdbClient("127.0.0.1", 5555, key)
                     client.connect()
 
-                    Log.d(TAG, "Eksekusi command via TCP 5555: $command")
-                    client.shellCommand(command) { _ -> }
+                    Log.d(TAG, "Eksekusi command via TCP 5555: $detachCommand")
+                    client.shellCommand(detachCommand) { _ -> }
                     client.close()
 
                     // 3. Verifikasi daemon
@@ -278,7 +279,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-                    val detachCommand = "nohup \"$command\" >/dev/null 2>&1 &"
+                    val detachCmd = "sh -c \"( $command >/dev/null 2>&1 & )\""
 
                     // ==========================================
                     // PERCOBAAN: START VIA ROOT (Untuk Perangkat Root)
@@ -296,7 +297,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     if (isRooted) {
                         Log.d(TAG, "Perangkat Root terdeteksi, mencoba start daemon via SU...")
                         try {
-                            Runtime.getRuntime().exec(arrayOf("su", "-c", detachCommand)).waitFor()
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", detachCmd)).waitFor()
                             
                             // Verifikasi apakah daemon berhasil hidup via root
                             var rootSuccess = false
@@ -367,15 +368,11 @@ class ConnectedActivity : BaseCompatActivity() {
                     client.connect()
                     
                     // ==========================================
-                    // PERBAIKAN: EKSEKUSI AMAN & DETACH SEMPURNA
+                    // PERBAIKAN: EKSEKUSI AMAN & DETACH SEMPURNA (DOUBLE FORK)
                     // ==========================================
-                    // Mengikuti metode Shizuku: cukup kirim eksekusi command secara mentah (raw string).
-                    // Proses ini mengandalkan cara kerja `libaurora.so` (seperti `libshizuku.so`) 
-                    // yang memang sejak awal di-desain menduplikasi dirinya sendiri (fork) di internal binary-nya
-                    // dan melakukan detaching (daemonize) lalu memutus stdin/stdout secara native.
-                    Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $command")
-                    client.shellCommand(command) { _ -> 
-                        // Output sengaja kosong karena daemon sudah memisahkan diri dan memutus output secara mandiri.
+                    Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $detachCmd")
+                    client.shellCommand(detachCmd) { _ -> 
+                        // Output sengaja kosong karena stream sudah dialihkan
                     }
                     client.close()
 
