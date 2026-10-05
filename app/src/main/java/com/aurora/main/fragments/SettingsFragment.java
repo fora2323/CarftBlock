@@ -16,6 +16,9 @@ import com.aurora.ConnectedActivity;
 import com.aurora.R;
 import org.aurora.dialogs.AuroraLoading;
 
+// Tambahan import yang kurang sebelumnya
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -92,5 +95,4 @@ public class SettingsFragment extends Fragment {
             }
         }).start();
     }
-
 }
