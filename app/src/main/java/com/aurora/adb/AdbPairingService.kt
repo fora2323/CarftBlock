@@ -244,7 +244,7 @@ class AdbPairingService : Service() {
             .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(title)
             .setContentText(text)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_aurora)
             .setAutoCancel(true)
 
         if (!success) {
@@ -309,7 +309,7 @@ class AdbPairingService : Service() {
         NotificationCompat.Builder(this, notificationChannel)
             .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(getString(R.string.notification_adb_pairing_searching_for_service_title))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_aurora)
             .setContentIntent(getSettingsPendingIntent()) 
             .addAction(stopNotificationAction)
             .build()
@@ -319,7 +319,7 @@ class AdbPairingService : Service() {
         NotificationCompat.Builder(this, notificationChannel)
             .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(getString(R.string.notification_adb_pairing_working_title))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_aurora)
             .build()
     }
 
@@ -327,7 +327,7 @@ class AdbPairingService : Service() {
         return NotificationCompat.Builder(this, notificationChannel)
             .setColor(ContextCompat.getColor(this, R.color.primary))
             .setContentTitle(getString(R.string.notification_adb_pairing_service_found_title))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_aurora)
             .addAction(replyNotificationAction(port)) 
             .build()
     }
