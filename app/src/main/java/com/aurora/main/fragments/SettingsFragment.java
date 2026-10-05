@@ -16,9 +16,6 @@ import com.aurora.ConnectedActivity;
 import com.aurora.R;
 import org.aurora.dialogs.AuroraLoading;
 
-// Tambahan import yang kurang sebelumnya
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -56,28 +53,21 @@ public class SettingsFragment extends Fragment {
                 // Koneksi ke port Daemon
                 socket.connect(new InetSocketAddress("127.0.0.1", 52847), 1500);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 
-                // 1. Tanya ke Daemon: "Siapa PID kamu?"
-                out.println("PING");
-                String response = in.readLine();
+                // Menyuruh Daemon mengeksekusi bunuh diri!
+                // Perintah dieksekusi dengan hak akses ADB (UID 2000) bawaan daemon
+                out.println("EXEC:pkill -f aurora_server");
+                out.println("EXEC:pkill -f libaurora.so"); // Cadangan jika nama prosesnya libaurora.so
                 
-                if (response != null && response.startsWith("PONG:")) {
-                    String[] parts = response.split(":");
-                    if (parts.length >= 2) {
-                        String pid = parts[1]; // Mengambil angka PID asli dari Daemon
-                        
-                        // 2. Suruh Daemon mengeksekusi bunuh diri! (Senjata makan tuan)
-                        // Karena dikirim via "EXEC:", daemon akan mengeksekusinya menggunakan hak akses ADB (UID 2000)
-                        out.println("EXEC:kill -9 " + pid);
-                        Log.d(TAG, "Berhasil mengirim sinyal kill -9 ke Daemon PID: " + pid);
-                    }
-                }
+                Log.d(TAG, "Berhasil mengirim sinyal pkill ke Daemon");
+                
+                // Jeda sebentar agar socket terkirim tuntas sebelum diputus
+                Thread.sleep(1000);
             } catch (Exception e) {
                 Log.e(TAG, "Socket error (Daemon mungkin sudah mati)", e);
             }
 
-            // Jeda 1 detik agar animasi loading terlihat dan memberi waktu daemon mati
+            // Jeda agar animasi loading terlihat dan memberi waktu daemon mati dari RAM
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignored) {}
