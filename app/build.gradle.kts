@@ -83,6 +83,7 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.2")
     
+    implementation("com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk:1.5.0")
     implementation("com.google.android.material:material:1.14.0")
     
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
