@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment;
 
 import com.aurora.ConnectedActivity;
 import com.aurora.R;
-
 import org.aurora.dialogs.AuroraLoading;
 
 import java.io.PrintWriter;
@@ -50,37 +49,38 @@ public class SettingsFragment extends Fragment {
         loading.showDialog(getParentFragmentManager(), "AuroraLoading");
 
         new Thread(() -> {
-            // 1. Kirim sinyal QUIT/STOP ke Socket Daemon
+            // 1. Suruh Daemon membunuh dirinya sendiri melalui Socket
             try (Socket socket = new Socket()) {
                 socket.connect(new InetSocketAddress("127.0.0.1", 52847), 1000);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                out.println("QUIT");
-                out.println("STOP");
+                
+                // Kirim perintah EXIT yang akan ditangkap oleh AuroraService
                 out.println("EXIT");
+                
+                // Sebagai cadangan (Plan B), kita suruh daemon mengeksekusi pkill 
+                // menggunakan hak akses dewa (EXEC) miliknya sendiri.
+                out.println("EXEC:pkill -f libaurora.so");
+                
+                // Beri waktu 0.5 detik agar socket terkirim sebelum ditutup
+                Thread.sleep(500); 
             } catch (Exception e) {
-                Log.d(TAG, "Socket stop command result: " + e.getMessage());
+                Log.e(TAG, "Daemon mungkin sudah mati atau tidak merespons", e);
             }
 
-            // 2. Lakukan pkill untuk memastikan proses benar-benar mati
-            try {
-                Runtime.getRuntime().exec("pkill -f libaurora.so");
-                Runtime.getRuntime().exec("pkill -f aurora_server");
-            } catch (Exception ignored) {}
+            // (HAPUS Runtime.getRuntime().exec() karena aplikasi tidak punya izin)
 
-            // Jeda sebentar untuk animasi loading dan meyakinkan daemon sudah mati
+            // 2. Jeda sebentar untuk animasi loading
             try {
-                Thread.sleep(1200);
+                Thread.sleep(1000);
             } catch (InterruptedException ignored) {}
 
             if (getActivity() != null && isAdded()) {
                 getActivity().runOnUiThread(() -> {
                     loading.dismissDialog();
-                    if (getActivity() != null) {
-                        Intent intent = new Intent(getActivity(), ConnectedActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        getActivity().finish();
-                    }
+                    Intent intent = new Intent(getActivity(), ConnectedActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    getActivity().finish();
                 });
             }
         }).start();
