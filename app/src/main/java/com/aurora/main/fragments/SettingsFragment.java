@@ -49,35 +49,42 @@ public class SettingsFragment extends Fragment {
         loading.showDialog(getParentFragmentManager(), "AuroraLoading");
 
         new Thread(() -> {
-            // 1. Suruh Daemon membunuh dirinya sendiri melalui Socket
             try (Socket socket = new Socket()) {
-                socket.connect(new InetSocketAddress("127.0.0.1", 52847), 1000);
+                // Koneksi ke port Daemon
+                socket.connect(new InetSocketAddress("127.0.0.1", 52847), 1500);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 
-                // Kirim perintah EXIT yang akan ditangkap oleh AuroraService
-                out.println("EXIT");
+                // 1. Tanya ke Daemon: "Siapa PID kamu?"
+                out.println("PING");
+                String response = in.readLine();
                 
-                // Sebagai cadangan (Plan B), kita suruh daemon mengeksekusi pkill 
-                // menggunakan hak akses dewa (EXEC) miliknya sendiri.
-                out.println("EXEC:pkill -f libaurora.so");
-                
-                // Beri waktu 0.5 detik agar socket terkirim sebelum ditutup
-                Thread.sleep(500); 
+                if (response != null && response.startsWith("PONG:")) {
+                    String[] parts = response.split(":");
+                    if (parts.length >= 2) {
+                        String pid = parts[1]; // Mengambil angka PID asli dari Daemon
+                        
+                        // 2. Suruh Daemon mengeksekusi bunuh diri! (Senjata makan tuan)
+                        // Karena dikirim via "EXEC:", daemon akan mengeksekusinya menggunakan hak akses ADB (UID 2000)
+                        out.println("EXEC:kill -9 " + pid);
+                        Log.d(TAG, "Berhasil mengirim sinyal kill -9 ke Daemon PID: " + pid);
+                    }
+                }
             } catch (Exception e) {
-                Log.e(TAG, "Daemon mungkin sudah mati atau tidak merespons", e);
+                Log.e(TAG, "Socket error (Daemon mungkin sudah mati)", e);
             }
 
-            // (HAPUS Runtime.getRuntime().exec() karena aplikasi tidak punya izin)
-
-            // 2. Jeda sebentar untuk animasi loading
+            // Jeda 1 detik agar animasi loading terlihat dan memberi waktu daemon mati
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ignored) {}
 
+            // Kembali ke halaman ConnectedActivity
             if (getActivity() != null && isAdded()) {
                 getActivity().runOnUiThread(() -> {
                     loading.dismissDialog();
                     Intent intent = new Intent(getActivity(), ConnectedActivity.class);
+                    // Hapus riwayat halaman agar tidak bisa di-back ke MainActivity
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     getActivity().finish();
@@ -85,4 +92,5 @@ public class SettingsFragment extends Fragment {
             }
         }).start();
     }
+
 }
