@@ -1,4 +1,4 @@
-package com.aurora.adapter;
+package com.aurora.main.adapters;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;

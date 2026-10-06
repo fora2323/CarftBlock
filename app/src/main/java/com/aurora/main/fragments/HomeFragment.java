@@ -51,6 +51,16 @@ public class HomeFragment extends Fragment {
         container = _view.findViewById(R.id.container);
         tv_uptime = _view.findViewById(R.id.tv_uptime);
         tv_pid = _view.findViewById(R.id.tv_pid);
+
+        View btnOpenSpace = _view.findViewById(R.id.open_space);
+        if (btnOpenSpace != null) {
+            btnOpenSpace.setOnClickListener(v -> {
+                if (getContext() != null) {
+                    android.content.Intent intent = new android.content.Intent(getContext(), com.aurora.GameLauncherActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
     }
 	
     private void initializeLogic() {

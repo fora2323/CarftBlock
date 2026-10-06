@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.viewpager2.widget.ViewPager2
 import com.aurora.R
-import com.aurora.adapter.MyBaseFragmentAdapter
+import com.aurora.main.adapters.MyBaseFragmentAdapter
 import com.aurora.main.fragments.HomeFragment
 import com.aurora.main.fragments.MenuFragment
 import com.aurora.main.fragments.SettingsFragment

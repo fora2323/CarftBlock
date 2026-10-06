@@ -126,13 +126,12 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-                    val detachCommand = "nohup $command >/dev/null 2>&1 &"
                     val key = AdbKey(PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs()), "aurora")
                     val client = AdbClient("127.0.0.1", 5555, key)
                     client.connect()
 
-                    Log.d(TAG, "Eksekusi command via TCP 5555: $detachCommand")
-                    client.shellCommand(detachCommand) { _ -> }
+                    Log.d(TAG, "Eksekusi command via TCP 5555: $command")
+                    client.shellCommand(command) { _ -> }
                     client.close()
 
                     // 3. Verifikasi daemon
@@ -280,7 +279,6 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     val command = AuroraStarter.getInternalCommand(this@ConnectedActivity)
-                    val detachCmd = "nohup $command >/dev/null 2>&1 &"
 
                     // ==========================================
                     // PERCOBAAN: START VIA ROOT (Untuk Perangkat Root)
@@ -298,7 +296,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     if (isRooted) {
                         Log.d(TAG, "Perangkat Root terdeteksi, mencoba start daemon via SU...")
                         try {
-                            Runtime.getRuntime().exec(arrayOf("su", "-c", detachCmd)).waitFor()
+                            Runtime.getRuntime().exec(arrayOf("su", "-c", command)).waitFor()
                             
                             // Verifikasi apakah daemon berhasil hidup via root
                             var rootSuccess = false
@@ -369,11 +367,8 @@ class ConnectedActivity : BaseCompatActivity() {
                     val client = AdbClient("127.0.0.1", adbPort, key)
                     client.connect()
                     
-                    // ==========================================
-                    // PERBAIKAN: EKSEKUSI AMAN & DETACH SEMPURNA (DOUBLE FORK)
-                    // ==========================================
-                    Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $detachCmd")
-                    client.shellCommand(detachCmd) { _ -> 
+                    Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $command")
+                    client.shellCommand(command) { _ -> 
                         // Output sengaja kosong karena stream sudah dialihkan
                     }
                     client.close()
