@@ -17,13 +17,10 @@
 		android:layout_height="wrap_content"
 		android:padding="6dp"
 		android:layout_gravity="top" />
-	<org.aurora.view.MyBaseNavigationBar
-		android:id="@+id/nav_bar"
+	<androidx.compose.ui.platform.ComposeView
+		android:id="@+id/compose_nav_bar"
 		android:layout_width="wrap_content"
-		android:layout_height="48dp"
+		android:layout_height="wrap_content"
 		android:layout_margin="18dp"
-		android:background="@color/surfaceContainerHigh"
-		android:layout_gravity="center_horizontal|bottom"
-		app:ax_menu="@menu/nav_menu_bottom"
-		app:ax_elevation="4dp" />
+		android:layout_gravity="center_horizontal|bottom" />
 </FrameLayout>

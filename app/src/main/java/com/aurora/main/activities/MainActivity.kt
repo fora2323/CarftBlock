@@ -1,75 +1,179 @@
-package com.aurora.main.activities;
+package com.aurora.main.activities
 
-import android.animation.*;
-import android.app.*;
-import android.content.*;
-import android.content.res.*;
-import android.graphics.*;
-import android.graphics.drawable.*;
-import android.media.*;
-import android.net.*;
-import android.os.*;
-import android.text.*;
-import android.text.style.*;
-import android.util.*;
-import android.view.*;
-import android.view.View.*;
-import android.view.animation.*;
-import android.widget.*;
-
-import androidx.annotation.*;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.viewpager2.widget.ViewPager2;
-
-import com.aurora.adapter.MyBaseFragmentAdapter;
-import com.aurora.main.fragments.HomeFragment;
-import com.aurora.main.fragments.MenuFragment;
-import com.aurora.main.fragments.SettingsFragment;
-import com.aurora.R;
-
-import org.aurora.view.MyBaseNavigationBar;
-import org.aurora.view.MyBaseToolbar;
-import org.aurora.core.BaseCompatActivity;
-
+import android.os.Bundle
+import android.widget.FrameLayout
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.viewpager2.widget.ViewPager2
+import com.aurora.R
+import com.aurora.adapter.MyBaseFragmentAdapter
+import com.aurora.main.fragments.HomeFragment
+import com.aurora.main.fragments.MenuFragment
+import com.aurora.main.fragments.SettingsFragment
+import org.aurora.core.BaseCompatActivity
+import org.aurora.view.MyBaseToolbar
 
 
-public class MainActivity extends BaseCompatActivity {
-	
-	private ViewPager2 viewpager1;
-	private MyBaseToolbar my_toolbar;
-	private MyBaseNavigationBar nav_bar;
-	
-	@Override
-	protected void onCreate(Bundle _savedInstanceState) {
-		super.onCreate(_savedInstanceState);
-		setContentView(R.layout.main);
-		initialize(_savedInstanceState);
-		initializeLogic();
-	}
-	
-	private void initialize(Bundle _savedInstanceState) {
-		viewpager1 = findViewById(R.id.viewpager1);
-		my_toolbar = findViewById(R.id.my_toolbar);
-		nav_bar = findViewById(R.id.nav_bar);
-	}
-	
-	private void initializeLogic() {
-		applySystemBarInsets(findViewById(R.id._main), my_toolbar, nav_bar);
-		MyBaseFragmentAdapter adapter = new MyBaseFragmentAdapter(this);
-		
-		adapter.addFragment(new HomeFragment());
-		adapter.addFragment(new MenuFragment());
-		adapter.addFragment(new SettingsFragment());
-		
-		viewpager1.setAdapter(adapter);
-		
-		nav_bar.setupWithViewPager2(viewpager1);
-		
-		nav_bar.setOnItemSelectedListener((index, itemId) -> {
-			viewpager1.setCurrentItem(index, true);
-		});
-	}
-	
+class MainActivity : BaseCompatActivity() {
+
+    private lateinit var viewpager1: ViewPager2
+    private lateinit var my_toolbar: MyBaseToolbar
+    private lateinit var compose_nav_bar: ComposeView
+    private lateinit var main_frame: FrameLayout
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.main)
+        initialize()
+        initializeLogic()
+    }
+
+    private fun initialize() {
+        viewpager1 = findViewById(R.id.viewpager1)
+        my_toolbar = findViewById(R.id.my_toolbar)
+        compose_nav_bar = findViewById(R.id.compose_nav_bar)
+        main_frame = findViewById(R.id._main)
+    }
+
+    private fun initializeLogic() {
+        applySystemBarInsets(main_frame, my_toolbar, compose_nav_bar)
+        val adapter = MyBaseFragmentAdapter(this)
+        
+        adapter.addFragment(HomeFragment())
+        adapter.addFragment(MenuFragment())
+        adapter.addFragment(SettingsFragment())
+        
+        viewpager1.adapter = adapter
+        
+        setupComposeBottomNav()
+    }
+    
+    private fun setupComposeBottomNav() {
+        compose_nav_bar.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                MaterialTheme {
+                    var selectedIndex by remember { mutableIntStateOf(0) }
+
+                    // Sync ViewPager2 with Compose
+                    LaunchedEffect(viewpager1) {
+                        viewpager1.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                            override fun onPageSelected(position: Int) {
+                                selectedIndex = position
+                            }
+                        })
+                    }
+
+                    CustomBottomNav(
+                        selectedIndex = selectedIndex,
+                        onItemSelected = { index ->
+                            selectedIndex = index
+                            viewpager1.setCurrentItem(index, true)
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
+
+@Composable
+fun CustomBottomNav(
+    selectedIndex: Int,
+    onItemSelected: (Int) -> Unit
+) {
+    val items = listOf(
+        NavItem(R.drawable.ic_game, "Game"),
+        NavItem(R.drawable.ic_widgets, "Menu"),
+        NavItem(R.drawable.ic_settings, "Settings")
+    )
+
+    Surface(
+        color = Color(0xFF1E2022), // Dark pill background from the image
+        shape = CircleShape,
+        shadowElevation = 8.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEachIndexed { index, item ->
+                CustomNavItem(
+                    item = item,
+                    isSelected = selectedIndex == index,
+                    onClick = { onItemSelected(index) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomNavItem(
+    item: NavItem,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val backgroundColor = if (isSelected) Color(0xFF1B4958) else Color.Transparent
+    val contentColor = if (isSelected) Color.White else Color(0xFF9AA0A6)
+
+    Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(backgroundColor)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = if (isSelected) 20.dp else 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(id = item.iconRes),
+            contentDescription = item.title,
+            tint = contentColor,
+            modifier = Modifier.size(24.dp)
+        )
+        AnimatedVisibility(
+            visible = isSelected,
+            enter = expandHorizontally(animationSpec = tween(300)),
+            exit = shrinkHorizontally(animationSpec = tween(300))
+        ) {
+            Row {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = item.title,
+                    color = contentColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+data class NavItem(val iconRes: Int, val title: String)
