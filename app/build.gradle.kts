@@ -16,7 +16,7 @@ android {
         versionName = "1.0-alpha1"
 
         ndk {
-            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a"))
+            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a", "x86_64"))
         }
 
         externalNativeBuild {
