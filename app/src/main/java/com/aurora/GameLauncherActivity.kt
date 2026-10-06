@@ -292,9 +292,30 @@ fun GameLauncherScreen(
                                 border = androidx.compose.foundation.BorderStroke(1.5.dp, primaryColor),
                                 modifier = Modifier
                                     .clickable {
+                                        if (!org.aurora.SettingsUtility.canDrawOverlays(context)) {
+                                            Toast.makeText(context, "Berikan Izin Tampil di Atas Aplikasi Lain dulu!", Toast.LENGTH_SHORT).show()
+                                            org.aurora.SettingsUtility.openOverlaySettings(context)
+                                            return@clickable
+                                        }
+
+                                        if (!org.aurora.SettingsUtility.hasUsageStatsPermission(context)) {
+                                            Toast.makeText(context, "Berikan Izin Akses Penggunaan (Usage Access) dulu!", Toast.LENGTH_SHORT).show()
+                                            org.aurora.SettingsUtility.openUsageStatsSettings(context)
+                                            return@clickable
+                                        }
+
                                         val pm = context.packageManager
                                         val launchIntent = pm.getLaunchIntentForPackage(selectedGame!!.packageName)
                                         if (launchIntent != null) {
+                                            val overlayIntent = Intent(context, GameOverlayService::class.java).apply {
+                                                putExtra("PACKAGE_NAME", selectedGame!!.packageName)
+                                            }
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                context.startForegroundService(overlayIntent)
+                                            } else {
+                                                context.startService(overlayIntent)
+                                            }
+
                                             context.startActivity(launchIntent)
                                         } else {
                                             Toast.makeText(context, "Gagal membuka ${selectedGame!!.name}", Toast.LENGTH_SHORT).show()
