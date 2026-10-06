@@ -1,4 +1,4 @@
-package org.aurora // Sesuaikan dengan package-mu jika ditaruh di dalam folder lain
+package org.aurora.toasts
 
 import android.app.Activity
 import android.os.Handler

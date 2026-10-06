@@ -31,9 +31,9 @@ import java.util.concurrent.TimeUnit
 import org.aurora.core.BaseCompatActivity
 import org.aurora.dialogs.AuroraDialog
 import org.aurora.dialogs.AuroraLoading
+import org.aurora.taosts.AuroraToast
 import org.aurora.SettingsUtility
 import org.aurora.Config
-import org.aurora.AuroraToast
 
 
 import com.aurora.adb.AdbPairingService
