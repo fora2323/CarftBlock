@@ -87,5 +87,30 @@ class SettingsUtility private constructor() {
                 context.startActivity(intent)
             }
         }
+
+        /**
+         * Memeriksa apakah izin Usage Access sudah diberikan.
+         */
+        @JvmStatic
+        fun hasUsageStatsPermission(context: Context): Boolean {
+            val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as android.app.AppOpsManager
+            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOps.unsafeCheckOpNoThrow(android.app.AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.packageName)
+            } else {
+                appOps.checkOpNoThrow(android.app.AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.packageName)
+            }
+            return mode == android.app.AppOpsManager.MODE_ALLOWED
+        }
+
+        /**
+         * Membuka halaman pengaturan Usage Access.
+         */
+        @JvmStatic
+        fun openUsageStatsSettings(context: Context) {
+            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+        }
     }
 }

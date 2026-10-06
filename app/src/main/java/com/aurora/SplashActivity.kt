@@ -83,6 +83,14 @@ class SplashActivity : BaseCompatActivity() {
                 )
                 false
             }
+            !SettingsUtility.canDrawOverlays(this) -> {
+                showPermissionDialog(
+                    title = "Izin Tampil di Atas Aplikasi Lain",
+                    message = "Aplikasi memerlukan izin ini agar dapat menampilkan menu overlay dengan baik.",
+                    onGrant = { SettingsUtility.openOverlaySettings(this) }
+                )
+                false
+            }
             !SettingsUtility.canWriteSettings(this) -> {
                 showPermissionDialog(
                     title = "Izin Modifikasi Sistem",

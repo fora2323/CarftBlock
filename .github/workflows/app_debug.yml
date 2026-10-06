@@ -38,7 +38,9 @@ jobs:
         run: python send_telegram_start.py
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug 2>&1 | tee build.log
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug 2>&1 | tee build.log
 
       - name: Send Debug APK to Telegram
         if: success()
