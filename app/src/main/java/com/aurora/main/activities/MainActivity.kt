@@ -113,8 +113,6 @@ fun CustomBottomNav(
         shadowElevation = 8.dp
     ) {
         Row(
-            modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEachIndexed { index, item ->
@@ -147,7 +145,7 @@ fun CustomNavItem(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = if (isSelected) 20.dp else 16.dp, vertical = 10.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
