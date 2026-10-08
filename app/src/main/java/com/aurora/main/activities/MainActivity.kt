@@ -85,7 +85,7 @@ class MainActivity : BaseCompatActivity() {
     }
 
     private fun initializeLogic() {
-        applySystemBarInsets(main_frame, my_toolbar, compose_nav_bar)
+        applySystemBarInsets(main_frame, compose_top_bar, compose_nav_bar)
         val adapter = MyBaseFragmentAdapter(this)
         adapter.addFragment(HomeFragment())
         adapter.addFragment(MenuFragment())
