@@ -13,18 +13,33 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,7 +61,13 @@ class MainActivity : BaseCompatActivity() {
 
     // State untuk melacak posisi halaman saat ini
     private val _selectedPageIndex = MutableStateFlow(0)
-    private val pageTitles = listOf("Game", "Menu", "Settings")
+    
+    // Array penampung ID String dari strings.xml
+    private val pageTitleResIds = listOf(
+        R.string.title_toolbar_name_main_game,
+        R.string.title_toolbar_name_main_menu,
+        R.string.title_toolbar_name_main_settings
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,14 +78,13 @@ class MainActivity : BaseCompatActivity() {
 
     private fun initialize() {
         viewpager1 = findViewById(R.id.viewpager1)
-        compose_top_bar = findViewById(R.id.compose_top_bar) // Menggunakan ComposeView baru
+        compose_top_bar = findViewById(R.id.compose_top_bar)
         compose_nav_bar = findViewById(R.id.compose_nav_bar)
         main_frame = findViewById(R.id._main)
     }
 
     private fun initializeLogic() {
-        applySystemBarInsets(main_frame, compose_top_bar, compose_nav_bar)
-        
+        applySystemBarInsets(main_frame, my_toolbar, compose_nav_bar)
         val adapter = MyBaseFragmentAdapter(this)
         adapter.addFragment(HomeFragment())
         adapter.addFragment(MenuFragment())
@@ -89,7 +109,8 @@ class MainActivity : BaseCompatActivity() {
             setContent {
                 MaterialTheme {
                     val pageIndex by _selectedPageIndex.collectAsState()
-                    val currentTitle = pageTitles.getOrElse(pageIndex) { "Game" }
+                    val currentTitleRes = pageTitleResIds.getOrElse(pageIndex) { R.string.title_toolbar_name_main_game }
+                    val currentTitle = stringResource(id = currentTitleRes)
                     
                     CustomTopBar(title = currentTitle)
                 }
@@ -116,7 +137,6 @@ class MainActivity : BaseCompatActivity() {
     }
 }
 
-// --- KOMPONEN TOP BAR (Persis seperti gambar referensi) ---
 @Composable
 fun CustomTopBar(title: String) {
     Row(
@@ -135,7 +155,7 @@ fun CustomTopBar(title: String) {
         ) { targetTitle ->
             Text(
                 text = targetTitle,
-                color = Color(0xFFF2EBE5), 
+                color = colorResource(id = R.color.onSurface), 
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold
             )
@@ -146,19 +166,22 @@ fun CustomTopBar(title: String) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "By FahrezONE",
-                color = Color(0xFF757575),
+                text = stringResource(id = R.string.title_developer),
+                color = colorResource(id = R.color.color_white_slow),
                 fontSize = 12.sp
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .background(Color(0xFF242424), shape = RoundedCornerShape(8.dp))
+                    .background(
+                        color = colorResource(id = R.color.surfaceContainerHigh), 
+                        shape = RoundedCornerShape(8.dp)
+                    )
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = "ID 923ba551",
-                    color = Color(0xFFD0603A), 
+                    color = colorResource(id = R.color.primary), // Menggunakan primary sebagai accent color
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -167,20 +190,19 @@ fun CustomTopBar(title: String) {
     }
 }
 
-// --- KOMPONEN BOTTOM NAV (Tetap seperti aslinya) ---
 @Composable
 fun CustomBottomNav(
     selectedIndex: Int,
     onItemSelected: (Int) -> Unit
 ) {
     val items = listOf(
-        NavItem(R.drawable.ic_game, "Game"),
-        NavItem(R.drawable.ic_widgets, "Menu"),
-        NavItem(R.drawable.ic_settings, "Settings")
+        NavItem(R.drawable.ic_game, R.string.title_toolbar_name_main_game),
+        NavItem(R.drawable.ic_widgets, R.string.title_toolbar_name_main_menu),
+        NavItem(R.drawable.ic_settings, R.string.title_toolbar_name_main_settings)
     )
 
     Surface(
-        color = Color(0xFF1E2022),
+        color = colorResource(id = R.color.surfaceContainer),
         shape = CircleShape,
         shadowElevation = 8.dp
     ) {
@@ -205,8 +227,12 @@ fun CustomNavItem(
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val backgroundColor = if (isSelected) Color(0xFF1B4958) else Color.Transparent
-    val contentColor = if (isSelected) Color.White else Color(0xFF9AA0A6)
+    
+    // Pemetaan warna Material 3 dari colors.xml
+    val backgroundColor = if (isSelected) colorResource(id = R.color.secondaryContainer) else Color.Transparent
+    val contentColor = if (isSelected) colorResource(id = R.color.onSecondaryContainer) else colorResource(id = R.color.onSurfaceVariant)
+    
+    val titleText = stringResource(id = item.titleRes)
 
     Row(
         modifier = Modifier
@@ -223,7 +249,7 @@ fun CustomNavItem(
     ) {
         Icon(
             painter = painterResource(id = item.iconRes),
-            contentDescription = item.title,
+            contentDescription = titleText,
             tint = contentColor,
             modifier = Modifier.size(24.dp)
         )
@@ -235,7 +261,7 @@ fun CustomNavItem(
             Row {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = item.title,
+                    text = titleText,
                     color = contentColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -246,4 +272,4 @@ fun CustomNavItem(
     }
 }
 
-data class NavItem(val iconRes: Int, val title: String)
+data class NavItem(val iconRes: Int, val titleRes: Int)
