@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -146,119 +147,124 @@ fun HomeContent(onLaunchClick: () -> Unit) {
         }
     }
 
-    Box(
-        modifier = Modifier
-            .padding(14.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF3E2E27)) // Warna background Cokelat Gelap
+    // Bungkus dengan Column fillMaxSize agar menahan sifat merenggang dari NestedScrollView
+    Column(
+        modifier = Modifier.fillMaxSize() 
     ) {
-        // Logo Watermark
-        Image(
-            painter = painterResource(id = R.drawable.ic_dex_space),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            alpha = 0.15f,
+        Box(
             modifier = Modifier
-                .size(180.dp)
-                .offset(x = 30.dp)
-                .align(Alignment.CenterEnd)
-        )
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            
-            // --- Bagian Paruh Atas ---
-            Column(
+                .padding(14.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFF3E2E27)) // Warna background Cokelat Gelap
+        ) {
+            // Logo Watermark
+            Image(
+                painter = painterResource(id = R.drawable.ic_dex_space),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alpha = 0.15f,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 30.dp)
-            ) {
-                Text(
-                    text = "AURORA",
-                    color = Color(0xFFBCAEA4),
-                    fontSize = 12.sp,
-                    letterSpacing = 0.05.sp
-                )
-                Text(
-                    text = stringResource(id = R.string.tag_title_dex_space),
-                    color = Color(0xFFF1E8E2),
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "V0.0.1-BETA",
-                    color = Color(0xFFBCAEA4),
-                    fontSize = 12.sp
-                )
-            }
+                    .size(180.dp)
+                    .offset(x = 30.dp)
+                    .align(Alignment.CenterEnd)
+            )
 
-            // --- Bagian Paruh Bawah (Lebih gelap) ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF251C18)) // Warna bottom bar lebih gelap
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Widget Uptime dan PID
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                
+                // --- Bagian Paruh Atas ---
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 30.dp)
                 ) {
-                    // Col Uptime
-                    Column {
-                        Text(
-                            text = stringResource(id = R.string.tag_title_uptime),
-                            color = Color(0xFFBCAEA4),
-                            fontSize = 11.sp
-                        )
-                        Text(
-                            text = uptime,
-                            color = Color(0xFFF1E8E2),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.05.sp
-                        )
-                    }
-                    
-                    // Col PID
-                    Column {
-                        Text(
-                            text = stringResource(id = R.string.tag_title_pid),
-                            color = Color(0xFFBCAEA4),
-                            fontSize = 11.sp
-                        )
-                        Text(
-                            text = pid,
-                            color = Color(0xFFF1E8E2),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.05.sp
-                        )
-                    }
+                    Text(
+                        text = "AURORA",
+                        color = Color(0xFFBCAEA4),
+                        fontSize = 12.sp,
+                        letterSpacing = 0.05.sp
+                    )
+                    Text(
+                        text = stringResource(id = R.string.tag_title_dex_space),
+                        color = Color(0xFFF1E8E2),
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "V0.0.1-BETA",
+                        color = Color(0xFFBCAEA4),
+                        fontSize = 12.sp
+                    )
                 }
 
-                // Tombol "Space" milikmu
-                Button(
-                    onClick = onLaunchClick,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF383838),
-                        contentColor = Color(0xFF9AA0A6)
-                    ),
-                    shape = RoundedCornerShape(24.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                // --- Bagian Paruh Bawah (Lebih gelap) ---
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF251C18)) // Warna bottom bar lebih gelap
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_launch),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(id = R.string.tag_launch_dex_space),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    // Widget Uptime dan PID
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        // Col Uptime
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.tag_title_uptime),
+                                color = Color(0xFFBCAEA4),
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = uptime,
+                                color = Color(0xFFF1E8E2),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.05.sp
+                            )
+                        }
+                        
+                        // Col PID
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.tag_title_pid),
+                                color = Color(0xFFBCAEA4),
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = pid,
+                                color = Color(0xFFF1E8E2),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.05.sp
+                            )
+                        }
+                    }
+
+                    // Tombol "Space"
+                    Button(
+                        onClick = onLaunchClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF383838),
+                            contentColor = Color(0xFF9AA0A6)
+                        ),
+                        shape = RoundedCornerShape(24.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_launch),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(id = R.string.tag_launch_dex_space),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
