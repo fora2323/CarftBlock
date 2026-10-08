@@ -44,12 +44,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.viewpager2.widget.ViewPager2
+
 import com.aurora.R
 import com.aurora.main.adapters.MyBaseFragmentAdapter
 import com.aurora.main.fragments.HomeFragment
 import com.aurora.main.fragments.MenuFragment
 import com.aurora.main.fragments.SettingsFragment
+
 import kotlinx.coroutines.flow.MutableStateFlow
+
 import org.aurora.core.BaseCompatActivity
 
 class MainActivity : BaseCompatActivity() {
@@ -58,11 +61,9 @@ class MainActivity : BaseCompatActivity() {
     private lateinit var compose_top_bar: ComposeView
     private lateinit var compose_nav_bar: ComposeView
     private lateinit var main_frame: FrameLayout
-
-    // State untuk melacak posisi halaman saat ini
     private val _selectedPageIndex = MutableStateFlow(0)
     
-    // Array penampung ID String dari strings.xml
+    // ambil nama dari file strings.xml
     private val pageTitleResIds = listOf(
         R.string.title_toolbar_name_main_game,
         R.string.title_toolbar_name_main_menu,
@@ -92,7 +93,6 @@ class MainActivity : BaseCompatActivity() {
         
         viewpager1.adapter = adapter
         
-        // Listener ViewPager2 untuk mengupdate State
         viewpager1.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 _selectedPageIndex.value = position
