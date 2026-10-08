@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,10 +35,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,7 +72,6 @@ class HomeFragment : Fragment() {
         val composeView = view.findViewById<ComposeView>(R.id.compose_view)
         
         composeView.apply {
-            // Compose Strategy agar memory tidak bocor saat Fragment hancur
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 MaterialTheme {
@@ -90,12 +93,8 @@ class HomeFragment : Fragment() {
 
 @Composable
 fun HomeContent(onLaunchClick: () -> Unit) {
-    var uptime by remember {
-         mutableStateOf("---:--:--")
-    }
-    var pid by remember {
-        mutableStateOf("---") 
-    }
+    var uptime by remember { mutableStateOf("---:--:--") }
+    var pid by remember { mutableStateOf("---") }
 
     LaunchedEffect(Unit) {
         while (isActive) {
@@ -147,26 +146,41 @@ fun HomeContent(onLaunchClick: () -> Unit) {
         }
     }
 
-    // Bungkus dengan Column fillMaxSize agar menahan sifat merenggang dari NestedScrollView
+    // Brush untuk efek Gradasi dengan sedikit transparansi (alpha) agar menyatu dengan background di baliknya
+    val cardGradient = Brush.linearGradient(
+        colors = listOf(
+            colorResource(id = R.color.surfaceContainerHighest).copy(alpha = 0.95f),
+            colorResource(id = R.color.surfaceContainer).copy(alpha = 0.85f)
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+    )
+
     Column(
         modifier = Modifier.fillMaxSize() 
     ) {
         Box(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF3E2E27)) // Warna background Cokelat Gelap
+                // Efek "Mengambang" menggunakan shadow
+                .shadow(
+                    elevation = 16.dp, 
+                    shape = RoundedCornerShape(20.dp),
+                    spotColor = colorResource(id = R.color.scrim)
+                )
+                .clip(RoundedCornerShape(20.dp))
+                .background(brush = cardGradient)
         ) {
-            // Logo Watermark
+            // Logo Watermark (Disesuaikan posisinya agar terpotong estetik di pojok kanan)
             Image(
                 painter = painterResource(id = R.drawable.ic_dex_space),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alpha = 0.15f,
                 modifier = Modifier
-                    .size(180.dp)
-                    .offset(x = 30.dp)
+                    .size(240.dp)
+                    .offset(x = 70.dp, y = 10.dp)
                     .align(Alignment.CenterEnd)
             )
 
@@ -176,53 +190,59 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = 30.dp)
+                        .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 24.dp)
                 ) {
                     Text(
                         text = "AURORA",
-                        color = Color(0xFFBCAEA4),
-                        fontSize = 12.sp,
-                        letterSpacing = 0.05.sp
+                        color = colorResource(id = R.color.onSurfaceVariant),
+                        fontSize = 13.sp,
+                        letterSpacing = 1.sp,
+                        fontWeight = FontWeight.Medium
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(id = R.string.tag_title_dex_space),
-                        color = Color(0xFFF1E8E2),
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
+                        color = colorResource(id = R.color.onSurface),
+                        fontSize = 34.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.5.sp
                     )
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = "V0.0.1-BETA",
-                        color = Color(0xFFBCAEA4),
-                        fontSize = 12.sp
+                        color = colorResource(id = R.color.onSurfaceVariant),
+                        fontSize = 13.sp
                     )
                 }
 
-                // --- Bagian Paruh Bawah (Lebih gelap) ---
+                // --- Bagian Paruh Bawah (Layering yang lebih gelap) ---
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF251C18)) // Warna bottom bar lebih gelap
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                        // Menggunakan alpha agar gradasi di bawahnya tetap terasa, namun memberikan batas yang jelas
+                        .background(colorResource(id = R.color.surfaceContainerLowest).copy(alpha = 0.6f))
+                        .padding(horizontal = 24.dp, vertical = 18.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Widget Uptime dan PID
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                        horizontalArrangement = Arrangement.spacedBy(32.dp)
                     ) {
                         // Col Uptime
                         Column {
                             Text(
                                 text = stringResource(id = R.string.tag_title_uptime),
-                                color = Color(0xFFBCAEA4),
-                                fontSize = 11.sp
+                                color = colorResource(id = R.color.onSurfaceVariant),
+                                fontSize = 12.sp
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = uptime,
-                                color = Color(0xFFF1E8E2),
+                                color = colorResource(id = R.color.onSurface),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.05.sp
+                                letterSpacing = 0.5.sp
                             )
                         }
                         
@@ -230,39 +250,40 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         Column {
                             Text(
                                 text = stringResource(id = R.string.tag_title_pid),
-                                color = Color(0xFFBCAEA4),
-                                fontSize = 11.sp
+                                color = colorResource(id = R.color.onSurfaceVariant),
+                                fontSize = 12.sp
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = pid,
-                                color = Color(0xFFF1E8E2),
+                                color = colorResource(id = R.color.onSurface),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.05.sp
+                                letterSpacing = 0.5.sp
                             )
                         }
                     }
 
-                    // Tombol "Space"
+                    // Tombol "Space" (Posisi Icon disesuaikan ke kanan seperti foto)
                     Button(
                         onClick = onLaunchClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF383838),
-                            contentColor = Color(0xFF9AA0A6)
+                            containerColor = colorResource(id = R.color.color_white_slowest),
+                            contentColor = colorResource(id = R.color.color_white_high)
                         ),
-                        shape = RoundedCornerShape(24.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                        shape = RoundedCornerShape(50),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
                     ) {
+                        Text(
+                            text = stringResource(id = R.string.tag_launch_dex_space),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launch),
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(id = R.string.tag_launch_dex_space),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
