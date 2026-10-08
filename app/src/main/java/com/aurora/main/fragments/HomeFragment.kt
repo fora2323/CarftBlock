@@ -89,11 +89,13 @@ class HomeFragment : Fragment() {
 
 @Composable
 fun HomeContent(onLaunchClick: () -> Unit) {
-    // State untuk menyimpan nilai Uptime dan PID
-    var uptime by remember { mutableStateOf("---:--:--") }
-    var pid by remember { mutableStateOf("---") }
+    var uptime by remember {
+         mutableStateOf("---:--:--")
+    }
+    var pid by remember {
+        mutableStateOf("---") 
+    }
 
-    // Coroutine khusus Compose, otomatis mati jika fragment di background/dihancurkan
     LaunchedEffect(Unit) {
         while (isActive) {
             var isRunning = false
@@ -140,12 +142,10 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                 pid = "---"
             }
             
-            // Tunggu 1 detik untuk perulangan berikutnya
             delay(1000)
         }
     }
 
-    // --- STRUKTUR UI (Menduplikasi Gambar Desain) ---
     Box(
         modifier = Modifier
             .padding(14.dp)
