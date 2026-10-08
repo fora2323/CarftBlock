@@ -153,7 +153,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .padding(14.dp)
+                .padding(12.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFF3E2E27)) // Warna background Cokelat Gelap
@@ -202,7 +202,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color(0xFF251C18)) // Warna bottom bar lebih gelap
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {

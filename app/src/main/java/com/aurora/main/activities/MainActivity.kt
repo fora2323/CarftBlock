@@ -177,7 +177,7 @@ fun CustomTopBar(title: String) {
                         color = colorResource(id = R.color.surfaceContainerHigh), 
                         shape = RoundedCornerShape(8.dp)
                     )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .padding(horizontal = 4.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = "ID 923ba551",
