@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
@@ -146,11 +145,11 @@ fun HomeContent(onLaunchClick: () -> Unit) {
         }
     }
 
-    // Brush untuk efek Gradasi dengan sedikit transparansi (alpha) agar menyatu dengan background di baliknya
+    // Gradasi background utama Card disamakan dengan warna XML
     val cardGradient = Brush.linearGradient(
         colors = listOf(
-            colorResource(id = R.color.surfaceContainerHighest).copy(alpha = 0.95f),
-            colorResource(id = R.color.surfaceContainer).copy(alpha = 0.85f)
+            colorResource(id = R.color.surfaceContainerHighest),
+            colorResource(id = R.color.surfaceContainer)
         ),
         start = Offset(0f, 0f),
         end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
@@ -161,26 +160,22 @@ fun HomeContent(onLaunchClick: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .padding(16.dp)
+                // Padding luar Card: Kiri-Kanan 14dp, Atas-Bawah 4dp (sesuai instruksi)
+                .padding(horizontal = 14.dp, vertical = 4.dp) 
                 .fillMaxWidth()
-                // Efek "Mengambang" menggunakan shadow
-                .shadow(
-                    elevation = 16.dp, 
-                    shape = RoundedCornerShape(20.dp),
-                    spotColor = colorResource(id = R.color.scrim)
-                )
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(16.dp))
+                // Menghilangkan .shadow() (elevation) sesuai instruksi
                 .background(brush = cardGradient)
         ) {
-            // Logo Watermark (Disesuaikan posisinya agar terpotong estetik di pojok kanan)
+            // Logo Watermark
             Image(
                 painter = painterResource(id = R.drawable.ic_dex_space),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                alpha = 0.15f,
+                alpha = 0.1f, // Alpha diredupkan sedikit agar flat
                 modifier = Modifier
-                    .size(240.dp)
-                    .offset(x = 70.dp, y = 10.dp)
+                    .size(220.dp)
+                    .offset(x = 60.dp, y = 10.dp)
                     .align(Alignment.CenterEnd)
             )
 
@@ -190,100 +185,106 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 24.dp)
+                        .padding(start = 24.dp, top = 20.dp, end = 24.dp, bottom = 20.dp)
                 ) {
                     Text(
                         text = "AURORA",
-                        color = colorResource(id = R.color.onSurfaceVariant),
-                        fontSize = 13.sp,
+                        color = colorResource(id = R.color.outline),
+                        fontSize = 11.sp,
                         letterSpacing = 1.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Bold,
+                        // Padding bottom 0 (sesuai instruksi)
+                        modifier = Modifier.padding(bottom = 0.dp)
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    // Spacer dihapus agar AURORA dan Dex Space rapat
                     Text(
                         text = stringResource(id = R.string.tag_title_dex_space),
                         color = colorResource(id = R.color.onSurface),
-                        fontSize = 34.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 0.5.sp
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        // Padding top 0 (sesuai instruksi)
+                        modifier = Modifier.padding(top = 0.dp)
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "V0.0.1-BETA",
-                        color = colorResource(id = R.color.onSurfaceVariant),
-                        fontSize = 13.sp
+                        color = colorResource(id = R.color.outline),
+                        fontSize = 11.sp
                     )
                 }
 
-                // --- Bagian Paruh Bawah (Layering yang lebih gelap) ---
+                // --- Bagian Paruh Bawah ---
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // Menggunakan alpha agar gradasi di bawahnya tetap terasa, namun memberikan batas yang jelas
-                        .background(colorResource(id = R.color.surfaceContainerLowest).copy(alpha = 0.6f))
-                        .padding(horizontal = 24.dp, vertical = 18.dp),
+                        // Menggunakan warna paling gelap dari XML (menyerupai screenshot)
+                        .background(colorResource(id = R.color.surfaceContainerLowest)) 
+                        .padding(horizontal = 24.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Widget Uptime dan PID
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(32.dp)
+                        horizontalArrangement = Arrangement.spacedBy(36.dp)
                     ) {
                         // Col Uptime
                         Column {
                             Text(
-                                text = stringResource(id = R.string.tag_title_uptime),
-                                color = colorResource(id = R.color.onSurfaceVariant),
-                                fontSize = 12.sp
+                                text = "UPTIME",
+                                color = colorResource(id = R.color.outline),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.5.sp
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = uptime,
                                 color = colorResource(id = R.color.onSurface),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                         
                         // Col PID
                         Column {
                             Text(
-                                text = stringResource(id = R.string.tag_title_pid),
-                                color = colorResource(id = R.color.onSurfaceVariant),
-                                fontSize = 12.sp
+                                text = "PID",
+                                color = colorResource(id = R.color.outline),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.5.sp
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = pid,
                                 color = colorResource(id = R.color.onSurface),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
 
-                    // Tombol "Space" (Posisi Icon disesuaikan ke kanan seperti foto)
+                    // Tombol "Launch"
                     Button(
                         onClick = onLaunchClick,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = colorResource(id = R.color.color_white_slowest),
                             contentColor = colorResource(id = R.color.color_white_high)
                         ),
-                        shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
+                        shape = RoundedCornerShape(24.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                        modifier = Modifier.height(36.dp)
                     ) {
                         Text(
-                            text = stringResource(id = R.string.tag_launch_dex_space),
-                            fontSize = 15.sp,
+                            text = "Launch",
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launch),
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
