@@ -32,7 +32,12 @@
             android:name="com.aurora.main.activities.MainActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
-            android:exported="true" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>    
             
         <activity
             android:name=".DebugActivity"
@@ -58,12 +63,7 @@
             android:name=".SplashActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="true" />
         
         <service
             android:name="com.aurora.adb.AdbPairingService"
