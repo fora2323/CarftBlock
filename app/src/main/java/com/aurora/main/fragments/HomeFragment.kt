@@ -1,7 +1,6 @@
 package com.aurora.main.fragments
 
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -46,13 +45,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.annotation.StyleRes
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.aurora.GameLauncherActivity
 import com.aurora.R
@@ -94,33 +92,6 @@ class HomeFragment : Fragment() {
         }
         
         return view
-    }
-}
-
-/**
- * Ambil font dari style XML (mis. TextAppearance.Aurora.Title).
- * Yang dibaca cuma atribut fontFamily (tanpa prefix android:) dari style itu.
- * Aman: kalau gagal / bukan font, otomatis pakai FontFamily.Default (tidak crash).
- */
-@Composable
-fun rememberTextAppearanceFont(@StyleRes styleRes: Int): FontFamily {
-    val context = LocalContext.current
-    return remember(styleRes) {
-        try {
-            val ta = context.obtainStyledAttributes(styleRes, intArrayOf(R.attr.fontFamily))
-            val resId = ta.getResourceId(0, 0)
-            val typeName = if (resId != 0) context.resources.getResourceTypeName(resId) else null
-            val typeface: Typeface? = when {
-                // fontFamily menunjuk ke file/xml di res/font
-                typeName == "font" -> ResourcesCompat.getFont(context, resId)
-                // fontFamily berupa nama font sistem, mis. "sans-serif-medium"
-                else -> ta.getString(0)?.let { Typeface.create(it, Typeface.NORMAL) }
-            }
-            ta.recycle()
-            if (typeface != null) FontFamily(typeface) else FontFamily.Default
-        } catch (e: Exception) {
-            FontFamily.Default
-        }
     }
 }
 
@@ -205,9 +176,9 @@ fun HomeContent(onLaunchClick: () -> Unit) {
         trim = LineHeightStyle.Trim.Both
     )
 
-    // Font diambil dari style XML. Ganti nama style di sini kalau mau font lain.
-    // Style harus punya <item name="android:fontFamily">@font/nama_font</item>
-    val cardFont = rememberTextAppearanceFont(R.style.TextAppearance_Aurora_Title)
+    // FONT: diambil dari res/font/force (file force.ttf / force.otf).
+    // Ganti R.font.force kalau mau pakai font lain dari folder res/font.
+    val cardFont = FontFamily(Font(R.font.force))
 
     Column(
         modifier = Modifier.fillMaxSize() 
@@ -253,7 +224,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     Text(
                         text = "AURORA",
                         color = colorResource(id = R.color.outline),
-                        fontFamily = cardFont,
+                        fontFamily = cardFont, // font force (ganti di val cardFont)
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 11.sp,      // ukuran teks
@@ -267,7 +238,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     Text(
                         text = stringResource(id = R.string.tag_title_dex_space),
                         color = colorResource(id = R.color.onSurface),
-                        fontFamily = cardFont,
+                        fontFamily = cardFont, // font force (ganti di val cardFont)
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 28.sp,
@@ -280,7 +251,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     Text(
                         text = versionText,
                         color = colorResource(id = R.color.outline),
-                        fontFamily = cardFont,
+                        fontFamily = cardFont, // font force (ganti di val cardFont)
                         style = TextStyle(
                             fontSize = 11.sp,
                             lineHeight = 14.sp,
@@ -311,7 +282,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             Text(
                                 text = "UPTIME",
                                 color = colorResource(id = R.color.outline),
-                                fontFamily = cardFont,
+                                fontFamily = cardFont, // font force (ganti di val cardFont)
                                 fontWeight = FontWeight.SemiBold,
                                 style = TextStyle(
                                     fontSize = 12.sp,    // ukuran label
@@ -324,7 +295,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             Text(
                                 text = uptime,
                                 color = colorResource(id = R.color.onSurface),
-                                fontFamily = cardFont,
+                                fontFamily = cardFont, // font force (ganti di val cardFont)
                                 fontWeight = FontWeight.Bold,
                                 style = TextStyle(
                                     fontSize = 16.sp,    // ukuran nilai
@@ -340,7 +311,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             Text(
                                 text = "PID",
                                 color = colorResource(id = R.color.outline),
-                                fontFamily = cardFont,
+                                fontFamily = cardFont, // font force (ganti di val cardFont)
                                 fontWeight = FontWeight.SemiBold,
                                 style = TextStyle(
                                     fontSize = 12.sp,
@@ -352,7 +323,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             Text(
                                 text = pid,
                                 color = colorResource(id = R.color.onSurface),
-                                fontFamily = cardFont,
+                                fontFamily = cardFont, // font force (ganti di val cardFont)
                                 fontWeight = FontWeight.Bold,
                                 style = TextStyle(
                                     fontSize = 16.sp,
@@ -381,7 +352,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     ) {
                         Text(
                             text = "Launch",
-                            fontFamily = cardFont,
+                            fontFamily = cardFont, // font force (ganti di val cardFont)
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
