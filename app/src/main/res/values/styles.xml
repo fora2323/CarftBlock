@@ -27,7 +27,7 @@
     </style>
 
     <style name="AuroraChip.TextAppearance" parent="TextAppearance.Material3.LabelLarge">
-        <item name="fontFamily">@font/ge_force</item>
+        <item name="fontFamily">@font/force</item>
         <item name="android:letterSpacing">0.05</item>
     </style>
 
