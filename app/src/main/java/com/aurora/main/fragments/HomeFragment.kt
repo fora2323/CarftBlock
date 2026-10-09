@@ -363,7 +363,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         Text(
                             text = "Launch",
                             fontFamily = cardFont, // font force (ganti di val cardFont)
-                            fontSize = 13.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                         // jarak teks ke icon
@@ -371,7 +371,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launch),
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
