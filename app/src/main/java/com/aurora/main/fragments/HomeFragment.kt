@@ -1,6 +1,7 @@
 package com.aurora.main.fragments
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -98,18 +99,28 @@ class HomeFragment : Fragment() {
 
 /**
  * Ambil font dari style XML (mis. TextAppearance.Aurora.Title).
- * Yang dibaca cuma atribut android:fontFamily dari style itu.
- * Kalau style tidak punya fontFamily, hasilnya FontFamily.Default.
+ * Yang dibaca cuma atribut fontFamily (tanpa prefix android:) dari style itu.
+ * Aman: kalau gagal / bukan font, otomatis pakai FontFamily.Default (tidak crash).
  */
 @Composable
 fun rememberTextAppearanceFont(@StyleRes styleRes: Int): FontFamily {
     val context = LocalContext.current
     return remember(styleRes) {
-        val ta = context.obtainStyledAttributes(styleRes, intArrayOf(android.R.attr.fontFamily))
-        val fontResId = ta.getResourceId(0, 0)
-        ta.recycle()
-        val typeface = if (fontResId != 0) ResourcesCompat.getFont(context, fontResId) else null
-        if (typeface != null) FontFamily(typeface) else FontFamily.Default
+        try {
+            val ta = context.obtainStyledAttributes(styleRes, intArrayOf(R.attr.fontFamily))
+            val resId = ta.getResourceId(0, 0)
+            val typeName = if (resId != 0) context.resources.getResourceTypeName(resId) else null
+            val typeface: Typeface? = when {
+                // fontFamily menunjuk ke file/xml di res/font
+                typeName == "font" -> ResourcesCompat.getFont(context, resId)
+                // fontFamily berupa nama font sistem, mis. "sans-serif-medium"
+                else -> ta.getString(0)?.let { Typeface.create(it, Typeface.NORMAL) }
+            }
+            ta.recycle()
+            if (typeface != null) FontFamily(typeface) else FontFamily.Default
+        } catch (e: Exception) {
+            FontFamily.Default
+        }
     }
 }
 
