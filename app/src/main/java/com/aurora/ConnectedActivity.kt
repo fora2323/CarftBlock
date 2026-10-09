@@ -131,7 +131,9 @@ class ConnectedActivity : BaseCompatActivity() {
                     client.connect()
 
                     Log.d(TAG, "Eksekusi command via TCP 5555: $command")
-                    client.shellCommand(command) { _ -> }
+                    client.shellCommand(command) { _ -> 
+                        Log.d(TAG, "AURORA_STARTER: $output")
+                    }
                     client.close()
 
                     // 3. Verifikasi daemon
@@ -369,7 +371,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     
                     Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $command")
                     client.shellCommand(command) { _ -> 
-                        // Output sengaja kosong karena stream sudah dialihkan
+                        Log.d(TAG, "AURORA_STARTER: $output")
                     }
                     client.close()
 
