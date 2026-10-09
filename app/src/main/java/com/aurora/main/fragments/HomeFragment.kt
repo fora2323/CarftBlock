@@ -203,7 +203,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     contentScale = ContentScale.Crop,
                     // alpha logo: 0f = hilang, 1f = pekat
                     alpha = 0.1f,
-                    colorFilter = ColorFilter.tint(colorResource(R.color.onPrimaryContainer))
+                    colorFilter = ColorFilter.tint(colorResource(R.color.onPrimaryContainer)),
                     modifier = Modifier
                         .requiredSize(150.dp)
                         .align(Alignment.CenterEnd)
