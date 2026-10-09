@@ -131,19 +131,21 @@ class ConnectedActivity : BaseCompatActivity() {
                     client.connect()
 
                     Log.d(TAG, "Eksekusi command via TCP 5555: $command")
-                    client.shellCommand(command) { _ -> 
+                    // FIX 3: Perbaikan parameter lambda agar tidak unresolved reference
+                    client.shellCommand(command) { output -> 
                         Log.d(TAG, "AURORA_STARTER: $output")
                     }
                     client.close()
 
                     // 3. Verifikasi daemon
                     var isDaemonReady = false
-                    for (i in 1..10) {
+                    // FIX 2: Tambah retry jadi 20 dan timeout jadi 1000 di verifikasi TCP
+                    for (i in 1..20) {
                         delay(500)
                         try {
                             Socket().use { socket ->
                                 socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
-                                socket.soTimeout = 500
+                                socket.soTimeout = 1000
                                 val out = PrintWriter(socket.getOutputStream(), true)
                                 val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
                                 out.println("PING")
@@ -158,7 +160,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     if (!isDaemonReady) {
-                        throw Exception("Daemon TCP terhubung tetapi langsung mati.")
+                        throw Exception("Daemon TCP gagal merespons setelah 10 detik.")
                     }
                 }
 
@@ -370,7 +372,8 @@ class ConnectedActivity : BaseCompatActivity() {
                     client.connect()
                     
                     Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $command")
-                    client.shellCommand(command) { _ -> 
+                    // FIX 3: Perbaikan parameter lambda agar tidak unresolved reference
+                    client.shellCommand(command) { output -> 
                         Log.d(TAG, "AURORA_STARTER: $output")
                     }
                     client.close()
@@ -381,12 +384,13 @@ class ConnectedActivity : BaseCompatActivity() {
                     Log.d(TAG, "Step 3: Memverifikasi apakah daemon berhasil hidup...")
                     var isDaemonReady = false
                     
-                    for (i in 1..10) {
+                    // FIX 1: Tambah retry jadi 20 dan timeout jadi 1000 di verifikasi Start
+                    for (i in 1..20) {
                         delay(500) // Tunggu 0.5 detik setiap percobaan
                         try {
                             Socket().use { socket ->
                                 socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
-                                socket.soTimeout = 500
+                                socket.soTimeout = 1000
                                 val out = PrintWriter(socket.getOutputStream(), true)
                                 val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
                                 
@@ -404,7 +408,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     if (!isDaemonReady) {
-                        throw Exception("Daemon terhubung tetapi langsung mati. Pastikan libaurora.so kompatibel dengan perangkat ini.")
+                        throw Exception("Daemon gagal merespons setelah 10 detik. Coba start ulang.")
                     }
                     Log.d(TAG, "Step 4: Daemon terverifikasi hidup!")
                 }
