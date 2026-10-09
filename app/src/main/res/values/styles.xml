@@ -5,7 +5,7 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="fontFamily">@font/roboto_condensed</item>
+        <item name="fontFamily">@font/roboto_medium</item>
 
         <item name="android:windowLightStatusBar">false</item>
     </style>
@@ -69,7 +69,7 @@
     </style>
     
     <style name="TextAppearance.Aurora.Title" parent="TextAppearance.Material3.HeadlineMedium">
-        <item name="fontFamily">@font/ge_force</item>
+        <item name="fontFamily">@font/force</item>
         <item name="android:textStyle">bold</item>
     </style>
     

@@ -254,22 +254,21 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                 ) {
                     // Widget Uptime dan PID
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(36.dp)
+                        horizontalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         // Col Uptime
                         Column {
                             Text(
                                 text = "UPTIME",
                                 color = colorResource(id = R.color.outline),
-                                fontSize = 10.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 0.5.sp
+                                style = TextStyle(fontSize = 12.sp, lineHeight = 14.sp, lineHeightStyle = trimStyle),
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = uptime,
                                 color = colorResource(id = R.color.onSurface),
-                                fontSize = 15.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -279,7 +278,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             Text(
                                 text = "PID",
                                 color = colorResource(id = R.color.outline),
-                                fontSize = 10.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 letterSpacing = 0.5.sp
                             )
@@ -287,7 +286,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             Text(
                                 text = pid,
                                 color = colorResource(id = R.color.onSurface),
-                                fontSize = 15.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -297,8 +296,8 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     Button(
                         onClick = onLaunchClick,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.color_white_slowest),
-                            contentColor = colorResource(id = R.color.color_white_high)
+                            containerColor = colorResource(id = R.color.primaryContainer),
+                            contentColor = colorResource(id = R.color.primary)
                         ),
                         shape = RoundedCornerShape(24.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
