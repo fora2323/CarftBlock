@@ -179,6 +179,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
     // FONT: diambil dari res/font/force (file force.ttf / force.otf).
     // Ganti R.font.force kalau mau pakai font lain dari folder res/font.
     val cardFont = FontFamily(Font(R.font.force))
+    val cardCondensed = FontFamily(Font(R.font.condensed))
 
     Column(
         modifier = Modifier.fillMaxSize() 
@@ -224,7 +225,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     Text(
                         text = "AURORA",
                         color = colorResource(id = R.color.outline),
-                        fontFamily = cardFont, // font force (ganti di val cardFont)
+                        fontFamily = cardCondensed, // font force (ganti di val cardFont)
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 11.sp,      // ukuran teks
