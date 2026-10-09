@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -144,7 +145,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                 uptime = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
                 pid = daemonPid
             } else {
-                uptime = "Offline"
+                uptime = "___"
                 pid = "---"
             }
             
@@ -172,7 +173,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
         "V${name ?: "-"}".uppercase(Locale.US)
     }
 
-    // Style teks tanpa extra padding font supaya jarak antar teks bisa presisi
     val trimStyle = LineHeightStyle(
         alignment = LineHeightStyle.Alignment.Proportional,
         trim = LineHeightStyle.Trim.Both
@@ -180,9 +180,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
     // Buang padding bawaan font (penyebab utama jarak antar teks masih jauh)
     @Suppress("DEPRECATION")
     val noFontPadding = PlatformTextStyle(includeFontPadding = false)
-
-    // FONT: diambil dari res/font/force (file force.ttf / force.otf).
-    // Ganti R.font.force kalau mau pakai font lain dari folder res/font.
     val cardFont = FontFamily(Font(R.font.force))
 
     Column(
@@ -206,10 +203,8 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     contentScale = ContentScale.Crop,
                     // alpha logo: 0f = hilang, 1f = pekat
                     alpha = 0.1f,
-                    // Warna logo: tambahkan colorFilter = ColorFilter.tint(colorResource(R.color.xxx))
-                    // (import androidx.compose.ui.graphics.ColorFilter)
+                    colorFilter = ColorFilter.tint(colorResource(R.color.onPrimaryContainer))
                     modifier = Modifier
-                        // Ukuran logo
                         .requiredSize(150.dp)
                         .align(Alignment.CenterEnd)
                         // Geser posisi logo (x = kanan+, y = bawah+)
@@ -234,7 +229,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 11.sp,      // ukuran teks
-                            lineHeight = 9.sp,     // tinggi baris AURORA: kecilkan = makin rapat
+                            lineHeight = 4.sp,     // tinggi baris AURORA: kecilkan = makin rapat
                             letterSpacing = 1.sp,  // jarak antar huruf
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
@@ -250,7 +245,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 28.sp,
-                            lineHeight = 22.sp,    // tinggi baris judul: kecilkan = makin rapat
+                            lineHeight = 4.sp,    // tinggi baris judul: kecilkan = makin rapat
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
                         ),
@@ -376,7 +371,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launch),
                             contentDescription = null,
-                            // warna icon khusus: tambah tint = colorResource(R.color.xxx)
                             modifier = Modifier.size(16.dp)
                         )
                     }
