@@ -261,7 +261,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             platformStyle = noFontPadding
                         ),
                         // POSISI VERSI dari atas: kira-kira posisi judul + 28 (kalau judul digeser, geser juga ini)
-                        modifier = Modifier.padding(top = 10.dp)
+                        modifier = Modifier.padding(top = 36.dp)
                     )
                 }
 
