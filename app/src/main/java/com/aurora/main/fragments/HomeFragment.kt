@@ -214,56 +214,58 @@ fun HomeContent(onLaunchClick: () -> Unit) {
             Column(modifier = Modifier.fillMaxWidth()) {
 
                 // ===== BAGIAN ATAS: AURORA / judul / versi =====
-                Column(
+                // Pakai Box (bukan Column): tiap teks diposisikan sendiri lewat padding(top),
+                // jadi jaraknya tidak tergantung tinggi baris font.
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         // PADDING DALAM BAGIAN ATAS (top/bottom dinaikkan = card makin tinggi)
-                        .padding(start = 16.dp, top = 22.dp, end = 16.dp, bottom = 22.dp)
+                        .padding(start = 16.dp, top = 22.dp, end = 16.dp, bottom = 18.dp)
                 ) {
                     Text(
                         text = "AURORA",
-                        overflow = TextOverflow.Visible, // jangan potong teks walau lineHeight kecil
+                        overflow = TextOverflow.Visible,
                         color = colorResource(id = R.color.outline),
-                        fontFamily = cardFontCondensed, // font force (ganti di val cardFont)
+                        fontFamily = cardFontCondensed, // font condensed
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
-                            fontSize = 12.sp,      // ukuran teks
-                            lineHeight = 4.sp,     // tinggi baris AURORA: kecilkan = makin rapat
-                            letterSpacing = 1.sp,  // jarak antar huruf
+                            fontSize = 12.sp,
+                            lineHeight = 12.sp,    // samakan dengan fontSize
+                            letterSpacing = 1.sp,
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
                         ),
-                        // margin bawah AURORA
-                        modifier = Modifier.padding(bottom = 0.dp)
+                        // POSISI AURORA dari atas (0 = paling atas)
+                        modifier = Modifier.padding(top = 0.dp)
                     )
                     Text(
                         text = stringResource(id = R.string.tag_title_dex_space),
-                        overflow = TextOverflow.Visible, // jangan potong teks walau lineHeight kecil
+                        overflow = TextOverflow.Visible,
                         color = colorResource(id = R.color.onSurface),
-                        fontFamily = cardFont, // font force (ganti di val cardFont)
+                        fontFamily = cardFont, // font force
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 28.sp,
-                            lineHeight = 4.sp,    // tinggi baris judul: kecilkan = makin rapat
+                            lineHeight = 28.sp,    // samakan dengan fontSize
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
                         ),
-                        // margin atas / bawah judul
-                        modifier = Modifier.padding(top = 0.dp, bottom = 2.dp)
+                        // POSISI JUDUL dari atas: kecilkan = makin dekat ke AURORA
+                        modifier = Modifier.padding(top = 10.dp)
                     )
                     Text(
                         text = versionText,
-                        overflow = TextOverflow.Visible, // jangan potong teks walau lineHeight kecil
+                        overflow = TextOverflow.Visible,
                         color = colorResource(id = R.color.outline),
-                        fontFamily = cardFont, // font force (ganti di val cardFont)
+                        fontFamily = cardFont, // font force
                         style = TextStyle(
                             fontSize = 11.sp,
-                            lineHeight = 10.sp,    // tinggi baris versi
+                            lineHeight = 11.sp,    // samakan dengan fontSize
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
                         ),
-                        // margin atas versi
-                        modifier = Modifier.padding(top = 2.dp)
+                        // POSISI VERSI dari atas: kira-kira posisi judul + 28 (kalau judul digeser, geser juga ini)
+                        modifier = Modifier.padding(top = 38.dp)
                     )
                 }
 
