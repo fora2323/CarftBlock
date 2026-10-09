@@ -207,7 +207,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     modifier = Modifier
                         .requiredSize(150.dp)
                         .align(Alignment.CenterEnd)
-                        // Geser posisi logo (x = kanan+, y = bawah+)
                         .offset(x = (-8).dp, y = 0.dp)
                 )
             }
@@ -219,7 +218,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         // PADDING DALAM BAGIAN ATAS (top/bottom dinaikkan = card makin tinggi)
-                        .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 22.dp)
+                        .padding(start = 16.dp, top = 22.dp, end = 16.dp, bottom = 22.dp)
                 ) {
                     Text(
                         text = "AURORA",
