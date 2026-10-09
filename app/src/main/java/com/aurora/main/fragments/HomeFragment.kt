@@ -226,7 +226,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         fontFamily = cardFontCondensed, // font condensed
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
-                            fontSize = 14.sp,
+                            fontSize = 12.sp,
                             lineHeight = 12.sp,
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
@@ -247,7 +247,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                             platformStyle = noFontPadding
                         ),
                         // POSISI JUDUL dari atas: kecilkan = makin dekat ke AURORA
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.padding(top = 8.dp)
                     )
                     Text(
                         text = versionText,
@@ -255,13 +255,13 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         color = colorResource(id = R.color.outline),
                         fontFamily = cardFont, // font force
                         style = TextStyle(
-                            fontSize = 16.sp,
+                            fontSize = 14.sp,
                             lineHeight = 11.sp,    // samakan dengan fontSize
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
                         ),
                         // POSISI VERSI dari atas: kira-kira posisi judul + 28 (kalau judul digeser, geser juga ini)
-                        modifier = Modifier.padding(top = 40.dp)
+                        modifier = Modifier.padding(top = 10.dp)
                     )
                 }
 
