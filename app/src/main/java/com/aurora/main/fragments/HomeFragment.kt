@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -172,9 +173,12 @@ fun HomeContent(onLaunchClick: () -> Unit) {
 
     // Style teks tanpa extra padding font supaya jarak antar teks bisa presisi
     val trimStyle = LineHeightStyle(
-        alignment = LineHeightStyle.Alignment.Center,
+        alignment = LineHeightStyle.Alignment.Proportional,
         trim = LineHeightStyle.Trim.Both
     )
+    // Buang padding bawaan font (penyebab utama jarak antar teks masih jauh)
+    @Suppress("DEPRECATION")
+    val noFontPadding = PlatformTextStyle(includeFontPadding = false)
 
     // FONT: diambil dari res/font/force (file force.ttf / force.otf).
     // Ganti R.font.force kalau mau pakai font lain dari folder res/font.
@@ -206,10 +210,10 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     // (import androidx.compose.ui.graphics.ColorFilter)
                     modifier = Modifier
                         // Ukuran logo
-                        .requiredSize(220.dp)
+                        .requiredSize(150.dp)
                         .align(Alignment.CenterEnd)
                         // Geser posisi logo (x = kanan+, y = bawah+)
-                        .offset(x = 60.dp, y = 10.dp)
+                        .offset(x = 25.dp, y = 0.dp)
                 )
             }
 
@@ -219,8 +223,8 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // PADDING DALAM BAGIAN ATAS
-                        .padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 12.dp)
+                        // PADDING DALAM BAGIAN ATAS (top/bottom dinaikkan = card makin tinggi)
+                        .padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 16.dp)
                 ) {
                     Text(
                         text = "AURORA",
@@ -229,9 +233,10 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 11.sp,      // ukuran teks
-                            lineHeight = 14.sp,    // tinggi baris (jaga >= fontSize)
+                            lineHeight = 12.sp,    // tinggi baris: kecilkan = makin rapat
                             letterSpacing = 1.sp,  // jarak antar huruf
-                            lineHeightStyle = trimStyle
+                            lineHeightStyle = trimStyle,
+                            platformStyle = noFontPadding
                         ),
                         // margin bawah AURORA
                         modifier = Modifier.padding(bottom = 0.dp)
@@ -243,8 +248,9 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 28.sp,
-                            lineHeight = 34.sp,
-                            lineHeightStyle = trimStyle
+                            lineHeight = 30.sp,    // tinggi baris judul: kecilkan = makin rapat
+                            lineHeightStyle = trimStyle,
+                            platformStyle = noFontPadding
                         ),
                         // margin atas / bawah judul
                         modifier = Modifier.padding(top = 0.dp, bottom = 2.dp)
@@ -255,8 +261,9 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         fontFamily = cardFont, // font force (ganti di val cardFont)
                         style = TextStyle(
                             fontSize = 11.sp,
-                            lineHeight = 14.sp,
-                            lineHeightStyle = trimStyle
+                            lineHeight = 12.sp,
+                            lineHeightStyle = trimStyle,
+                            platformStyle = noFontPadding
                         ),
                         // margin atas versi
                         modifier = Modifier.padding(top = 2.dp)
@@ -270,7 +277,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         // Warna + alpha overlay bawah (0.55f, ubah sesuai selera)
                         .background(colorResource(id = R.color.surfaceContainerLowest).copy(alpha = 0.55f))
                         // PADDING overlay bawah: horizontal = kiri-kanan, vertical = atas-bawah
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -289,7 +296,8 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                                     fontSize = 12.sp,    // ukuran label
                                     lineHeight = 14.sp,
                                     letterSpacing = 0.5.sp,
-                                    lineHeightStyle = trimStyle
+                                    lineHeightStyle = trimStyle,
+                            platformStyle = noFontPadding
                                 )
                             )
                             // Margin top nilai uptime (0.dp = rapat ke label)
@@ -301,7 +309,8 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                                 style = TextStyle(
                                     fontSize = 16.sp,    // ukuran nilai
                                     lineHeight = 20.sp,
-                                    lineHeightStyle = trimStyle
+                                    lineHeightStyle = trimStyle,
+                            platformStyle = noFontPadding
                                 ),
                                 modifier = Modifier.padding(top = 0.dp)
                             )
@@ -318,7 +327,8 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                                     fontSize = 12.sp,
                                     lineHeight = 14.sp,
                                     letterSpacing = 0.5.sp,
-                                    lineHeightStyle = trimStyle
+                                    lineHeightStyle = trimStyle,
+                            platformStyle = noFontPadding
                                 )
                             )
                             Text(
@@ -329,7 +339,8 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     lineHeight = 20.sp,
-                                    lineHeightStyle = trimStyle
+                                    lineHeightStyle = trimStyle,
+                            platformStyle = noFontPadding
                                 ),
                                 modifier = Modifier.padding(top = 0.dp)
                             )
@@ -347,7 +358,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         ),
                         shape = RoundedCornerShape(24.dp),
                         // PADDING tombol kiri-kanan (horizontal) dan atas-bawah (vertical)
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 0.dp),
                         // tinggi tombol
                         modifier = Modifier.height(36.dp)
                     ) {
@@ -362,7 +373,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launch),
                             contentDescription = null,
-                            // warna icon khusus: tambah tint = colorResource(R.color.xxx)
                             modifier = Modifier.size(16.dp)
                         )
                     }
