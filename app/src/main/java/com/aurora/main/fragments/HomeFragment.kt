@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -183,7 +184,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
     // FONT: diambil dari res/font/force (file force.ttf / force.otf).
     // Ganti R.font.force kalau mau pakai font lain dari folder res/font.
     val cardFont = FontFamily(Font(R.font.force))
-    val cardCondensed = FontFamily(Font(R.font.condensed))
 
     Column(
         modifier = Modifier.fillMaxSize() 
@@ -213,7 +213,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         .requiredSize(150.dp)
                         .align(Alignment.CenterEnd)
                         // Geser posisi logo (x = kanan+, y = bawah+)
-                        .offset(x = 25.dp, y = 0.dp)
+                        .offset(x = (-8).dp, y = 0.dp)
                 )
             }
 
@@ -224,16 +224,17 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         // PADDING DALAM BAGIAN ATAS (top/bottom dinaikkan = card makin tinggi)
-                        .padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 16.dp)
+                        .padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 22.dp)
                 ) {
                     Text(
                         text = "AURORA",
+                        overflow = TextOverflow.Visible, // jangan potong teks walau lineHeight kecil
                         color = colorResource(id = R.color.outline),
-                        fontFamily = cardCondensed, // font force (ganti di val cardFont)
+                        fontFamily = cardFont, // font force (ganti di val cardFont)
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 11.sp,      // ukuran teks
-                            lineHeight = 12.sp,    // tinggi baris: kecilkan = makin rapat
+                            lineHeight = 9.sp,     // tinggi baris AURORA: kecilkan = makin rapat
                             letterSpacing = 1.sp,  // jarak antar huruf
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
@@ -243,12 +244,13 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     )
                     Text(
                         text = stringResource(id = R.string.tag_title_dex_space),
+                        overflow = TextOverflow.Visible, // jangan potong teks walau lineHeight kecil
                         color = colorResource(id = R.color.onSurface),
                         fontFamily = cardFont, // font force (ganti di val cardFont)
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 28.sp,
-                            lineHeight = 30.sp,    // tinggi baris judul: kecilkan = makin rapat
+                            lineHeight = 22.sp,    // tinggi baris judul: kecilkan = makin rapat
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
                         ),
@@ -257,11 +259,12 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     )
                     Text(
                         text = versionText,
+                        overflow = TextOverflow.Visible, // jangan potong teks walau lineHeight kecil
                         color = colorResource(id = R.color.outline),
                         fontFamily = cardFont, // font force (ganti di val cardFont)
                         style = TextStyle(
                             fontSize = 11.sp,
-                            lineHeight = 12.sp,
+                            lineHeight = 10.sp,    // tinggi baris versi
                             lineHeightStyle = trimStyle,
                             platformStyle = noFontPadding
                         ),
@@ -373,6 +376,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launch),
                             contentDescription = null,
+                            // warna icon khusus: tambah tint = colorResource(R.color.xxx)
                             modifier = Modifier.size(16.dp)
                         )
                     }
