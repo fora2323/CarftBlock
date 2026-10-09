@@ -181,6 +181,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
     @Suppress("DEPRECATION")
     val noFontPadding = PlatformTextStyle(includeFontPadding = false)
     val cardFont = FontFamily(Font(R.font.force))
+    val cardFontCondensed = FontFamily(Font(R.font.condensed))
 
     Column(
         modifier = Modifier.fillMaxSize() 
@@ -224,7 +225,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         text = "AURORA",
                         overflow = TextOverflow.Visible, // jangan potong teks walau lineHeight kecil
                         color = colorResource(id = R.color.outline),
-                        fontFamily = cardFont, // font force (ganti di val cardFont)
+                        fontFamily = cardFontCondensed, // font force (ganti di val cardFont)
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 11.sp,      // ukuran teks
