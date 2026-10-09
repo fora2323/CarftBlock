@@ -202,7 +202,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                     painter = painterResource(id = R.drawable.ic_dex_space),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    // alpha logo: 0f = hilang, 1f = pekat
                     alpha = 0.1f,
                     colorFilter = ColorFilter.tint(colorResource(R.color.onPrimaryContainer)),
                     modifier = Modifier
@@ -228,7 +227,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                         fontFamily = cardFontCondensed, // font force (ganti di val cardFont)
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
-                            fontSize = 11.sp,      // ukuran teks
+                            fontSize = 12.sp,      // ukuran teks
                             lineHeight = 4.sp,     // tinggi baris AURORA: kecilkan = makin rapat
                             letterSpacing = 1.sp,  // jarak antar huruf
                             lineHeightStyle = trimStyle,
