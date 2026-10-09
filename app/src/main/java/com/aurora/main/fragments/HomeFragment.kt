@@ -213,9 +213,6 @@ fun HomeContent(onLaunchClick: () -> Unit) {
 
             Column(modifier = Modifier.fillMaxWidth()) {
 
-                // ===== BAGIAN ATAS: AURORA / judul / versi =====
-                // Pakai Box (bukan Column): tiap teks diposisikan sendiri lewat padding(top),
-                // jadi jaraknya tidak tergantung tinggi baris font.
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -272,9 +269,7 @@ fun HomeContent(onLaunchClick: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // Warna + alpha overlay bawah (0.55f, ubah sesuai selera)
                         .background(colorResource(id = R.color.surfaceContainerLowest).copy(alpha = 0.55f))
-                        // PADDING overlay bawah: horizontal = kiri-kanan, vertical = atas-bawah
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
