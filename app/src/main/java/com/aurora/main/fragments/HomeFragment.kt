@@ -45,10 +45,13 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.annotation.StyleRes
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.aurora.GameLauncherActivity
 import com.aurora.R
@@ -90,6 +93,23 @@ class HomeFragment : Fragment() {
         }
         
         return view
+    }
+}
+
+/**
+ * Ambil font dari style XML (mis. TextAppearance.Aurora.Title).
+ * Yang dibaca cuma atribut android:fontFamily dari style itu.
+ * Kalau style tidak punya fontFamily, hasilnya FontFamily.Default.
+ */
+@Composable
+fun rememberTextAppearanceFont(@StyleRes styleRes: Int): FontFamily {
+    val context = LocalContext.current
+    return remember(styleRes) {
+        val ta = context.obtainStyledAttributes(styleRes, intArrayOf(android.R.attr.fontFamily))
+        val fontResId = ta.getResourceId(0, 0)
+        ta.recycle()
+        val typeface = if (fontResId != 0) ResourcesCompat.getFont(context, fontResId) else null
+        if (typeface != null) FontFamily(typeface) else FontFamily.Default
     }
 }
 
@@ -174,144 +194,192 @@ fun HomeContent(onLaunchClick: () -> Unit) {
         trim = LineHeightStyle.Trim.Both
     )
 
+    // Font diambil dari style XML. Ganti nama style di sini kalau mau font lain.
+    // Style harus punya <item name="android:fontFamily">@font/nama_font</item>
+    val cardFont = rememberTextAppearanceFont(R.style.TextAppearance_Aurora_Title)
+
     Column(
         modifier = Modifier.fillMaxSize() 
     ) {
         Box(
             modifier = Modifier
+                // PADDING LUAR CARD: horizontal = kiri-kanan, vertical = atas-bawah
                 .padding(horizontal = 12.dp, vertical = 4.dp)
                 .fillMaxWidth()
+                // Radius sudut card
                 .clip(RoundedCornerShape(16.dp))
+                // Background gradasi (lihat cardGradient di atas)
                 .background(brush = cardGradient)
         ) {
-            // Logo watermark: dibungkus matchParentSize supaya ukuran logo
-            // TIDAK ikut menambah tinggi card (penyebab gap di bawah overlay)
+            // Logo watermark (dibungkus matchParentSize supaya tidak menambah tinggi card)
             Box(modifier = Modifier.matchParentSize()) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_dex_space),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
+                    // alpha logo: 0f = hilang, 1f = pekat
                     alpha = 0.1f,
+                    // Warna logo: tambahkan colorFilter = ColorFilter.tint(colorResource(R.color.xxx))
+                    // (import androidx.compose.ui.graphics.ColorFilter)
                     modifier = Modifier
+                        // Ukuran logo
                         .requiredSize(220.dp)
                         .align(Alignment.CenterEnd)
+                        // Geser posisi logo (x = kanan+, y = bawah+)
                         .offset(x = 60.dp, y = 10.dp)
                 )
             }
 
             Column(modifier = Modifier.fillMaxWidth()) {
 
-                // --- Bagian Paruh Atas ---
+                // ===== BAGIAN ATAS: AURORA / judul / versi =====
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // PADDING DALAM BAGIAN ATAS
                         .padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 12.dp)
                 ) {
                     Text(
                         text = "AURORA",
                         color = colorResource(id = R.color.outline),
+                        fontFamily = cardFont,
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
-                            fontSize = 11.sp,
-                            lineHeight = 14.sp,
-                            letterSpacing = 1.sp,
+                            fontSize = 11.sp,      // ukuran teks
+                            lineHeight = 14.sp,    // tinggi baris (jaga >= fontSize)
+                            letterSpacing = 1.sp,  // jarak antar huruf
                             lineHeightStyle = trimStyle
                         ),
+                        // margin bawah AURORA
                         modifier = Modifier.padding(bottom = 0.dp)
                     )
                     Text(
                         text = stringResource(id = R.string.tag_title_dex_space),
                         color = colorResource(id = R.color.onSurface),
+                        fontFamily = cardFont,
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             fontSize = 28.sp,
                             lineHeight = 34.sp,
                             lineHeightStyle = trimStyle
                         ),
+                        // margin atas / bawah judul
                         modifier = Modifier.padding(top = 0.dp, bottom = 2.dp)
                     )
                     Text(
                         text = versionText,
                         color = colorResource(id = R.color.outline),
+                        fontFamily = cardFont,
                         style = TextStyle(
                             fontSize = 11.sp,
                             lineHeight = 14.sp,
                             lineHeightStyle = trimStyle
                         ),
+                        // margin atas versi
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
 
-                // --- Bagian Paruh Bawah ---
+                // ===== BAGIAN BAWAH: uptime, PID, tombol Launch =====
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // Overlay semi-transparan, menempel ke dasar card
+                        // Warna + alpha overlay bawah (0.55f, ubah sesuai selera)
                         .background(colorResource(id = R.color.surfaceContainerLowest).copy(alpha = 0.55f))
+                        // PADDING overlay bawah: horizontal = kiri-kanan, vertical = atas-bawah
                         .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Widget Uptime dan PID
                     Row(
+                        // JARAK antara kolom UPTIME dan PID
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
-                        // Col Uptime
+                        // --- Kolom UPTIME ---
                         Column {
                             Text(
                                 text = "UPTIME",
                                 color = colorResource(id = R.color.outline),
+                                fontFamily = cardFont,
                                 fontWeight = FontWeight.SemiBold,
-                                style = TextStyle(fontSize = 12.sp, lineHeight = 14.sp, lineHeightStyle = trimStyle),
+                                style = TextStyle(
+                                    fontSize = 12.sp,    // ukuran label
+                                    lineHeight = 14.sp,
+                                    letterSpacing = 0.5.sp,
+                                    lineHeightStyle = trimStyle
+                                )
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
+                            // Margin top nilai uptime (0.dp = rapat ke label)
                             Text(
                                 text = uptime,
                                 color = colorResource(id = R.color.onSurface),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                fontFamily = cardFont,
+                                fontWeight = FontWeight.Bold,
+                                style = TextStyle(
+                                    fontSize = 16.sp,    // ukuran nilai
+                                    lineHeight = 20.sp,
+                                    lineHeightStyle = trimStyle
+                                ),
+                                modifier = Modifier.padding(top = 0.dp)
                             )
                         }
-                        
-                        // Col PID
+
+                        // --- Kolom PID (dibuat sama persis dengan UPTIME) ---
                         Column {
                             Text(
                                 text = "PID",
                                 color = colorResource(id = R.color.outline),
-                                fontSize = 12.sp,
+                                fontFamily = cardFont,
                                 fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 0.5.sp
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    lineHeight = 14.sp,
+                                    letterSpacing = 0.5.sp,
+                                    lineHeightStyle = trimStyle
+                                )
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = pid,
                                 color = colorResource(id = R.color.onSurface),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
+                                fontFamily = cardFont,
+                                fontWeight = FontWeight.Bold,
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    lineHeight = 20.sp,
+                                    lineHeightStyle = trimStyle
+                                ),
+                                modifier = Modifier.padding(top = 0.dp)
                             )
                         }
                     }
 
-                    // Tombol "Launch"
+                    // --- Tombol Launch ---
                     Button(
                         onClick = onLaunchClick,
                         colors = ButtonDefaults.buttonColors(
+                            // warna background tombol
                             containerColor = colorResource(id = R.color.primaryContainer),
+                            // warna teks + icon tombol
                             contentColor = colorResource(id = R.color.primary)
                         ),
                         shape = RoundedCornerShape(24.dp),
+                        // PADDING tombol kiri-kanan (horizontal) dan atas-bawah (vertical)
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                        // tinggi tombol
                         modifier = Modifier.height(36.dp)
                     ) {
                         Text(
                             text = "Launch",
+                            fontFamily = cardFont,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
+                        // jarak teks ke icon
                         Spacer(modifier = Modifier.width(6.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.ic_launch),
                             contentDescription = null,
+                            // warna icon khusus: tambah tint = colorResource(R.color.xxx)
                             modifier = Modifier.size(16.dp)
                         )
                     }
