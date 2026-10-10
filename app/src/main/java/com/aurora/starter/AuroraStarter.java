@@ -13,9 +13,9 @@ public class AuroraStarter {
         String apkPath = context.getApplicationInfo().sourceDir;
         String libPath = context.getApplicationInfo().nativeLibraryDir;
 
-        return "(CLASSPATH='" + apkPath + "'"
-                + " /system/bin/app_process"
-                + " '-Daurora.library.path=" + libPath + "'"
+        return "(CLASSPATH=" + apkPath
+                + " app_process"
+                + " -Daurora.library.path=" + libPath
                 + " /system/bin"
                 + " --nice-name=" + PROCESS_NAME
                 + " " + SERVER_CLASS + ")&";
