@@ -1,4 +1,7 @@
-Plugins {
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+
+plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
 }
@@ -13,7 +16,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0-alpha1"
+        versionName = "1.0-alpha2"
 
         ndk {
             abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a", "x86_64"))
@@ -61,7 +64,7 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            jvmTarget.set(JVM_17)
         }
     }
 
@@ -85,10 +88,8 @@ android {
         }
         
         variant.outputs.all {
-            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            if (variant.buildType.name == "release") {
-                output.outputFileName = "app-release-$commitHash.apk"
-            }
+            val output = this as BaseVariantOutputImpl
+            output.outputFileName = "app-${variant.buildType.name}-$commitHash.apk"
         }
     }
 }
