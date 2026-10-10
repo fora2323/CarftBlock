@@ -18,19 +18,19 @@ class AuroraService {
         private const val DAEMON_PORT = 52847
         private val START_TIME = System.currentTimeMillis()
 
-        // Mencegah memory leak dengan membatasi proses bersamaan
         private val threadPool: ExecutorService = Executors.newFixedThreadPool(5)
 
         @JvmStatic
         fun main(args: Array<String>) {
-            // 1. Sinyal bahwa mesin sukses mengambil alih Hak Akses ADB (UID 2000)
+            if (Looper.getMainLooper() == null) {
+                Looper.prepareMainLooper()
+            }
+
             println("info: aurora_starter exit with 0")
-            println("auroa_PID_REPORT:" + android.os.Process.myPid())
+            println("aurora_PID_REPORT:" + android.os.Process.myPid())
 
             var serverSocket: ServerSocket? = null
             try {
-                // 2. Buka jalur. Jika port sudah dipakai, berarti ini duplikat. 
-                // Kita matikan proses yang baru ini saja.
                 serverSocket = ServerSocket(DAEMON_PORT)
                 println("Aurora Daemon started on Private Port: $DAEMON_PORT")
             } catch (e: Exception) {
@@ -39,12 +39,8 @@ class AuroraService {
                 return
             }
 
-            // ========================================================
-            // 3. IMMORTAL LOOP (RAHASIA SHIZUKU AGAR TIDAK MATI)
-            // ========================================================
             while (true) {
                 try {
-                    // Mesin diam di sini, menunggu aplikasi mengirim perintah
                     val clientSocket = serverSocket!!.accept()
                     handleClientRequest(clientSocket)
                 } catch (e: Exception) {
@@ -55,12 +51,10 @@ class AuroraService {
 
         private fun handleClientRequest(socket: Socket) {
             threadPool.execute {
-                // Menggunakan Kotlin 'use' agar socket OTOMATIS tertutup meski error
                 try {
                     socket.use { s ->
                         BufferedReader(InputStreamReader(s.inputStream)).use { `in` ->
                             PrintWriter(s.outputStream, true).use { out ->
-                                
                                 val request = `in`.readLine()
                                 if (request != null) {
                                     if (request == "PING") {
@@ -73,15 +67,12 @@ class AuroraService {
                             }
                         }
                     }
-                } catch (ignored: Exception) {
-                    // Error aman, socket otomatis ditutup
-                }
+                } catch (ignored: Exception) {}
             }
         }
 
         private fun executeCommand(command: String, out: PrintWriter) {
             try {
-                // Menjalankan shell command sebagai UID 2000 (ADB/Root)
                 val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
                 val reader = BufferedReader(InputStreamReader(process.inputStream))
                 val errorReader = BufferedReader(InputStreamReader(process.errorStream))
