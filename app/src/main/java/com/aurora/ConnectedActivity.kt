@@ -48,8 +48,8 @@ class ConnectedActivity : BaseCompatActivity() {
 
     companion object {
         private const val TAG = "ConnectedActivity"
-        private const val DAEMON_MAX_RETRIES = 20
-        private const val DAEMON_RETRY_DELAY = 1200L
+        private const val DAEMON_MAX_RETRIES = 10
+        private const val DAEMON_RETRY_DELAY = 500L
         private const val DAEMON_CONNECT_TIMEOUT = 1200
         private const val DAEMON_SO_TIMEOUT = 2000
     }
