@@ -24,11 +24,6 @@
     native <methods>;
 }
 
--keep class rikka.shizuku.ShizukuProvider { *; }
--keep class rikka.shizuku.ShizukuProvider$* { *; }
--keep class moe.shizuku.api.BinderContainer { *; }
--keep class moe.shizuku.api.BinderContainer$* { *; }
-
 -allowaccessmodification
 -ignorewarnings
 -dontnote
@@ -36,3 +31,8 @@
 -optimizations !code/simplification/arithmetic
 -optimizationpasses 5
 -overloadaggressively
+
+-keep class rikka.shizuku.ShizukuProvider { *; }
+-keep class rikka.shizuku.ShizukuProvider$* { *; }
+-keep class moe.shizuku.api.BinderContainer { *; }
+-keep class moe.shizuku.api.BinderContainer$* { *; }

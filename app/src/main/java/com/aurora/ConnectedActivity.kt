@@ -48,6 +48,10 @@ class ConnectedActivity : BaseCompatActivity() {
 
     companion object {
         private const val TAG = "ConnectedActivity"
+        private const val DAEMON_MAX_RETRIES = 20
+        private const val DAEMON_RETRY_DELAY = 1200L
+        private const val DAEMON_CONNECT_TIMEOUT = 1200
+        private const val DAEMON_SO_TIMEOUT = 2000
     }
 
     private val activityScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -65,7 +69,6 @@ class ConnectedActivity : BaseCompatActivity() {
         val btnPairing: MaterialButton = findViewById(R.id.btn_pairing)
         val btnStart: MaterialButton = findViewById(R.id.btn_start)
 
-        // Tampilkan card TCP hanya jika perangkat sudah pernah ter-pairing
         val keyStore = PreferenceAdbKeyStore(AuroraApplication.getAdbPrefs())
         if (keyStore.get() != null) {
             cardTcp.visibility = View.VISIBLE
@@ -93,8 +96,8 @@ class ConnectedActivity : BaseCompatActivity() {
                     var isAlreadyRunning = false
                     try {
                         Socket().use { socket ->
-                            socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
-                            socket.soTimeout = 500
+                            socket.connect(InetSocketAddress("127.0.0.1", 52847), DAEMON_CONNECT_TIMEOUT)
+                            socket.soTimeout = DAEMON_SO_TIMEOUT
                             val out = PrintWriter(socket.getOutputStream(), true)
                             val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
                             out.println("PING")
@@ -131,21 +134,19 @@ class ConnectedActivity : BaseCompatActivity() {
                     client.connect()
 
                     Log.d(TAG, "Eksekusi command via TCP 5555: $command")
-                    // FIX 3: Perbaikan parameter lambda agar tidak unresolved reference
                     client.shellCommand(command) { output -> 
                         Log.d(TAG, "AURORA_STARTER: $output")
                     }
                     client.close()
 
-                    // 3. Verifikasi daemon
+                    // 3. Verifikasi daemon menggunakan variabel dari companion object
                     var isDaemonReady = false
-                    // FIX 2: Tambah retry jadi 20 dan timeout jadi 1000 di verifikasi TCP
-                    for (i in 1..20) {
-                        delay(500)
+                    for (i in 1..DAEMON_MAX_RETRIES) {
+                        delay(DAEMON_RETRY_DELAY)
                         try {
                             Socket().use { socket ->
-                                socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
-                                socket.soTimeout = 1000
+                                socket.connect(InetSocketAddress("127.0.0.1", 52847), DAEMON_CONNECT_TIMEOUT)
+                                socket.soTimeout = DAEMON_SO_TIMEOUT
                                 val out = PrintWriter(socket.getOutputStream(), true)
                                 val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
                                 out.println("PING")
@@ -160,7 +161,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     if (!isDaemonReady) {
-                        throw Exception("Daemon TCP gagal merespons setelah 10 detik.")
+                        throw Exception("Daemon TCP gagal merespons setelah batas waktu habis (±24 detik).")
                     }
                 }
 
@@ -262,8 +263,8 @@ class ConnectedActivity : BaseCompatActivity() {
                     var isAlreadyRunning = false
                     try {
                         Socket().use { socket ->
-                            socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
-                            socket.soTimeout = 500
+                            socket.connect(InetSocketAddress("127.0.0.1", 52847), DAEMON_CONNECT_TIMEOUT)
+                            socket.soTimeout = DAEMON_SO_TIMEOUT
                             val out = PrintWriter(socket.getOutputStream(), true)
                             val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
                             
@@ -305,11 +306,11 @@ class ConnectedActivity : BaseCompatActivity() {
                             // Verifikasi apakah daemon berhasil hidup via root
                             var rootSuccess = false
                             for (i in 1..5) {
-                                delay(500)
+                                delay(DAEMON_RETRY_DELAY)
                                 try {
                                     Socket().use { socket ->
-                                        socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
-                                        socket.soTimeout = 500
+                                        socket.connect(InetSocketAddress("127.0.0.1", 52847), DAEMON_CONNECT_TIMEOUT)
+                                        socket.soTimeout = DAEMON_SO_TIMEOUT
                                         val out = PrintWriter(socket.getOutputStream(), true)
                                         val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
                                         out.println("PING")
@@ -372,25 +373,20 @@ class ConnectedActivity : BaseCompatActivity() {
                     client.connect()
                     
                     Log.d(TAG, "Step 2: Menjalankan Eksekusi -> $command")
-                    // FIX 3: Perbaikan parameter lambda agar tidak unresolved reference
                     client.shellCommand(command) { output -> 
                         Log.d(TAG, "AURORA_STARTER: $output")
                     }
                     client.close()
 
-                    // ==========================================
-                    // PERBAIKAN: VERIFIKASI DAEMON
-                    // ==========================================
                     Log.d(TAG, "Step 3: Memverifikasi apakah daemon berhasil hidup...")
                     var isDaemonReady = false
                     
-                    // FIX 1: Tambah retry jadi 20 dan timeout jadi 1000 di verifikasi Start
-                    for (i in 1..20) {
-                        delay(500) // Tunggu 0.5 detik setiap percobaan
+                    for (i in 1..DAEMON_MAX_RETRIES) {
+                        delay(DAEMON_RETRY_DELAY)
                         try {
                             Socket().use { socket ->
-                                socket.connect(InetSocketAddress("127.0.0.1", 52847), 500)
-                                socket.soTimeout = 1000
+                                socket.connect(InetSocketAddress("127.0.0.1", 52847), DAEMON_CONNECT_TIMEOUT)
+                                socket.soTimeout = DAEMON_SO_TIMEOUT
                                 val out = PrintWriter(socket.getOutputStream(), true)
                                 val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
                                 
@@ -408,7 +404,7 @@ class ConnectedActivity : BaseCompatActivity() {
                     }
 
                     if (!isDaemonReady) {
-                        throw Exception("Daemon gagal merespons setelah 10 detik. Coba start ulang.")
+                        throw Exception("Daemon gagal merespons setelah batas waktu habis (±24 detik). Coba start ulang.")
                     }
                     Log.d(TAG, "Step 4: Daemon terverifikasi hidup!")
                 }
