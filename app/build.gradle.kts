@@ -1,5 +1,3 @@
-import com.android.build.gradle.AppExtension
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 
 plugins {
@@ -81,20 +79,17 @@ android {
     }
 }
 
-val appExtension = project.extensions.getByType(AppExtension::class.java)
-appExtension.applicationVariants.all {
-    val variant = this
-    
+androidComponents {
     val commitHash = try {
-        Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "HEAD"))
-            .inputStream.reader().readText().trim()
+        Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "HEAD")).inputStream.reader().readText().trim()
     } catch (e: Exception) {
         "unknown"
     }
-    
-    variant.outputs.all {
-        val output = this as BaseVariantOutputImpl
-        output.outputFileName = "app-${variant.buildType.name}-$commitHash.apk"
+
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("app-${variant.name}-$commitHash.apk")
+        }
     }
 }
 
