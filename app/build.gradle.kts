@@ -1,3 +1,4 @@
+import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 
@@ -16,10 +17,10 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0-alpha2"
+        versionName = "1.0-alpha1"
 
         ndk {
-            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a", "x86_64", "x86"))
+            abiFilters.addAll(setOf("armeabi-v7a", "arm64-v8a", "x86_64"))
         }
 
         externalNativeBuild {
@@ -78,19 +79,22 @@ android {
         prefab = true
         compose = true 
     }
+}
 
-    applicationVariants.all {
-        val variant = this
-        val commitHash = try {
-            Runtime.getRuntime().exec("git rev-parse --short HEAD").inputStream.reader().readText().trim()
-        } catch (e: Exception) {
-            "unknown"
-        }
-        
-        variant.outputs.all {
-            val output = this as BaseVariantOutputImpl
-            output.outputFileName = "app-${variant.buildType.name}-$commitHash.apk"
-        }
+val appExtension = project.extensions.getByType(AppExtension::class.java)
+appExtension.applicationVariants.all {
+    val variant = this
+    
+    val commitHash = try {
+        Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "--short", "HEAD"))
+            .inputStream.reader().readText().trim()
+    } catch (e: Exception) {
+        "unknown"
+    }
+    
+    variant.outputs.all {
+        val output = this as BaseVariantOutputImpl
+        output.outputFileName = "app-${variant.buildType.name}-$commitHash.apk"
     }
 }
 
