@@ -1,4 +1,4 @@
-plugins {
+Plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
 }
@@ -74,6 +74,22 @@ android {
     buildFeatures {
         prefab = true
         compose = true 
+    }
+
+    applicationVariants.all {
+        val variant = this
+        val commitHash = try {
+            Runtime.getRuntime().exec("git rev-parse --short HEAD").inputStream.reader().readText().trim()
+        } catch (e: Exception) {
+            "unknown"
+        }
+        
+        variant.outputs.all {
+            val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            if (variant.buildType.name == "release") {
+                output.outputFileName = "app-release-$commitHash.apk"
+            }
+        }
     }
 }
 
