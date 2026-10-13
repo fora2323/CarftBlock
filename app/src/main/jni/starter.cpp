@@ -11,6 +11,7 @@
 #include <cerrno>
 #include <string>
 #include <termios.h>
+#include <csignal>
 #include "android.h"
 #include "misc.h"
 #include "selinux.h"
@@ -92,8 +93,12 @@ v_current = (uintptr_t) v + v_size - sizeof(char *); \
 #define ARG_PUSH_DEBUG_ONLY(v, arg)
 #endif
 
+    char dex_path_copy[PATH_MAX]{0};
+    strncpy(dex_path_copy, dex_path, sizeof(dex_path_copy) - 1);
+    char *parent_dir = dirname(dex_path_copy);
+
     char lib_path[PATH_MAX]{0};
-    snprintf(lib_path, PATH_MAX, "%s/lib/%s", dirname(dex_path), ABI);
+    snprintf(lib_path, sizeof(lib_path), "%s/lib/%s", parent_dir, ABI);
 
     ARG(argv)
     ARG_PUSH(argv, "/system/bin/app_process")
@@ -114,6 +119,9 @@ v_current = (uintptr_t) v + v_size - sizeof(char *); \
 }
 
 static void start_server(const char *path, const char *main_class, const char *process_name) {
+    signal(SIGHUP, SIG_IGN);
+    signal(SIGPIPE, SIG_IGN);
+
     pid_t pid = fork();
     switch (pid) {
         case -1: {
@@ -123,6 +131,14 @@ static void start_server(const char *path, const char *main_class, const char *p
         case 0: {
             LOGD("child");
             setsid();
+            signal(SIGHUP, SIG_IGN);
+            signal(SIGPIPE, SIG_IGN);
+
+            pid_t pid2 = fork();
+            if (pid2 > 0) {
+                _exit(EXIT_SUCCESS);
+            }
+
             chdir("/");
             int fd = open("/dev/null", O_RDWR);
             if (fd != -1) {
