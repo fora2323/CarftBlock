@@ -46,7 +46,6 @@ public class Hud implements Disposable {
         pixBtn.fill();
         Texture texBtn = new Texture(pixBtn);
         genTextures.add(texBtn);
-        skin.add("btn-up", new TextureRegionDrawable(texBtn));
         pixBtn.dispose();
 
         // Tombol Ditekan
@@ -55,12 +54,11 @@ public class Hud implements Disposable {
         pixBtnDown.fill();
         Texture texBtnDown = new Texture(pixBtnDown);
         genTextures.add(texBtnDown);
-        skin.add("btn-down", new TextureRegionDrawable(texBtnDown));
         pixBtnDown.dispose();
 
         TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
-        btnStyle.up = skin.getDrawable("btn-up");
-        btnStyle.down = skin.getDrawable("btn-down");
+        btnStyle.up = new TextureRegionDrawable(texBtn);
+        btnStyle.down = new TextureRegionDrawable(texBtnDown);
         btnStyle.font = skin.getFont("default-font");
         skin.add("default", btnStyle);
 
