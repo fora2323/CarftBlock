@@ -41,6 +41,11 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     private final Vector3 camForward = new Vector3();
     private final Vector3 rayPos = new Vector3();
 
+    // Variable untuk Slide mechanic
+    private boolean isSliding = false;
+    private float slideTimer = 0f;
+    private final Vector3 slideDir = new Vector3();
+
     private float yaw = 0f;
     private float pitch = -10f;
     private boolean onGround = true;
@@ -114,8 +119,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         if (onGround) {
             stance = CharacterModel.STANCE_STAND;
             isDolphinDiving = false;
+            
+            // Slide Jump ala game AAA
+            if (isSliding) {
+                isSliding = false;
+                vel.y = 7.0f;
+            } else {
+                vel.y = 8.2f;
+            }
+            
             hud.syncStanceButtons(stance);
-            vel.y = 8.2f;
             onGround = false;
         }
     }
@@ -123,6 +136,31 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     @Override
     public void onCrouchToggled() {
         if (isDolphinDiving) return;
+
+        float padMag = (float) Math.hypot(hud.touchpad.getKnobPercentX(), hud.touchpad.getKnobPercentY());
+
+        // Cek jika sedang lari kencang (joystick ditarik penuh > 0.7)
+        if (stance == CharacterModel.STANCE_STAND && padMag > 0.7f && onGround) {
+            isSliding = true;
+            slideTimer = 0.85f; // Durasi slide
+            stance = CharacterModel.STANCE_CROUCH;
+            hud.syncStanceButtons(stance);
+
+            // Kunci arah luncuran (slide) berdasarkan arah pandang saat itu
+            float rad = (float) Math.toRadians(yaw);
+            slideDir.set((float) Math.sin(rad), 0f, (float) Math.cos(rad)).nor();
+            return;
+        }
+
+        // Batalkan slide jika klik jongkok lagi saat masih meluncur
+        if (isSliding) {
+            isSliding = false;
+            stance = CharacterModel.STANCE_STAND;
+            hud.syncStanceButtons(stance);
+            return;
+        }
+
+        // Jongkok Normal
         stance = (stance == CharacterModel.STANCE_CROUCH)
                 ? CharacterModel.STANCE_STAND
                 : CharacterModel.STANCE_CROUCH;
@@ -143,6 +181,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             if (vel.y < 3.0f) vel.y = 3.5f;
             return;
         }
+
+        isSliding = false; // Batalkan slide jika tiarap
 
         stance = (stance == CharacterModel.STANCE_PRONE)
                 ? CharacterModel.STANCE_STAND
@@ -197,9 +237,20 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         float sin = (float) Math.sin(rad);
         float cos = (float) Math.cos(rad);
 
+        // Movement Logic
         if (isDolphinDiving && !onGround) {
             vel.x = diveVel.x;
             vel.z = diveVel.z;
+        } else if (isSliding) {
+            slideTimer -= delta;
+            // Momentum: Meluncur cepat di awal lalu melambat realistis ke kecepatan jongkok
+            float slideSpeed = 3.5f + 6.5f * (slideTimer / 0.85f);
+            vel.x = slideDir.x * slideSpeed;
+            vel.z = slideDir.z * slideSpeed;
+
+            if (slideTimer <= 0f) {
+                isSliding = false; // Berhenti meluncur
+            }
         } else {
             vel.x = (sin * joyY - cos * joyX) * maxSpeed;
             vel.z = (cos * joyY + sin * joyX) * maxSpeed;
@@ -211,16 +262,23 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         float playerHeight = (stance == CharacterModel.STANCE_STAND) ? 1.75f
                 : (stance == CharacterModel.STANCE_CROUCH ? 1.25f : 0.65f);
 
+        // X Collision
         float nextX = pos.x + vel.x * delta;
         if (!collidesWithArena(nextX, pos.y, pos.z, playerHeight)) {
             pos.x = nextX;
+        } else if (isSliding) {
+            isSliding = false; // Batalkan slide otomatis jika nabrak tembok
         }
 
+        // Z Collision
         float nextZ = pos.z + vel.z * delta;
         if (!collidesWithArena(pos.x, pos.y, nextZ, playerHeight)) {
             pos.z = nextZ;
+        } else if (isSliding) {
+            isSliding = false; // Batalkan slide otomatis jika nabrak tembok
         }
 
+        // Y Collision
         float nextY = pos.y + vel.y * delta;
         if (vel.y <= 0f) {
             if (collidesWithArena(pos.x, nextY, pos.z, playerHeight)) {
@@ -245,10 +303,13 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             }
         }
 
-        playerAnimator.update(delta, pos, yaw, pitch, joyMag, onGround, stance, isDolphinDiving);
+        // Update Animator (termasuk isSliding state)
+        playerAnimator.update(delta, pos, yaw, pitch, joyMag, onGround, stance, isDolphinDiving, isSliding);
 
+        // Camera Dynamics (Lebih rendah saat meluncur dibanding saat jongkok diam)
         float targetEye = (stance == CharacterModel.STANCE_STAND) ? 1.62f
-                : (stance == CharacterModel.STANCE_CROUCH ? 1.12f : 0.42f);
+                : (stance == CharacterModel.STANCE_CROUCH ? (isSliding ? 0.75f : 1.12f) : 0.42f);
+        
         currentEyeHeight = MathUtils.lerp(currentEyeHeight, targetEye, Math.min(1f, delta * 12f));
         camera.fieldOfView = MathUtils.lerp(camera.fieldOfView, targetFov, Math.min(1f, delta * 12f));
 
