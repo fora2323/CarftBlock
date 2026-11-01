@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-	compileSdk 34
-	
-	useLibrary 'org.apache.http.legacy'defaultConfig {
+	compileSdk 37
+
+defaultConfig {
 		applicationId "org.carft.block"
 		namespace "org.carft.block"
-		minSdkVersion 24
-		targetSdkVersion 34
+		minSdkVersion 26
+		targetSdkVersion 36
 		versionCode 1
 		versionName "1.0"
 	}
@@ -23,5 +23,4 @@ android {
 }
 
 dependencies {
-	implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
