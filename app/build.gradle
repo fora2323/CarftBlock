@@ -1,26 +1,85 @@
 plugins {
-	id 'com.android.application'
+    id 'com.android.application'
+}
+
+def gdxVersion = '1.13.1'
+
+configurations {
+    natives
 }
 
 android {
-	compileSdk 37
+    namespace "org.carft.block"
+    compileSdk 37
 
-defaultConfig {
-		applicationId "org.carft.block"
-		namespace "org.carft.block"
-		minSdkVersion 26
-		targetSdkVersion 36
-		versionCode 1
-		versionName "1.0"
-	}
-	
-	buildTypes {
-		release {
-			minifyEnabled false
-			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-		}
-	}
+    defaultConfig {
+        applicationId "org.carft.block"
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        aurora {
+            storeFile rootProject.file('key-store-aurora.jks')
+            storePassword 'aurora23'
+            keyAlias 'Aurora'
+            keyPassword 'aurora23'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.aurora
+        }
+        release {
+            signingConfig signingConfigs.aurora
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir layout.buildDirectory.dir('gdx-natives')
+        }
+    }
+}
+
+tasks.register('copyAndroidNatives', Sync) {
+    into layout.buildDirectory.dir('gdx-natives')
+    ['armeabi-v7a', 'arm64-v8a'].each { abi ->
+        into(abi) {
+            from {
+                configurations.natives.filter {
+                    it.name.endsWith("natives-${abi}.jar")
+                }.collect {
+                    zipTree(it)
+                }
+            }
+            include '*.so'
+        }
+    }
+}
+
+tasks.matching { it.name ==~ /merge.*JniLibFolders/ }.configureEach {
+    dependsOn 'copyAndroidNatives'
 }
 
 dependencies {
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+    
+    implementation "com.badlogicgames.gdx:gdx-bullet:$gdxVersion"
+    natives "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-bullet-platform:$gdxVersion:natives-arm64-v8a"
 }
