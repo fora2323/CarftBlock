@@ -35,7 +35,7 @@ android {
         }
         release {
             signingConfig signingConfigs.aurora
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

@@ -11,7 +11,8 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import org.carft.block.entity.CharacterModel;
@@ -28,6 +29,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     private ModelBatch modelBatch;
     private Environment environment;
 
+    // SHADOW SYSTEM
+    private DirectionalShadowLight shadowLight;
+    private ModelBatch shadowBatch;
+
     private VoxelArena arena;
     private VoxelRenderer renderer;
     private Hud hud;
@@ -39,10 +44,12 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     private final Vector3 vel = new Vector3();
     private final Vector3 diveVel = new Vector3();
     private final Vector3 camForward = new Vector3();
+    private final Vector3 camRight = new Vector3(); // Untuk TPP Over The Shoulder
     private final Vector3 rayPos = new Vector3();
 
-    // Variable untuk Slide mechanic
+    // Variable mechanic
     private boolean isSliding = false;
+    private boolean isClimbing = false;
     private float slideTimer = 0f;
     private final Vector3 slideDir = new Vector3();
 
@@ -90,9 +97,17 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
 
     private void setup3DWorld() {
         modelBatch = new ModelBatch();
+        shadowBatch = new ModelBatch(new DepthShaderProvider());
+
         environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.5f, 0.5f, 0.5f, 1f));
-        environment.add(new DirectionalLight().set(0.85f, 0.85f, 0.85f, -0.6f, -0.9f, -0.4f));
+        // Pencahayaan ambient dinaikkan sedikit agar bayangan tidak gelap gulita
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.65f, 1f));
+
+        // Inisiasi Shadow Light (2048x2048 agar bayangan tajam)
+        shadowLight = new DirectionalShadowLight(2048, 2048, 80f, 80f, 1f, 300f);
+        shadowLight.set(0.7f, 0.7f, 0.7f, -0.6f, -0.9f, -0.4f);
+        environment.add(shadowLight);
+        environment.shadowMap = shadowLight;
 
         camera = new PerspectiveCamera(75f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.near = 0.1f;
@@ -120,7 +135,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             stance = CharacterModel.STANCE_STAND;
             isDolphinDiving = false;
             
-            // Slide Jump ala game AAA
             if (isSliding) {
                 isSliding = false;
                 vel.y = 7.0f;
@@ -130,29 +144,29 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             
             hud.syncStanceButtons(stance);
             onGround = false;
+        } else if (isClimbing) {
+            vel.y = 7.0f;
+            isClimbing = false;
         }
     }
 
     @Override
     public void onCrouchToggled() {
-        if (isDolphinDiving) return;
+        if (isDolphinDiving || isClimbing) return;
 
         float padMag = (float) Math.hypot(hud.touchpad.getKnobPercentX(), hud.touchpad.getKnobPercentY());
 
-        // Cek jika sedang lari kencang (joystick ditarik penuh > 0.7)
         if (stance == CharacterModel.STANCE_STAND && padMag > 0.7f && onGround) {
             isSliding = true;
-            slideTimer = 0.85f; // Durasi slide
+            slideTimer = 0.85f;
             stance = CharacterModel.STANCE_CROUCH;
             hud.syncStanceButtons(stance);
 
-            // Kunci arah luncuran (slide) berdasarkan arah pandang saat itu
             float rad = (float) Math.toRadians(yaw);
             slideDir.set((float) Math.sin(rad), 0f, (float) Math.cos(rad)).nor();
             return;
         }
 
-        // Batalkan slide jika klik jongkok lagi saat masih meluncur
         if (isSliding) {
             isSliding = false;
             stance = CharacterModel.STANCE_STAND;
@@ -160,7 +174,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             return;
         }
 
-        // Jongkok Normal
         stance = (stance == CharacterModel.STANCE_CROUCH)
                 ? CharacterModel.STANCE_STAND
                 : CharacterModel.STANCE_CROUCH;
@@ -169,6 +182,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
 
     @Override
     public void onProneToggled() {
+        if (isClimbing) return;
+
         float padMag = (float) Math.hypot(hud.touchpad.getKnobPercentX(), hud.touchpad.getKnobPercentY());
 
         if (!onGround && padMag > 0.45f && !isDolphinDiving) {
@@ -182,7 +197,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             return;
         }
 
-        isSliding = false; // Batalkan slide jika tiarap
+        isSliding = false; 
 
         stance = (stance == CharacterModel.STANCE_PRONE)
                 ? CharacterModel.STANCE_STAND
@@ -237,48 +252,61 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         float sin = (float) Math.sin(rad);
         float cos = (float) Math.cos(rad);
 
-        // Movement Logic
-        if (isDolphinDiving && !onGround) {
+        float playerHeight = (stance == CharacterModel.STANCE_STAND) ? 1.75f
+                : (stance == CharacterModel.STANCE_CROUCH ? 1.25f : 0.65f);
+
+        if (!onGround && !isSliding && !isDolphinDiving) {
+            float fwdX = sin * 0.4f;
+            float fwdZ = cos * 0.4f;
+            boolean wallInFront = collidesWithArena(pos.x + fwdX, pos.y, pos.z + fwdZ, playerHeight);
+            
+            if (wallInFront && joyY > 0.5f) {
+                isClimbing = true;
+                vel.y = 4.2f; 
+                vel.x = 0f;
+                vel.z = 0f;
+            } else {
+                isClimbing = false;
+            }
+        } else {
+            isClimbing = false;
+        }
+
+        if (isClimbing) {
+            // Bergerak ke atas
+        } else if (isDolphinDiving && !onGround) {
             vel.x = diveVel.x;
             vel.z = diveVel.z;
         } else if (isSliding) {
             slideTimer -= delta;
-            // Momentum: Meluncur cepat di awal lalu melambat realistis ke kecepatan jongkok
             float slideSpeed = 3.5f + 6.5f * (slideTimer / 0.85f);
             vel.x = slideDir.x * slideSpeed;
             vel.z = slideDir.z * slideSpeed;
-
-            if (slideTimer <= 0f) {
-                isSliding = false; // Berhenti meluncur
-            }
+            if (slideTimer <= 0f) isSliding = false; 
         } else {
             vel.x = (sin * joyY - cos * joyX) * maxSpeed;
             vel.z = (cos * joyY + sin * joyX) * maxSpeed;
         }
 
-        vel.y -= 22f * delta;
-        if (vel.y < -25f) vel.y = -25f;
+        if (!isClimbing) {
+            vel.y -= 22f * delta;
+            if (vel.y < -25f) vel.y = -25f;
+        }
 
-        float playerHeight = (stance == CharacterModel.STANCE_STAND) ? 1.75f
-                : (stance == CharacterModel.STANCE_CROUCH ? 1.25f : 0.65f);
-
-        // X Collision
         float nextX = pos.x + vel.x * delta;
         if (!collidesWithArena(nextX, pos.y, pos.z, playerHeight)) {
             pos.x = nextX;
         } else if (isSliding) {
-            isSliding = false; // Batalkan slide otomatis jika nabrak tembok
+            isSliding = false; 
         }
 
-        // Z Collision
         float nextZ = pos.z + vel.z * delta;
         if (!collidesWithArena(pos.x, pos.y, nextZ, playerHeight)) {
             pos.z = nextZ;
         } else if (isSliding) {
-            isSliding = false; // Batalkan slide otomatis jika nabrak tembok
+            isSliding = false;
         }
 
-        // Y Collision
         float nextY = pos.y + vel.y * delta;
         if (vel.y <= 0f) {
             if (collidesWithArena(pos.x, nextY, pos.z, playerHeight)) {
@@ -297,16 +325,15 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         } else {
             if (collidesWithArena(pos.x, nextY, pos.z, playerHeight)) {
                 vel.y = 0f;
+                isClimbing = false; 
             } else {
                 pos.y = nextY;
                 onGround = false;
             }
         }
 
-        // Update Animator (termasuk isSliding state)
-        playerAnimator.update(delta, pos, yaw, pitch, joyMag, onGround, stance, isDolphinDiving, isSliding);
+        playerAnimator.update(delta, pos, yaw, pitch, joyMag, onGround, stance, isDolphinDiving, isSliding, isClimbing);
 
-        // Camera Dynamics (Lebih rendah saat meluncur dibanding saat jongkok diam)
         float targetEye = (stance == CharacterModel.STANCE_STAND) ? 1.62f
                 : (stance == CharacterModel.STANCE_CROUCH ? (isSliding ? 0.75f : 1.12f) : 0.42f);
         
@@ -320,21 +347,31 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
                 cos * (float) Math.cos(pitchRad)
         ).nor();
 
+        // Cari vector Kanan untuk kamera Over The Shoulder
+        camRight.set(camForward).crs(Vector3.Y).nor();
+
         if (thirdPersonView && !scopeActive) {
             float camDist = 3.6f;
+            float otsOffset = 0.65f; // Geser kamera ke Kanan (Bahu Karakter)
+
+            float targetCamX = pos.x + camRight.x * otsOffset;
+            float targetCamY = pos.y + currentEyeHeight;
+            float targetCamZ = pos.z + camRight.z * otsOffset;
+
             for (float d = 0.5f; d <= 3.6f; d += 0.4f) {
-                float cx = pos.x - camForward.x * d;
-                float cy = pos.y + currentEyeHeight - camForward.y * d;
-                float cz = pos.z - camForward.z * d;
+                float cx = targetCamX - camForward.x * d;
+                float cy = targetCamY - camForward.y * d;
+                float cz = targetCamZ - camForward.z * d;
                 if (arena.isSolid((int) Math.floor(cx), (int) Math.floor(cy), (int) Math.floor(cz))) {
                     camDist = Math.max(0.6f, d - 0.5f);
                     break;
                 }
             }
+            
             camera.position.set(
-                    pos.x - camForward.x * camDist,
-                    pos.y + currentEyeHeight - camForward.y * camDist + 0.25f,
-                    pos.z - camForward.z * camDist
+                    targetCamX - camForward.x * camDist,
+                    targetCamY - camForward.y * camDist + 0.25f,
+                    targetCamZ - camForward.z * camDist
             );
         } else {
             camera.position.set(pos.x, pos.y + currentEyeHeight, pos.z);
@@ -396,13 +433,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     }
 
     private void performShootRaycast() {
-        rayPos.set(pos.x, pos.y + currentEyeHeight, pos.z);
+        // BUG AKURASI CROSSHAIR DIPERBAIKI: 
+        // Titik tembak tembak kini berasal tepat dari kamera menuju tengah layar (Crosshair)
+        // Jadi mode FPS / TPP arah tembakan tetap 100% akurat mengenai bidikan
+        rayPos.set(camera.position); 
         for (float t = 0f; t < 60f; t += 0.25f) {
-            int bx = (int) Math.floor(rayPos.x + camForward.x * t);
-            int by = (int) Math.floor(rayPos.y + camForward.y * t);
-            int bz = (int) Math.floor(rayPos.z + camForward.z * t);
+            int bx = (int) Math.floor(rayPos.x + camera.direction.x * t);
+            int by = (int) Math.floor(rayPos.y + camera.direction.y * t);
+            int bz = (int) Math.floor(rayPos.z + camera.direction.z * t);
             if (arena.isSolid(bx, by, bz)) {
-                break;
+                break; // Tembakan mengenai arena
             }
         }
     }
@@ -423,10 +463,23 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         Gdx.gl.glClearColor(0.48f, 0.75f, 0.98f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        modelBatch.begin(camera);
-        renderer.render(modelBatch, environment);
+        // --- MULAI RENDER BAYANGAN (SHADOW MAP) ---
+        // Target lampu difokuskan ke tengah arena (32, 0, 32)
+        shadowLight.begin(new Vector3(32f, 0f, 32f), shadowLight.direction);
+        shadowBatch.begin(shadowLight.getCamera());
+        renderer.render(shadowBatch, null); // Render Arena ke bayangan
         if (thirdPersonView && !scopeActive) {
-            modelBatch.render(playerAnimator.instance, environment);
+            shadowBatch.render(playerAnimator.instance); // Render Player ke bayangan
+        }
+        shadowBatch.end();
+        shadowLight.end();
+        // --- SELESAI RENDER BAYANGAN ---
+
+        // --- RENDER DUNIA 3D NORMAL ---
+        modelBatch.begin(camera);
+        renderer.render(modelBatch, environment); // Arena menerima cahaya & bayangan
+        if (thirdPersonView && !scopeActive) {
+            modelBatch.render(playerAnimator.instance, environment); // Player menerima cahaya & bayangan
         }
         modelBatch.end();
 
@@ -444,6 +497,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     @Override
     public void dispose() {
         modelBatch.dispose();
+        shadowBatch.dispose();
+        shadowLight.dispose();
         renderer.dispose();
         hud.dispose();
         sharedMaleModel.dispose();
