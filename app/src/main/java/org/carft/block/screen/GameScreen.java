@@ -32,13 +32,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     private VoxelRenderer renderer;
     private Hud hud;
 
-    // Model & Animator Karakter Pemain dan Bot Dummy
     private Model sharedMaleModel;
     private CharacterModel.Animator playerAnimator;
-    private CharacterModel.Animator dummyAnimator;
-    private final Vector3 dummyPos = new Vector3(32f, 1f, 37f);
 
-    // Fisika & Status Pemain (Tanpa alokasi objek baru di render)
     private final Vector3 pos = new Vector3(32f, 1f, 28f);
     private final Vector3 vel = new Vector3();
     private final Vector3 diveVel = new Vector3();
@@ -50,14 +46,13 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     private boolean onGround = true;
     private int stance = CharacterModel.STANCE_STAND;
     private boolean isDolphinDiving = false;
-    private boolean thirdPersonView = true; // Default 3rd Person agar animasi langsung terlihat
+    private boolean thirdPersonView = true;
 
     private float currentEyeHeight = 1.62f;
     private float targetFov = 75f;
     private boolean scopeActive = false;
     private float baseSens;
 
-    // Data Senjata (0 = Rifle, 1 = Pistol)
     private int activeWeapon = 0;
     private final String[] weaponNames = {"RIFLE", "PISTOL"};
     private final int[] magMax = {30, 12};
@@ -78,7 +73,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         findSafeSpawnPoint();
 
         hud = new Hud(game.uiAssets, arena, this);
-        hud.setHealth(75); // Set 75 di awal agar tombol Medkit bisa langsung dites
+        hud.setHealth(75);
         hud.setArmor(100);
         updateWeaponHudText();
 
@@ -103,11 +98,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
 
         sharedMaleModel = CharacterModel.createMaleModel();
         playerAnimator = new CharacterModel.Animator(sharedMaleModel);
-        dummyAnimator = new CharacterModel.Animator(sharedMaleModel);
     }
 
     private void findSafeSpawnPoint() {
-        // Cari koordinat dekat tengah arena yang tidak tertutup pilar
         for (int z = 26; z < 40; z++) {
             if (!arena.isSolid(32, 1, z) && !arena.isSolid(32, 2, z)) {
                 pos.set(32.5f, 1.0f, z + 0.5f);
@@ -116,11 +109,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         }
     }
 
-    // --- IMPLEMENTASI AKSI HUD ---
     @Override
     public void onJumpPressed() {
         if (onGround) {
-            // Loncat membatalkan jongkok/tiarap
             stance = CharacterModel.STANCE_STAND;
             isDolphinDiving = false;
             hud.syncStanceButtons(stance);
@@ -142,20 +133,17 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     public void onProneToggled() {
         float padMag = (float) Math.hypot(hud.touchpad.getKnobPercentX(), hud.touchpad.getKnobPercentY());
 
-        // FITUR SPESIAL: Saat Lari + Lompat (di udara) lalu klik TIARAP -> Lompat sambil Telentang!
         if (!onGround && padMag > 0.45f && !isDolphinDiving) {
             isDolphinDiving = true;
             stance = CharacterModel.STANCE_PRONE;
             hud.syncStanceButtons(stance);
 
-            // Beri dorongan loncat ke depan di udara
             float rad = (float) Math.toRadians(yaw);
             diveVel.set((float) Math.sin(rad) * 8.5f, 0f, (float) Math.cos(rad) * 8.5f);
             if (vel.y < 3.0f) vel.y = 3.5f;
             return;
         }
 
-        // Toggle Tiarap normal saat di darat
         stance = (stance == CharacterModel.STANCE_PRONE)
                 ? CharacterModel.STANCE_STAND
                 : CharacterModel.STANCE_PRONE;
@@ -197,9 +185,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         dispose();
     }
 
-    // --- FISIKA, KOLISI AABB & ANIMASI ---
     private void updateGameplay(float delta) {
-        // 1. Kecepatan gerak sesuai postur (Berdiri / Jongkok / Tiarap)
         float maxSpeed = (stance == CharacterModel.STANCE_STAND) ? 6.5f
                 : (stance == CharacterModel.STANCE_CROUCH ? 3.2f : 1.6f);
 
@@ -212,35 +198,29 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         float cos = (float) Math.cos(rad);
 
         if (isDolphinDiving && !onGround) {
-            // Saat lompat telentang di udara, pertahankan momentum loncatan
             vel.x = diveVel.x;
             vel.z = diveVel.z;
         } else {
-            // Gerak maju/mundur & geser kanan/kiri sesuai arah hadap kamera
             vel.x = (sin * joyY - cos * joyX) * maxSpeed;
             vel.z = (cos * joyY + sin * joyX) * maxSpeed;
         }
 
-        // 2. Gravitasi dan Perbaikan Bug Naik-Turun
         vel.y -= 22f * delta;
         if (vel.y < -25f) vel.y = -25f;
 
         float playerHeight = (stance == CharacterModel.STANCE_STAND) ? 1.75f
                 : (stance == CharacterModel.STANCE_CROUCH ? 1.25f : 0.65f);
 
-        // Resolusi Sumbu X
         float nextX = pos.x + vel.x * delta;
         if (!collidesWithArena(nextX, pos.y, pos.z, playerHeight)) {
             pos.x = nextX;
         }
 
-        // Resolusi Sumbu Z
         float nextZ = pos.z + vel.z * delta;
         if (!collidesWithArena(pos.x, pos.y, nextZ, playerHeight)) {
             pos.z = nextZ;
         }
 
-        // Resolusi Sumbu Y (Bebas bug naik-turun menggunakan Math.floor)
         float nextY = pos.y + vel.y * delta;
         if (vel.y <= 0f) {
             if (collidesWithArena(pos.x, nextY, pos.z, playerHeight)) {
@@ -248,7 +228,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
                 vel.y = 0f;
                 onGround = true;
                 if (isDolphinDiving) {
-                    // Begitu mendarat dari lompat telentang, otomatis masuk ke mode tiarap
                     isDolphinDiving = false;
                     stance = CharacterModel.STANCE_PRONE;
                     hud.syncStanceButtons(stance);
@@ -266,17 +245,13 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             }
         }
 
-        // 3. Update Animasi Karakter Pemain & Karakter Dummy (Mirror)
         playerAnimator.update(delta, pos, yaw, pitch, joyMag, onGround, stance, isDolphinDiving);
-        dummyAnimator.update(delta, dummyPos, yaw + 180f, pitch, joyMag, onGround, stance, isDolphinDiving);
 
-        // 4. Transisi halus tinggi mata kamera & Zoom Scope
         float targetEye = (stance == CharacterModel.STANCE_STAND) ? 1.62f
                 : (stance == CharacterModel.STANCE_CROUCH ? 1.12f : 0.42f);
         currentEyeHeight = MathUtils.lerp(currentEyeHeight, targetEye, Math.min(1f, delta * 12f));
         camera.fieldOfView = MathUtils.lerp(camera.fieldOfView, targetFov, Math.min(1f, delta * 12f));
 
-        // 5. Hitung arah vektor kamera
         float pitchRad = (float) Math.toRadians(pitch);
         camForward.set(
                 sin * (float) Math.cos(pitchRad),
@@ -285,7 +260,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         ).nor();
 
         if (thirdPersonView && !scopeActive) {
-            // Kamera 3rd Person berada di belakang bahu karakter (dengan pengecekan dinding)
             float camDist = 3.6f;
             for (float d = 0.5f; d <= 3.6f; d += 0.4f) {
                 float cx = pos.x - camForward.x * d;
@@ -302,7 +276,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
                     pos.z - camForward.z * camDist
             );
         } else {
-            // Kamera 1st Person
             camera.position.set(pos.x, pos.y + currentEyeHeight, pos.z);
         }
 
@@ -310,7 +283,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         camera.up.set(0f, 1f, 0f);
         camera.update();
 
-        // 6. Update Tembakan & Reload
         updateWeapons(delta);
         hud.refreshTopDownMap(pos.x, pos.z, yaw);
     }
@@ -363,7 +335,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     }
 
     private void performShootRaycast() {
-        // Raycast dari mata pemain berhenti di blok pertama yang kena
         rayPos.set(pos.x, pos.y + currentEyeHeight, pos.z);
         for (float t = 0f; t < 60f; t += 0.25f) {
             int bx = (int) Math.floor(rayPos.x + camForward.x * t);
@@ -393,12 +364,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
 
         modelBatch.begin(camera);
         renderer.render(modelBatch, environment);
-        // Render karakter pemain jika di mode 3rd Person (dan tidak sedang Scope)
         if (thirdPersonView && !scopeActive) {
             modelBatch.render(playerAnimator.instance, environment);
         }
-        // Render karakter kedua di tengah arena yang menirukan gerakanmu
-        modelBatch.render(dummyAnimator.instance, environment);
         modelBatch.end();
 
         hud.render();
@@ -420,7 +388,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         sharedMaleModel.dispose();
     }
 
-    // --- INPUT SWIPE KAMERA DI AREA KANAN LAYAR ---
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         if (hud.isOverlayOpen()) return false;

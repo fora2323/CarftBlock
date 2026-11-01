@@ -69,17 +69,16 @@ public class Hud implements Disposable {
     }
 
     private void buildMainHud(UiAssets assets) {
-        // Crosshair tepat di tengah layar
+        Table crosshairTable = new Table();
+        crosshairTable.setFillParent(true);
         Image crosshair = new Image(assets.crosshairTex);
-        crosshair.setSize(28, 28);
-        crosshair.setPosition(1280 / 2f - 14f, 720 / 2f - 14f);
-        stage.addActor(crosshair);
+        crosshairTable.add(crosshair).size(28, 28).center();
+        stage.addActor(crosshairTable);
 
         Table root = new Table();
         root.setFillParent(true);
         stage.addActor(root);
 
-        // 1. BARIS ATAS: HP/Armor di kiri, Tombol CAM / PETA / SETTINGS di kanan
         Table statusTable = new Table();
         hpBar = new ProgressBar(0, 100, 1, false, skin, "hp-bar");
         hpBar.setValue(health);
@@ -115,7 +114,6 @@ public class Hud implements Disposable {
         topBar.add(centerInfo).expandX().center();
         topBar.add(topRight).right().pad(14);
 
-        // 2. SISI KIRI: Granat, Medkit, Fire-Kiri, Analog
         btnGrenade = new TextButton("BOM (3)", skin);
         btnMedkit = new TextButton("MED (2)", skin);
         btnFireLeft = new TextButton("FIRE", skin, "fire");
@@ -130,7 +128,6 @@ public class Hud implements Disposable {
         leftBottom.add(leftItems).padLeft(18).padBottom(14).bottom();
         leftBottom.add(touchpad).size(200, 200).padLeft(18).padBottom(14);
 
-        // 3. TENGAH BAWAH: Pilihan Senjata 1 & 2
         btnWeapon1 = new TextButton("1. RIFLE", skin, "toggle");
         btnWeapon1.setChecked(true);
         btnWeapon2 = new TextButton("2. PISTOL", skin, "toggle");
@@ -139,7 +136,6 @@ public class Hud implements Disposable {
         weaponBar.add(btnWeapon1).size(155, 68).padRight(12);
         weaponBar.add(btnWeapon2).size(155, 68);
 
-        // 4. SISI KANAN: Scope, Tiarap, Jongkok, Loncat, Fire-Kanan
         btnScope = new TextButton("SCOPE", skin, "toggle");
         btnProne = new TextButton("TIARAP", skin, "toggle");
         btnCrouch = new TextButton("JONGKOK", skin, "toggle");
@@ -156,7 +152,6 @@ public class Hud implements Disposable {
         rightBottom.add(btnFireRight).size(125, 115).padRight(12).bottom();
         rightBottom.add(stanceRow).right().padRight(14).bottom();
 
-        // Susun semua ke Root Table
         root.add(topBar).colspan(3).expandX().fillX().top().row();
         root.add().colspan(3).expand().fill().row();
         root.add(leftBottom).left().bottom();
@@ -342,7 +337,6 @@ public class Hud implements Disposable {
         });
     }
 
-    // Menggambar peta top-down 64x64 dari VoxelArena + posisi dan arah pemain
     public void refreshTopDownMap(float playerX, float playerZ, float yawDeg) {
         if (!mapOpen) return;
         int scale = 4;
