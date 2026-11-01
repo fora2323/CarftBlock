@@ -101,13 +101,10 @@ public class HomeScreen extends ScreenAdapter {
         settingsTable.add(sensSlider).width(400).padBottom(60).row();
         settingsTable.add(btnBack).width(300).height(80);
 
-        // --- EVENTS ---
         btnPlay.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // Pindah ke GameScreen. 
-                // ERROR COMPILE AKAN TERJADI DI BARIS INI SAMPAI BAGIAN 2 DIMASUKKAN.
-                // game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game));
             }
         });
 
