@@ -12,12 +12,14 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
+import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import org.carft.block.entity.CharacterModel;
 import org.carft.block.game.CarftBlockGame;
 import org.carft.block.ui.Hud;
+import org.carft.block.weapon.AK47;
 import org.carft.block.world.VoxelArena;
 import org.carft.block.world.VoxelRenderer;
 
@@ -29,7 +31,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     private ModelBatch modelBatch;
     private Environment environment;
 
-    // SHADOW SYSTEM
     private DirectionalShadowLight shadowLight;
     private ModelBatch shadowBatch;
 
@@ -39,15 +40,16 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
 
     private Model sharedMaleModel;
     private CharacterModel.Animator playerAnimator;
+    
+    private AK47 ak47;
 
     private final Vector3 pos = new Vector3(32f, 1f, 28f);
     private final Vector3 vel = new Vector3();
     private final Vector3 diveVel = new Vector3();
     private final Vector3 camForward = new Vector3();
-    private final Vector3 camRight = new Vector3(); // Untuk TPP Over The Shoulder
+    private final Vector3 camRight = new Vector3(); 
     private final Vector3 rayPos = new Vector3();
 
-    // Variable mechanic
     private boolean isSliding = false;
     private boolean isClimbing = false;
     private float slideTimer = 0f;
@@ -65,14 +67,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
     private boolean scopeActive = false;
     private float baseSens;
 
-    private int activeWeapon = 0;
-    private final String[] weaponNames = {"RIFLE", "PISTOL"};
-    private final int[] magMax = {30, 12};
-    private final int[] ammoInMag = {30, 12};
-    private final float[] fireIntervals = {0.12f, 0.28f};
-    private float fireTimer = 0f;
-    private float reloadTimer = 0f;
-
     private int lookPointer = -1;
     private float lastTouchX, lastTouchY;
 
@@ -87,7 +81,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         hud = new Hud(game.uiAssets, arena, this);
         hud.setHealth(75);
         hud.setArmor(100);
-        updateWeaponHudText();
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(hud.stage);
@@ -100,10 +93,8 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         shadowBatch = new ModelBatch(new DepthShaderProvider());
 
         environment = new Environment();
-        // Pencahayaan ambient dinaikkan sedikit agar bayangan tidak gelap gulita
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.6f, 0.6f, 0.65f, 1f));
 
-        // Inisiasi Shadow Light (2048x2048 agar bayangan tajam)
         shadowLight = new DirectionalShadowLight(2048, 2048, 80f, 80f, 1f, 300f);
         shadowLight.set(0.7f, 0.7f, 0.7f, -0.6f, -0.9f, -0.4f);
         environment.add(shadowLight);
@@ -118,6 +109,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
 
         sharedMaleModel = CharacterModel.createMaleModel();
         playerAnimator = new CharacterModel.Animator(sharedMaleModel);
+        
+        ak47 = new AK47();
+        ak47.equip();
     }
 
     private void findSafeSpawnPoint() {
@@ -213,9 +207,6 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
 
     @Override
     public void onWeaponSelected(int index) {
-        this.activeWeapon = index;
-        this.reloadTimer = 0f;
-        updateWeaponHudText();
     }
 
     @Override
@@ -248,6 +239,9 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         float joyY = hud.touchpad.getKnobPercentY();
         float joyMag = Math.min(1f, (float) Math.hypot(joyX, joyY));
 
+        boolean isMoving = joyMag > 0.08f;
+        boolean isSprinting = joyMag > 0.72f && stance == CharacterModel.STANCE_STAND && onGround;
+
         float rad = (float) Math.toRadians(yaw);
         float sin = (float) Math.sin(rad);
         float cos = (float) Math.cos(rad);
@@ -273,7 +267,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         }
 
         if (isClimbing) {
-            // Bergerak ke atas
+            // Memanjat
         } else if (isDolphinDiving && !onGround) {
             vel.x = diveVel.x;
             vel.z = diveVel.z;
@@ -332,7 +326,10 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
             }
         }
 
-        playerAnimator.update(delta, pos, yaw, pitch, joyMag, onGround, stance, isDolphinDiving, isSliding, isClimbing);
+        float reloadProgress = ak47.isReloading() ? (ak47.stateTimer / AK47.RELOAD_TIME) : 0f;
+
+        playerAnimator.update(delta, pos, yaw, pitch, joyMag, onGround, stance, isDolphinDiving, 
+                isSliding, isClimbing, ak47.isReloading(), reloadProgress);
 
         float targetEye = (stance == CharacterModel.STANCE_STAND) ? 1.62f
                 : (stance == CharacterModel.STANCE_CROUCH ? (isSliding ? 0.75f : 1.12f) : 0.42f);
@@ -347,12 +344,11 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
                 cos * (float) Math.cos(pitchRad)
         ).nor();
 
-        // Cari vector Kanan untuk kamera Over The Shoulder
         camRight.set(camForward).crs(Vector3.Y).nor();
 
         if (thirdPersonView && !scopeActive) {
             float camDist = 3.6f;
-            float otsOffset = 0.65f; // Geser kamera ke Kanan (Bahu Karakter)
+            float otsOffset = 0.65f; 
 
             float targetCamX = pos.x + camRight.x * otsOffset;
             float targetCamY = pos.y + currentEyeHeight;
@@ -381,7 +377,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         camera.up.set(0f, 1f, 0f);
         camera.update();
 
-        updateWeapons(delta);
+        updateWeapons(delta, isSprinting, isMoving);
         hud.refreshTopDownMap(pos.x, pos.z, yaw);
     }
 
@@ -404,51 +400,42 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         return false;
     }
 
-    private void updateWeapons(float delta) {
-        if (fireTimer > 0f) fireTimer -= delta;
-
-        if (reloadTimer > 0f) {
-            reloadTimer -= delta;
-            if (reloadTimer <= 0f) {
-                ammoInMag[activeWeapon] = magMax[activeWeapon];
-                updateWeaponHudText();
-            }
-            return;
-        }
-
-        if (hud.isFiringPressed() && fireTimer <= 0f) {
-            if (ammoInMag[activeWeapon] > 0) {
-                ammoInMag[activeWeapon]--;
-                fireTimer = fireIntervals[activeWeapon];
+    private void updateWeapons(float delta, boolean isSprinting, boolean isMoving) {
+        if (hud.isFiringPressed()) {
+            if (ak47.canFire()) {
+                Vector3 muzzleWorldPos = new Vector3(camera.position).add(camera.direction.x * 0.5f, camera.direction.y * 0.5f, camera.direction.z * 0.5f);
+                ak47.triggerFire(muzzleWorldPos, camera.direction, camRight);
                 performShootRaycast();
-
-                if (ammoInMag[activeWeapon] == 0) {
-                    reloadTimer = 1.5f;
-                    hud.setWeaponStatus(weaponNames[activeWeapon] + " | RELOADING...");
-                } else {
-                    updateWeaponHudText();
-                }
+                
+                pitch += MathUtils.random(1.2f, 2.5f);
+                yaw += MathUtils.random(-0.8f, 0.8f);
+                pitch = MathUtils.clamp(pitch, -80f, 80f);
+                
+            } else if (ak47.getAmmoInMag() == 0 && !ak47.isReloading()) {
+                ak47.triggerReload();
             }
         }
+
+        if (ak47.isReloading()) {
+            hud.setWeaponStatus("AK-47 | RELOADING...");
+        } else {
+            hud.setWeaponStatus("AK-47 | " + ak47.getAmmoInMag() + "/" + ak47.getAmmoReserve());
+        }
+
+        Node armRNode = thirdPersonView ? playerAnimator.instance.getNode("arm_R") : null;
+        ak47.update(delta, camera, thirdPersonView, armRNode, playerAnimator.instance.transform, isSprinting, isMoving);
     }
 
     private void performShootRaycast() {
-        // BUG AKURASI CROSSHAIR DIPERBAIKI: 
-        // Titik tembak tembak kini berasal tepat dari kamera menuju tengah layar (Crosshair)
-        // Jadi mode FPS / TPP arah tembakan tetap 100% akurat mengenai bidikan
         rayPos.set(camera.position); 
         for (float t = 0f; t < 60f; t += 0.25f) {
             int bx = (int) Math.floor(rayPos.x + camera.direction.x * t);
             int by = (int) Math.floor(rayPos.y + camera.direction.y * t);
             int bz = (int) Math.floor(rayPos.z + camera.direction.z * t);
             if (arena.isSolid(bx, by, bz)) {
-                break; // Tembakan mengenai arena
+                break;
             }
         }
-    }
-
-    private void updateWeaponHudText() {
-        hud.setWeaponStatus(weaponNames[activeWeapon] + " | " + ammoInMag[activeWeapon] + "/" + magMax[activeWeapon]);
     }
 
     @Override
@@ -463,24 +450,23 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         Gdx.gl.glClearColor(0.48f, 0.75f, 0.98f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-        // --- MULAI RENDER BAYANGAN (SHADOW MAP) ---
-        // Target lampu difokuskan ke tengah arena (32, 0, 32)
         shadowLight.begin(new Vector3(32f, 0f, 32f), shadowLight.direction);
         shadowBatch.begin(shadowLight.getCamera());
-        renderer.render(shadowBatch, null); // Render Arena ke bayangan
+        renderer.render(shadowBatch, null); 
         if (thirdPersonView && !scopeActive) {
-            shadowBatch.render(playerAnimator.instance); // Render Player ke bayangan
+            shadowBatch.render(playerAnimator.instance); 
         }
+        ak47.render(shadowBatch, null, thirdPersonView);
         shadowBatch.end();
         shadowLight.end();
-        // --- SELESAI RENDER BAYANGAN ---
 
-        // --- RENDER DUNIA 3D NORMAL ---
         modelBatch.begin(camera);
-        renderer.render(modelBatch, environment); // Arena menerima cahaya & bayangan
+        renderer.render(modelBatch, environment); 
+        
         if (thirdPersonView && !scopeActive) {
-            modelBatch.render(playerAnimator.instance, environment); // Player menerima cahaya & bayangan
+            modelBatch.render(playerAnimator.instance, environment); 
         }
+        ak47.render(modelBatch, environment, thirdPersonView);
         modelBatch.end();
 
         hud.render();
@@ -502,6 +488,7 @@ public class GameScreen extends ScreenAdapter implements InputProcessor, Hud.Hud
         renderer.dispose();
         hud.dispose();
         sharedMaleModel.dispose();
+        ak47.dispose(); 
     }
 
     @Override

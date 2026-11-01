@@ -34,7 +34,6 @@ public class CharacterModel {
         Node root = mb.node();
         root.id = "root";
 
-        // KEMBALI KE BENTUK KOTAK (VOXEL) SEPERTI AWAL
         Node body = mb.node();
         body.id = "body";
         body.translation.set(0f, 0f, 0f);
@@ -117,7 +116,8 @@ public class CharacterModel {
         }
 
         public void update(float delta, Vector3 worldPos, float bodyYaw, float headPitch,
-                           float moveSpeedRatio, boolean onGround, int stance, boolean isDolphinDiving, boolean isSliding, boolean isClimbing) {
+                           float moveSpeedRatio, boolean onGround, int stance, boolean isDolphinDiving, 
+                           boolean isSliding, boolean isClimbing, boolean isReloading, float reloadProgress) {
 
             root.rotation.idt();
             body.rotation.idt();
@@ -138,7 +138,7 @@ public class CharacterModel {
             }
 
             float swing = isMoving || isClimbing ? MathUtils.sin(animTimer) : 0f;
-            float breath = MathUtils.sin(animTimer) * 3f;
+            float breath = MathUtils.sin(animTimer) * 2.5f;
 
             if (isClimbing) {
                 root.translation.set(0f, 0.75f, 0.4f);
@@ -152,10 +152,9 @@ public class CharacterModel {
 
             } else if (isDolphinDiving && !onGround) {
                 root.translation.set(0f, 0.95f, 0f);
-                // BUG TERBALIK DIPERBAIKI: Dirubah dari -78f (jungkir balik) menjadi 75f (condong Superman ke depan)
                 root.rotation.setEulerAngles(0f, 75f, 0f);
                 body.rotation.setEulerAngles(0f, 10f, 0f);
-                head.rotation.setEulerAngles(0f, -25f, 0f); // Kepala agak mendongak
+                head.rotation.setEulerAngles(0f, -25f, 0f);
                 armL.rotation.setEulerAngles(0f, -145f, -35f);
                 armR.rotation.setEulerAngles(0f, -145f, 35f);
                 legL.rotation.setEulerAngles(0f, 20f, -10f);
@@ -163,27 +162,27 @@ public class CharacterModel {
 
             } else if (isSliding) {
                 root.translation.set(0f, 0.35f, 0f); 
-                root.rotation.setEulerAngles(0f, -15f, 0f); // Condong ke belakang
+                root.rotation.setEulerAngles(0f, -15f, 0f); 
                 body.rotation.setEulerAngles(0f, -15f, 0f); 
                 head.rotation.setEulerAngles(0f, 30f + MathUtils.clamp(-headPitch * 0.6f, -35f, 35f), 0f); 
                 
                 legL.rotation.setEulerAngles(0f, -80f, 0f);
                 legR.rotation.setEulerAngles(0f, 40f, 0f);
-                armL.rotation.setEulerAngles(0f, -40f, -20f);
-                armR.rotation.setEulerAngles(0f, -75f, 15f);
+                armR.rotation.setEulerAngles(0f, -80f, 10f);
+                armL.rotation.setEulerAngles(0f, -65f, -35f);
 
             } else if (!onGround) {
                 root.translation.set(0f, 0.82f, 0f);
                 body.rotation.setEulerAngles(0f, 12f, 0f);
                 head.rotation.setEulerAngles(0f, MathUtils.clamp(-headPitch * 0.5f, -35f, 35f), 0f);
-                armL.rotation.setEulerAngles(0f, -140f, -15f);
-                armR.rotation.setEulerAngles(0f, -35f, 10f);
+                armL.rotation.setEulerAngles(0f, -70f, -30f);
+                armR.rotation.setEulerAngles(0f, -75f, 10f);
                 legL.rotation.setEulerAngles(0f, 35f, 0f);
                 legR.rotation.setEulerAngles(0f, -30f, 0f);
 
             } else if (stance == STANCE_PRONE) {
                 root.translation.set(0f, 0.18f, 0f);
-                root.rotation.setEulerAngles(0f, 85f, 0f); // Tengkurap pas di tanah
+                root.rotation.setEulerAngles(0f, 85f, 0f); 
                 head.rotation.setEulerAngles(0f, -68f, 0f);
                 float crawl = swing * 28f;
                 armL.rotation.setEulerAngles(0f, -150f + crawl, -15f);
@@ -193,13 +192,19 @@ public class CharacterModel {
 
             } else if (stance == STANCE_CROUCH) {
                 root.translation.set(0f, 0.52f, 0f);
-                body.rotation.setEulerAngles(0f, 28f, 0f);
-                head.rotation.setEulerAngles(0f, -20f + MathUtils.clamp(-headPitch * 0.4f, -30f, 30f), 0f);
-                float crouchWalk = swing * 32f;
+                body.rotation.setEulerAngles(0f, 25f, 0f);
+                head.rotation.setEulerAngles(0f, -18f + MathUtils.clamp(-headPitch * 0.4f, -30f, 30f), 0f);
+                float crouchWalk = swing * 30f;
                 legL.rotation.setEulerAngles(0f, -35f + crouchWalk, 0f);
                 legR.rotation.setEulerAngles(0f, -35f - crouchWalk, 0f);
-                armL.rotation.setEulerAngles(0f, -45f - crouchWalk * 0.5f, 0f);
-                armR.rotation.setEulerAngles(0f, -65f + crouchWalk * 0.3f, 0f);
+                
+                armR.rotation.setEulerAngles(0f, -75f, 10f);
+                if (isReloading) {
+                    float reloadSw = MathUtils.sin(reloadProgress * MathUtils.PI) * 45f;
+                    armL.rotation.setEulerAngles(0f, -25f - reloadSw, -15f);
+                } else {
+                    armL.rotation.setEulerAngles(0f, -65f, -35f);
+                }
 
             } else {
                 float bounceY = isMoving ? Math.abs(MathUtils.cos(animTimer)) * (isRunning ? 0.08f : 0.04f) : 0f;
@@ -207,16 +212,25 @@ public class CharacterModel {
                 float torsoLean = isRunning ? 16f : 0f;
                 body.rotation.setEulerAngles(0f, torsoLean, 0f);
                 head.rotation.setEulerAngles(0f, MathUtils.clamp(-headPitch * 0.5f, -40f, 40f) - torsoLean * 0.5f, 0f);
-                float maxAngle = isRunning ? 62f : 38f;
+                float maxAngle = isRunning ? 55f : 35f;
                 float limbAngle = swing * maxAngle;
                 legL.rotation.setEulerAngles(0f, limbAngle, 0f);
                 legR.rotation.setEulerAngles(0f, -limbAngle, 0f);
-                if (isMoving) {
-                    armL.rotation.setEulerAngles(0f, -limbAngle * 0.9f, -5f);
-                    armR.rotation.setEulerAngles(0f, limbAngle * 0.9f, 5f);
+                
+                // TPP Gun Grip 2 Tangan & Tactical Sprint
+                if (isRunning) {
+                    // Senjata diangkat miring saat sprint
+                    armR.rotation.setEulerAngles(0f, -95f, 15f);
+                    armL.rotation.setEulerAngles(0f, -75f, -40f);
                 } else {
-                    armL.rotation.setEulerAngles(0f, breath, -4f);
-                    armR.rotation.setEulerAngles(0f, -45f + breath, 4f);
+                    armR.rotation.setEulerAngles(0f, -78f + breath, 8f);
+                    if (isReloading) {
+                        float reloadSw = MathUtils.sin(reloadProgress * MathUtils.PI) * 50f;
+                        armL.rotation.setEulerAngles(0f, -30f - reloadSw, -15f);
+                    } else {
+                        // Tangan kiri menopang laras
+                        armL.rotation.setEulerAngles(0f, -65f + breath, -38f);
+                    }
                 }
             }
 
