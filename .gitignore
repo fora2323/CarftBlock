@@ -3,3 +3,6 @@
 /.gradle/
 build/
 */build/
+local.properties
+.build_success
+/.androstudio
