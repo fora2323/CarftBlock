@@ -1,79 +1,27 @@
 <resources>
-    <style name="Base.Theme.Aurora" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="android:windowBackground">@color/surface</item>
-
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="fontFamily">@font/roboto_medium</item>
-
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-
-    <style name="Base.Widget.AuroraChip" parent="Widget.Material3.Chip.Filter">
-        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Full</item>
-        <item name="android:textAppearance">@style/AuroraChip.TextAppearance</item>
-        <item name="chipStrokeColor">@color/chip_stroke_color</item>
-        <item name="chipStrokeWidth">1dp</item>
-        <!--atur pedding-->
-        <item name="android:paddingTop">2dp</item>
-        <item name="android:paddingBottom">2dp</item>
-        <item name="chipStartPadding">18dp</item>
-        <item name="chipEndPadding">18dp</item>
-        <item name="chipMinHeight">28dp</item>
-        <item name="ensureMinTouchTargetSize">false</item>
-        <item name="chipBackgroundColor">@color/chip_background_color</item>
-        <item name="android:textColor">@color/chip_text_color</item>
-    </style>
-
-    <style name="AuroraChip.TextAppearance" parent="TextAppearance.Material3.LabelLarge">
-        <item name="fontFamily">@font/force</item>
-        <item name="android:letterSpacing">0.05</item>
-    </style>
-
-    <style name="Base.Theme.AuroraButton" parent="Widget.Material3.Button">
-        <item name="android:backgroundTint">@color/primary</item>
-        <item name="android:textColor">@color/onPrimary</item>
-        <item name="cornerRadius">@dimen/radius_24dp</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconPadding">8dp</item>
-        <item name="iconTint">@color/onPrimary</item>
-        <item name="android:paddingStart">24dp</item>
-        <item name="android:paddingEnd">24dp</item>
-        <item name="android:paddingTop">2dp</item>
-        <item name="android:paddingBottom">2dp</item>
-    </style>
-
-    <style name="Base.Theme.AuroraOutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="android:backgroundTint">@color/surfaceContainer</item>
-        <item name="android:textColor">@color/onSurface</item>
-        <item name="strokeColor">@color/outlineVariant</item>
-        <item name="strokeWidth">@dimen/size_outline_1dp</item>
-        <item name="cornerRadius">@dimen/radius_24dp</item>
-        <item name="iconGravity">textStart</item>
-        <item name="iconPadding">8dp</item>
-        <item name="iconTint">@color/onSurface</item>
-        <item name="android:paddingStart">24dp</item>
-        <item name="android:paddingEnd">24dp</item>
-        <item name="android:paddingTop">2dp</item>
-        <item name="android:paddingBottom">2dp</item>
-    </style>
-
-    <style name="Base.Theme.AuroraDialog" parent="Theme.Material3.Dark.Dialog">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:windowMinWidthMajor">90%</item>
-        <item name="android:windowMinWidthMinor">90%</item>
-    </style>
-    
-    <style name="TextAppearance.Aurora.Title" parent="TextAppearance.Material3.HeadlineMedium">
-        <item name="fontFamily">@font/force</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-    
-    <style name="TextAppearance.Aurora.Highlight" parent="TextAppearance.Material3.BodyLarge">
-        <item name="fontFamily">@font/roboto_medium</item>
-    </style>
+	<style name="AppTheme" parent="@android:style/Theme.Material.Light.DarkActionBar">
+		<item name="android:colorPrimary">@color/colorPrimary</item>
+		<item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+		<item name="android:colorAccent">@color/colorAccent</item>
+		<item name="android:colorControlHighlight">@color/colorControlHighlight</item>
+		<item name="android:colorControlNormal">@color/colorControlNormal</item>
+	</style>
+	<style name="FullScreen" parent="@android:style/Theme.Material.Light.NoActionBar.Fullscreen">
+		<item name="android:colorPrimary">@color/colorPrimary</item>
+		<item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+		<item name="android:colorAccent">@color/colorAccent</item>
+		<item name="android:colorControlHighlight">@color/colorControlHighlight</item>
+		<item name="android:colorControlNormal">@color/colorControlNormal</item>
+	</style>
+	<style name="NoActionBar" parent="@android:style/Theme.Material.Light.NoActionBar">
+		<item name="android:colorPrimary">@color/colorPrimary</item>
+		<item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+		<item name="android:colorAccent">@color/colorAccent</item>
+		<item name="android:colorControlHighlight">@color/colorControlHighlight</item>
+		<item name="android:colorControlNormal">@color/colorControlNormal</item>
+	</style>
+	<style name="NoStatusBar" parent="AppTheme">
+		<item name="android:windowFullscreen">true</item>
+	</style>
+	<style name="AppTheme.DebugActivity" parent="AppTheme" />
 </resources>

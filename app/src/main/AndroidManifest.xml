@@ -1,83 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-
-    <!-- Izin Wajib untuk Notifikasi dan Background Service ADB (Khususnya Android 13+) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
-    <application
-        android:allowBackup="true"
-        android:autoRevokePermissions="allowed"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:name=".AuroraApplication"
-        android:largeHeap="true"
-        android:extractNativeLibs="true"
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/Base.Theme.Aurora">
-        
-        <activity
-            android:name="com.aurora.main.activities.MainActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:exported="true" />
-            
-        <activity
-            android:name=".DebugActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:exported="true" />
-            
-        <activity
-            android:name=".ConnectedActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:exported="true" />
-
-        <activity
-            android:name=".GameLauncherActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:screenOrientation="landscape"
-            android:theme="@style/Base.Theme.Aurora"
-            android:exported="true" />
-
-        <!-- Add activity connected pair -->
-        <activity
-            android:name=".SplashActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        
-        <service
-            android:name="com.aurora.adb.AdbPairingService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
-        <service
-            android:name=".GameOverlayService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="GameOverlay"/>
-        </service>
-    </application>
+<manifest
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<application
+		android:allowBackup="true"
+		android:icon="@mipmap/ic_launcher"
+		android:label="@string/app_name"
+		android:name=".SketchApplication"
+		android:requestLegacyExternalStorage="true"
+		android:usesCleartextTraffic="true"
+		android:theme="@style/AppTheme">
+		<activity
+			android:name=".MainActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+			android:hardwareAccelerated="true"
+			android:supportsPictureInPicture="true"
+			android:theme="@style/NoActionBar"
+			android:screenOrientation="landscape"
+			android:windowSoftInputMode="stateHidden"
+			android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name=".DebugActivity"
+			android:screenOrientation="portrait"
+			android:theme="@style/AppTheme.DebugActivity" />
+	</application>
 </manifest>

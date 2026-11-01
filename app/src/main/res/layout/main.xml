@@ -1,30 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/surface"
-	android:foreground="@drawable/bg_shadow_edges"
-	android:id="@+id/_main">
-
-	<androidx.viewpager2.widget.ViewPager2
-		android:id="@+id/viewpager1"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent" />
-
-	<androidx.compose.ui.platform.ComposeView
-		android:id="@+id/compose_top_bar"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:padding="6dp"
-		android:layout_gravity="top" />
-
-	<androidx.compose.ui.platform.ComposeView
-		android:id="@+id/compose_nav_bar"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_margin="18dp"
-		android:layout_gravity="center_horizontal|bottom" />
-        
-</FrameLayout>
+	android:orientation="vertical" />

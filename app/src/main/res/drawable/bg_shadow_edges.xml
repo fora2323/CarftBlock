@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/bg_shadow_top"
-        android:gravity="top"
-        android:height="65dp" />
-    <item android:drawable="@drawable/bg_shadow_bottom"
-        android:gravity="bottom"
-        android:height="75dp" />
-</layer-list>
